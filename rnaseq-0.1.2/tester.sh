@@ -2,7 +2,6 @@
 
 . _util/container_exec.sh
 
-
 version=$(cat VERSION)
 export CONTAINER_IMAGE="sd2e/rnaseq:$version"
 

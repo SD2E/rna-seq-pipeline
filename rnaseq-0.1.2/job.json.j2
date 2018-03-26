@@ -1,6 +1,6 @@
 {
-  "name": "rnaseq-test-0001",
-  "appId": "rnaseq-0.1.1",
+  "name": "{{ agave.username }}-{{ app.name }}-test-{{ date_time.iso8601_basic_short }}",
+  "appId": "{{ agave.username }}-{{ app.name }}-{{ app.version }}",
   "archive": false,
   "inputs": {
     "read1": "agave://data-sd2e-community/sample/rnaseq/test/4311028_S61_R1_001.fastq.gz",
