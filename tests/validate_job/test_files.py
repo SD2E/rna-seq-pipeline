@@ -6,7 +6,7 @@ import os
 '''Parameterize the test with a list of required files'''
 
 @pytest.mark.parametrize("file_list", [
-    (['rna_free_reads.fastq'])
+    (['4311028_S61_R1_001_rna_free_reads_fastqc.zip','4311028_S61_R1_001_paired_fastqc.zip','4311028_S61_R2_001_rna_free_reads_fastqc.zip','4311028_S61_R2_001_paired_fastqc.zip'])
 ])
 
 def test_files(job_directory,file_list):
