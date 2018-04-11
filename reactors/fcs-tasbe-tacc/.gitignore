@@ -1,7 +1,0 @@
-test-data-cache/*
-localtest/*
-.dirty
-*.pyc
-octave-workspace
-plots/*
-logs/
