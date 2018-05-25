@@ -1,4 +1,5 @@
 #! /usr/bin/env Rscript
+library("knitr")
 library(httr)
 set_config( config( ssl_verifypeer = 0L ) )
 library("ulimit")
@@ -15,10 +16,12 @@ rmarkdown::render("count_features.R", "pdf_document")
 # usage: Rscript --vanilla count_features.R -bpath user/study/bamfiles -a /user/reference/annotation.gff3 -o /user/data/studyname_readcount
 suppressPackageStartupMessages(require(optparse))
 library("BiocParallel")
-library("knitr")
 library("optparse")
 library("Rsubread")
 library("scatterplot3d")
+library("genomeIntervals")
+library("Rsamtools")
+library("parallel")
 
 
 option_list = list(
@@ -38,8 +41,16 @@ if (is.null(opt$file)){
   stop("Please supply input files", call.=FALSE)
 }
 
-bam.files <- list.files(opt$bamfiles,pattern=".*bam$") 
+#Reading bam files from user's input location
+files_location=opt$bamfiles
+#bam.files <- list.files(files_location,pattern=".*bam$") 
+bam.files <- dir(system.file(files_location), pattern="*.bam$",full.names=TRUE)
+#genomic.alignments <- mclapply(bam.files,readGAlignmentsFromBam)
+bamFileList <- BamFileList(bam.files,yieldSize=10^6)
+
+# Working through annotation file passed by user
 gtf <- opt$annotation
+gInterval<-readGff3(gtf, quiet=TRUE)
 output <- opt$out
 
 props <- propmapped(files=bam.files)
@@ -88,3 +99,6 @@ colnames(highexprgenes_counts)<- group
 png(file=paste(opt$bamfiles,"/",output,"_High_exprs_genes.heatmap.group.png", sep=""))
 heatmap(highexprgenes_counts, col = topo.colors(50), margin=c(10,6))
 dev.off()
+
+#system(sprintf("multiqc %s", files_location))
+system(paste("multiqc", files_location, sep=""))
