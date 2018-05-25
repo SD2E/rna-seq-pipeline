@@ -38,7 +38,12 @@ RUN Rscript -e 'install.packages(c("knitr","rmarkdown"), repos="http://cran.us.r
 RUN Rscript -e 'library(devtools) ; install.packages("pdftools", repos = "http://cran.us.r-project.org") ; install_github("ropensci/tabulizer")'
 RUN Rscript -e 'library(devtools) ; devtools::install_github("hadley/lineprof")'
 RUN Rscript -e 'install.packages("Nozzle.R1", type="source", repos = "http://cran.us.r-project.org"); source("https://bioconductor.org/biocLite.R"); biocLite("Rsubread", dependencies=TRUE); biocLite("DESeq2", dependencies=TRUE); biocLite("Rsamtools", dependencies=TRUE);library(devtools); devtools::install_github("krlmlr/ulimit")'
-RUN Rscript -e 'source("https://bioconductor.org/biocLite.R");biocLite('vsn'); biocLite('preprocessCore'); biocLite('gridExtra'); biocLite('ggplot2'); biocLite('reshape2')'
+RUN Rscript -e 'source("https://bioconductor.org/biocLite.R"); biocLite("vsn"); biocLite("preprocessCore"); biocLite("gridExtra"); biocLite("ggplot2"); biocLite("reshape2")'
+
+RUN https://github.com/jgm/pandoc/releases/download/2.2.1/pandoc-2.2.1-linux.tar.gz
+RUN tar xvzf pandoc-2.2.1-linux.tar.gz
+RUN mv pandoc-2.2.1/bin/* /bin/
+
 
 ADD /src /opt/src
 RUN chmod 777 /opt/src/*
