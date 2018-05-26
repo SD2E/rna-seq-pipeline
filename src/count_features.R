@@ -1,16 +1,16 @@
 #! /usr/bin/env Rscript
 library("knitr")
-library(httr)
-set_config( config( ssl_verifypeer = 0L ) )
-library("ulimit")
-ulimit::memory_limit(40000)
-rmarkdown::render("count_features.R", "pdf_document")
+library("httr")
+#set_config( config( ssl_verifypeer = 0L ) )
+#library("ulimit")
+#ulimit::memory_limit(40000)
+#rmarkdown::render("/opt/src/count_features.R", "pdf_document")
 #' ---
 #' title: "Raw Read Counts for RNAseq data - Paired or Unpaired sequences"
 #' author: "usaxena"
 #' date: paste(Sys.Date(), "_and_",Sys.time(),sep="")
 #' ---
-#' 
+#'
 #Uma Saxena, MIT/Broad Foundry, 8th May 2018
 #Performs feature counts on paired read sequences. Input data is path to bam file directory
 # usage: Rscript --vanilla count_features.R -bpath user/study/bamfiles -a /user/reference/annotation.gff3 -o /user/data/studyname_readcount
@@ -25,13 +25,13 @@ library("parallel")
 
 
 option_list = list(
-  make_option(c("-bpath", "--bamfilespath"), type="character", default=NULL, 
+  make_option(c("-bpath", "--bamfilespath"), type="character", default=NULL,
               help="Directory path to bam files", metavar="character"),
-  make_option(c("-a", "--annotation"), type="character", default=NULL, 
+  make_option(c("-a", "--annotation"), type="character", default=NULL,
               help="annotation file in gtf/gff/gff3 format", metavar="character"),
-  make_option(c("-o", "--out"), type="character", default=paste(opt$bamfilespath,"/",Sys.time(),"_readcount",sep=""), 
+  make_option(c("-o", "--out"), type="character", default=paste(opt$bamfilespath,"/",Sys.time(),"_readcount",sep=""),
               help="output file name [default= %default]", metavar="character")
-); 
+);
 
 opt_parser = OptionParser(option_list=option_list);
 opt = parse_args(opt_parser)
@@ -43,7 +43,7 @@ if (is.null(opt$file)){
 
 #Reading bam files from user's input location
 files_location=opt$bamfiles
-#bam.files <- list.files(files_location,pattern=".*bam$") 
+#bam.files <- list.files(files_location,pattern=".*bam$")
 bam.files <- dir(system.file(files_location), pattern="*.bam$",full.names=TRUE)
 #genomic.alignments <- mclapply(bam.files,readGAlignmentsFromBam)
 bamFileList <- BamFileList(bam.files,yieldSize=10^6)
@@ -67,11 +67,11 @@ counts=fc$counts
 
 #' density plot of raw read counts (log10)
 png(file=paste(opt$bamfiles,"/",output,"_Raw_read_counts_per_gene.density.png", sep=""))
-logcounts <- log(counts$counts[,1],10) 
+logcounts <- log(counts$counts[,1],10)
 d <- density(logcounts)
 plot(d,xlim=c(1,8),main="",ylim=c(0,.45),xlab="Raw read counts per gene (log10)", ylab="Density")
 for (s in 2:length(samples)){
-  logcounts <- log(counts$counts[,s],10) 
+  logcounts <- log(counts$counts[,s],10)
   d <- density(logcounts)
   lines(d)
 }
