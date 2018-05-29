@@ -39,6 +39,7 @@ RUN Rscript -e 'library(devtools) ; install.packages("pdftools", repos = "http:/
 RUN Rscript -e 'library(devtools) ; devtools::install_github("hadley/lineprof")'
 RUN Rscript -e 'install.packages("Nozzle.R1", type="source", repos = "http://cran.us.r-project.org"); source("https://bioconductor.org/biocLite.R"); biocLite("Rsubread", dependencies=TRUE); biocLite("DESeq2", dependencies=TRUE); biocLite("Rsamtools", dependencies=TRUE);library(devtools); devtools::install_github("krlmlr/ulimit")'
 RUN Rscript -e 'source("https://bioconductor.org/biocLite.R"); biocLite("vsn"); biocLite("preprocessCore"); biocLite("gridExtra"); biocLite("ggplot2"); biocLite("reshape2")'
+RUN Rscript -e 'source("https://bioconductor.org/biocLite.R"); biocLite("genomeIntervals")'
 
 #get pandoc
 RUN wget https://github.com/jgm/pandoc/releases/download/2.2.1/pandoc-2.2.1-linux.tar.gz
@@ -46,12 +47,8 @@ RUN tar xvfz pandoc-2.2.1-linux.tar.gz && rm pandoc-2.2.1-linux.tar.gz && mv pan
 ENV PATH=/bin/pandoc:$PATH
 RUN chmod 777 /bin/pandoc
 
-
 ADD /src /opt/src
 RUN chmod 777 /opt/src/*
-
-#hey, i heard you like r packages, so I got you some r packages for your r so you can r pack while you're r packing
-RUN Rscript -e 'source("https://bioconductor.org/biocLite.R"); biocLite("genomeIntervals")'
 
 #adding sample data
 ADD sample_data/* sample_data/
