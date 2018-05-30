@@ -17,4 +17,8 @@ fi
 #   Example: docker run centos:7 uname -a
 #            container_exec centos:7 uname -a
 
-container_exec ${CONTAINER_IMAGE}
+echo "bam is ${bam}"
+echo "gff is ${gff}"
+
+echo DEBUG=1 container_exec ${CONTAINER_IMAGE} Rscript --vanilla opt/src/count_features.R -bpath ${bam} -a ${gff} -o ${output}
+DEBUG=1 container_exec ${CONTAINER_IMAGE} Rscript --vanilla opt/src/count_features.R -bpath ${bam} -a ${gff} -o ${output}
