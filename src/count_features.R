@@ -39,17 +39,26 @@ library("parallel")
 option_list = list(
   make_option(c("-bpath", "--bamfilespath"), type="character", action="store_true", default=FALSE, 
               help="Directory path to bam files", metavar="character"),
-  make_option(c("-gtf", "--annotation"), type="character", action="store_true", default=FALSE,
+  make_option(c("-anno", "--annotation"), type="character", action="store_true", default=FALSE,
               help="Annotation file in gtf/gff/gff3 format", metavar="character")
   ); 
 
 
-opt_parser = OptionParser(option_list=option_list);
+opt_parser = OptionParser(usage = "count_features.R [options]", option_list=option_list);
 opt = parse_args(opt_parser)
 
 if (is.null(opt$file)){
   print_help(opt_parser)
   stop("Please supply input files", call.=FALSE)
+}
+
+#Error Messages
+if ( opt$bamfilespath ) { 
+  write("Files path not given...\n", stderr()) 
+}
+
+if ( opt$annotation ) { 
+  write("Annotation file not given...\n", stderr()) 
 }
 
 #Check if directory exists
