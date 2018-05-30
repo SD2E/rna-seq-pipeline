@@ -39,7 +39,7 @@ library("parallel")
 option_list = list(
   make_option(c("-bpath", "--bamfilespath"), type="character", action="store_true", default=FALSE, 
               help="Directory path to bam files", metavar="character"),
-  make_option(c("-a", "--annotation"), type="character", action="store_true", default=FALSE,
+  make_option(c("-gtf", "--annotation"), type="character", action="store_true", default=FALSE,
               help="Annotation file in gtf/gff/gff3 format", metavar="character")
   ); 
 
