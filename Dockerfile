@@ -32,11 +32,7 @@ RUN R CMD javareconf
 RUN Rscript -e 'source("https://bioconductor.org/biocLite.R") ; biocLite()'
 
 # install common packages
-RUN Rscript -e 'install.packages(c("tidyverse","scatterplot3d","data.table","dtplyr","devtools","roxygen2","bit64", "plyr", "pryr","reshape2", "stringr","ggplot2"), repos = "https://cran.rstudio.com/")'
-RUN Rscript -e 'install.packages(c("htmlTable","openxlsx"), repos = "http://cran.us.r-project.org")'
-RUN Rscript -e 'install.packages(c("knitr","rmarkdown", "optparse"), repos="http://cran.us.r-project.org")'
-RUN Rscript -e 'library(devtools) ; install.packages("pdftools", repos = "http://cran.us.r-project.org") ; install_github("ropensci/tabulizer")'
-RUN Rscript -e 'library(devtools) ; devtools::install_github("hadley/lineprof")'
+RUN Rscript -e 'install.packages(c("optparse","tidyverse","scatterplot3d","data.table","dtplyr","devtools","roxygen2","bit64", "plyr", "pryr","reshape2", "stringr","ggplot2"), repos = "https://cran.rstudio.com/")'
 RUN Rscript -e 'install.packages("Nozzle.R1", type="source", repos = "http://cran.us.r-project.org"); source("https://bioconductor.org/biocLite.R"); biocLite("Rsubread", dependencies=TRUE); biocLite("DESeq2", dependencies=TRUE); biocLite("Rsamtools", dependencies=TRUE);library(devtools); devtools::install_github("krlmlr/ulimit")'
 RUN Rscript -e 'source("https://bioconductor.org/biocLite.R"); biocLite("vsn"); biocLite("preprocessCore"); biocLite("gridExtra"); biocLite("ggplot2"); biocLite("reshape2")'
 RUN Rscript -e 'source("https://bioconductor.org/biocLite.R"); biocLite("genomeIntervals")'
