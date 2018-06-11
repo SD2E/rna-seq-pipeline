@@ -188,9 +188,11 @@ fi
 
 # and clean up... for now leaving hte free reads unzipped
 
-rm $R1
-rm $R2
-rm -r $RNADB_DIR
+#rm $R1
+#rm $R2
+gzip $R1
+gzip $R2
+#rm -r $RNADB_DIR
 rm *_merged.fastq
 rm *_merged.blast
 rm *_merged-reads.fastq
