@@ -31,15 +31,15 @@
 		{
 			"id": "read1",
 			"value": {
-				"default": "agave://data-sd2e-community/sample/rnaseq/test/4311028_S61_R1_001.fastq.gz",
+				"default": null,
 				"order": 0,
-				"required": true,
+				"required": false,
 				"validator": null,
 				"visible": true
 			},
 			"semantics": {
 				"ontology": ["http://sswapmeet.sswap.info/mime/application/X-fastq"],
-				"minCardinality": 1,
+				"minCardinality": 0,
 				"fileTypes": ["raw-0"]
 			},
 			"details": {
@@ -52,15 +52,15 @@
 		{
 			"id": "read2",
 			"value": {
-				"default": "agave://data-sd2e-community/sample/rnaseq/test/4311028_S61_R2_001.fastq.gz",
+				"default": null,
 				"order": 0,
-				"required": true,
+				"required": false,
 				"validator": null,
 				"visible": true
 			},
 			"semantics": {
 				"ontology": ["http://sswapmeet.sswap.info/mime/application/X-fastq"],
-				"minCardinality": 1,
+				"minCardinality": 0,
 				"fileTypes": ["raw-0"]
 			},
 			"details": {
@@ -73,8 +73,8 @@
 		{
 			"id": "filterseqs",
 			"value": {
-				"default": "agave://data-sd2e-community/reference/rna_databases/rRNA_databases",
-				"required": true,
+				"default": null,
+				"required": false,
 				"type": "string",
 				"visible": true
 			},
@@ -88,6 +88,33 @@
 	],
 	"parameters":
 	[
+	{
+		"id": "path_read1",
+		"value": {
+			"default": null,
+			"required": false,
+			"type": "string",
+			"visible": true
+		}
+	},
+	{
+		"id": "path_read2",
+		"value": {
+			"default": null,
+			"required": false,
+			"type": "string",
+			"visible": true
+		}
+	},
+		{
+			"id": "path_filterseqs",
+			"value": {
+				"default": "/work/projects/SD2E-Community/prod/data/reference/rna_databases/rRNA_databases",
+				"required": false,
+				"type": "string",
+				"visible": true
+			}
+		},
 		{
 			"id": "trim",
 			"value": {

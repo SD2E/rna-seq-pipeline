@@ -115,7 +115,6 @@ if [ $paired == 1 ]; then
     if [[ $R2 =~ $FASTQ_SUFFIX ]]; then
        R2NAME=${R2::-6}
     fi
-    echo R2 is $R2
 fi
 echo R2 is $R2
 
