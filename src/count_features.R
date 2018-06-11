@@ -16,15 +16,40 @@ library("genomeIntervals")
 
 
 option_list = list(
-  make_option(c("-bpath", "--bamfilespath"), type="character", action="store_true", default=FALSE, 
+  make_option(c("-bpath", "--bamfilespath"), type="character", action="store", default=FALSE, 
               help="Directory path to bam files", metavar="character"),
-  make_option(c("-anno", "--annotation"), type="character", action="store_true", default=FALSE,
-              help="Annotation file in gtf/gff/gff3 format", metavar="character")
+  make_option(c("-anno", "--annotation"), type="character", action="store", default=FALSE,
+              help="Annotation file in gtf/gff/gff3 format", metavar="character"),
+  make_option(c("-v", "--verbose"), action="store_true", default=TRUE,
+              help="Should the program print extra stuff out? [default %default]")
   ); 
 
 
 opt_parser = OptionParser(usage = "count_features.R [options]", option_list=option_list);
 opt = parse_args(opt_parser)
+
+if (opt$v) {
+  # you can use either the long or short name
+  # so opt$bpath and opt$bamfilespath are the same.
+  cat("bamfilespath:\n")
+  cat(opt$bamfilespath)
+  cat("\n\nbpath:\n")
+  cat(opt$bpath)
+  
+  # show the user what anoo is
+  cat("\n\nanno:\n")
+  cat(opt$annotation)
+}
+
+#Print Error
+
+if(!is.na(opt$bamfilespath) & !is.na(opt$annotation)) {
+  cat("Here are strings bpath and anno together at last:\n")
+  cat(paste(opt$bpath,opt$anno,sep=''))
+  cat("\n\n")
+} else {
+  cat("You didn't specify both variables bamfilepath and annotation file\n", file=stderr()) # print error messages to stderr
+}
 
 
 #Check if directory exists
@@ -38,11 +63,13 @@ dir.exists<-function (x)
 print(opt$bamfiles)
 print(opt$annotation)
 files_location=file.path(opt$bamfiles)
-paste(Sys.Date(), "_and_",Sys.time(),sep="")
-
 # Start writing to an output file
 logfile=paste("files_location", "_log.txt",sep="")
 sink(logfile)
+
+###### Read Count Aggregation ##################
+paste(Sys.Date(), "_and_",Sys.time(),sep="")
+
 
 
 if(dir.exists(files_location)){

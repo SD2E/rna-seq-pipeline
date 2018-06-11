@@ -10,7 +10,8 @@ RUN apt-get update \
   && export DEBIAN_FRONTEND=noninteractive \
 	&& apt-get -y install --fix-missing --fix-broken texlive texinfo texlive-fonts-extra texlive-latex-extra \
 	&& apt-get -y install libpoppler-cpp-dev default-jdk r-cran-rjava \
-	&& apt-get install libfreetype6-dev
+	&& apt-get install libfreetype6-dev \
+	&& apt-get install bedtools
 
 RUN apt-get -y install python3.6
 RUN wget https://bootstrap.pypa.io/get-pip.py -O /tmp/get-pip.py

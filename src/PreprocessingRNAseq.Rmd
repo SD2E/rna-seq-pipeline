@@ -69,6 +69,7 @@ intervals= ""
 gtf= ""
 logpath = ""
 # LOAD TOOLS
+library(parallel)
 library(Rsubread)
 library(Rbowtie)
 library(Rsamtools)
@@ -197,12 +198,12 @@ qc %>%
 
 ```{r readMapping alignment}
 x=fastq.files
-f <- lapply(strsplit(x, "_"), "[", 1)
+f <- lapply(strsplit(x, "\\_ |\\.R |\\_r |\\.r"), "[", 1)
 f <- unique(unlist(f))
-sample_names = f
+sample.names = f
 #sample_names <- lapply(f, function(x) list.files(pattern=x))
 
-for(i in 1:length(file.names)) {
+for(i in 1:length(sample.names)) {
   
         print(sample.name[i])
         outsam= paste(sample_names[i],".sam",sep="")
@@ -227,8 +228,24 @@ for(i in 1:length(file.names)) {
 ```
 
 ```{r rnaseq qc}
-
+bam.files <- list.files(rawdatapath, pattern ="*.bam$",full.names=TRUE, recursive = TRUE)
+for(i in 1:length(bam.files)) {
+  bam.name <- sub(pattern = "(.*)\\..*$", replacement = "\\1", basename(bam.files[i]))
+  bam.name <- unique(unlist(f))
+  eachbam <- scanBam(bam.files[i])
+}
 ```
+
+```{r readcount}
+
+bamFileList <- BamFileList(bam.files)
+gAlns <- mclapply(bamFileList,readGAlignmentsFromBam)
+print(bam.files) 
+output <- "ReadCountMatrix_preCAD"
+fc <- featureCounts(files=bam.files,annot.ext=ref.filepath,isGTFAnnotationFile=TRUE,GTF.featureType="gene",isPairedEnd=TRUE,requireBothEndsMapped=FALSE)
+write.table(fc$counts,paste(files_location,"/",output,".tsv",sep=""),quote=F,sep="\t",append=F)
+```
+
 ## Including Plots
 
 You can also embed plots, for example:
