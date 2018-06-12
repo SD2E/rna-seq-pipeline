@@ -30,6 +30,25 @@ else
   fseqs=${filterseqs}
 fi
 
+if [[ ${r1} =~ \.gz$ ]]; then
+   echo READ1 is gzipped, upzipping
+   echo zcat ${r1} > ${r1##*/}
+   zcat ${r1} > ${r1##*/}
+   r1=${r1##*/}
+   mv ${r1} ${r1%.gz}
+   r1=${r1%.gz}
+else
+   echo READ1 is not gzipped
+fi
+if [[ ${r2} =~ \.gz$ ]]; then
+   echo READ2 is gzipped, upzipping
+   zcat ${r2} > ${r2##*/}
+   r2=${r2##*/}
+   mv ${r2} ${r2%.gz}
+   r2=${r2%.gz}
+else
+   echo READ2 is not gzipped
+fi
 
 echo the input parameters
 echo read1 is ${r1}
@@ -43,3 +62,6 @@ echo filterseqs is ${fseqs}
 echo DEBUG=1 container_exec ${CONTAINER_IMAGE} /opt/scripts/runsortmerna.sh ${r1} ${r2} ${trim} ${adaptersfile} ${minlen} ${sortmerna} ${fseqs}
 
 DEBUG=1 container_exec ${CONTAINER_IMAGE} /opt/scripts/runsortmerna.sh ${r1} ${r2} ${trim} ${adaptersfile} ${minlen} ${sortmerna} ${fseqs}
+
+rm $(basename $r1)
+rm $(basename $r2)

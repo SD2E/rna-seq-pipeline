@@ -141,8 +141,10 @@ else
 fi
 
 # sort if we are told to
-
+echo "checking sortmerna"
 if [ $SORT == 1 ]; then
+    rsync -rltv $RNADB_DIR ./
+    RNADB_DIR=$(basename $RNADB_DIR)
     gunzip $RNADB_DIR/*.gz
     if [ $paired == 1 ]; then
     echo ${SORTMERNA_DIR}/sortmerna --paired_out --ref ${RNADB}  --reads ${SORT_FILE} --num_alignments 1 --fastx --aligned ${R1NAME}_merged --other ${R1NAME}_rna_free_reads -a $NTHREADS --log -v --blast 1
@@ -188,11 +190,7 @@ fi
 
 # and clean up... for now leaving hte free reads unzipped
 
-#rm $R1
-#rm $R2
-gzip $R1
-gzip $R2
-#rm -r $RNADB_DIR
+rm -r $(basename $RNADB_DIR)
 rm *_merged.fastq
 rm *_merged.blast
 rm *_merged-reads.fastq
