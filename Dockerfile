@@ -48,4 +48,4 @@ ADD /src /opt/src
 RUN chmod 777 /opt/src/*
 
 #adding sample data
-ADD sample_data/* sample_data/
+#ADD sample_data/* sample_data/

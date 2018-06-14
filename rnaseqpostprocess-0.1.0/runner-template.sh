@@ -1,6 +1,7 @@
 # Import Agave runtime extensions
 . _lib/extend-runtime.sh
 
+
 # Allow CONTAINER_IMAGE over-ride via local file
 if [ -z "${CONTAINER_IMAGE}" ]
 then
@@ -17,8 +18,8 @@ fi
 #   Example: docker run centos:7 uname -a
 #            container_exec centos:7 uname -a
 
-echo "bam is ${bam}"
-echo "gff is ${gff}"
+echo "bam directory is ${path_bam_dir}"
+echo "gff is ${path_gff}"
 
-echo DEBUG=1 container_exec ${CONTAINER_IMAGE} Rscript --vanilla opt/src/count_features.R -bpath ${bam} -a ${gff} -o ${output}
-DEBUG=1 container_exec ${CONTAINER_IMAGE} Rscript --vanilla opt/src/count_features.R -bpath ${bam} -a ${gff} -o ${output}
+echo DEBUG=1 container_exec ${CONTAINER_IMAGE} Rscript --vanilla opt/src/count_features.R --bamfilespath ${path_bam_dir} --annotation ${path_gff}
+DEBUG=1 container_exec ${CONTAINER_IMAGE} Rscript --vanilla opt/src/count_features.R --bamfilespath ${path_bam_dir} --annotation ${path_gff}
