@@ -21,5 +21,5 @@ fi
 echo "bam directory is ${path_bam_dir}"
 echo "gff is ${path_gff}"
 
-echo DEBUG=1 container_exec ${CONTAINER_IMAGE} Rscript --vanilla opt/src/count_features.R --bamfilespath ${path_bam_dir} --annotation ${path_gff}
-DEBUG=1 container_exec ${CONTAINER_IMAGE} Rscript --vanilla opt/src/count_features.R --bamfilespath ${path_bam_dir} --annotation ${path_gff}
+echo DEBUG=1 container_exec ${CONTAINER_IMAGE} Rscript --vanilla /opt/src/count_features.R --bamfilespath ${path_bam_dir} --annotation ${path_gff}
+DEBUG=1 container_exec ${CONTAINER_IMAGE} Rscript --vanilla /opt/src/count_features.R --bamfilespath ${path_bam_dir} --annotation ${path_gff}

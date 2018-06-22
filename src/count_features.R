@@ -16,13 +16,13 @@ library("genomeIntervals")
 
 
 option_list = list(
-  make_option(c("-bpath", "--bamfilespath"), type="character", action="store", default=FALSE, 
+  make_option(c("-bpath", "--bamfilespath"), type="character", action="store", default=FALSE,
               help="Directory path to bam files", metavar="character"),
   make_option(c("-anno", "--annotation"), type="character", action="store", default=FALSE,
               help="Annotation file in gtf/gff/gff3 format", metavar="character"),
   make_option(c("-v", "--verbose"), action="store_true", default=TRUE,
               help="Should the program print extra stuff out? [default %default]")
-  ); 
+  );
 
 
 opt_parser = OptionParser(usage = "count_features.R [options]", option_list=option_list);
@@ -35,7 +35,7 @@ if (opt$v) {
   cat(opt$bamfilespath)
   cat("\n\nbpath:\n")
   cat(opt$bpath)
-  
+
   # show the user what anoo is
   cat("\n\nanno:\n")
   cat(opt$annotation)
@@ -88,9 +88,9 @@ gInterval<-readGff3(gtf, quiet=TRUE)
 #Calculate read count data frame
 output <- "ReadCountMatrix_preCAD"
 fc <- featureCounts(files=bam.files,annot.ext=gtf,isGTFAnnotationFile=TRUE,GTF.featureType="gene",isPairedEnd=TRUE,requireBothEndsMapped=FALSE)
-write.table(fc$counts,paste(files_location,"/",output,".tsv",sep=""),quote=F,sep="\t",append=F)
+write.table(fc$counts,paste(output,".tsv",sep=""),quote=F,sep="\t",append=F)
 counts=fc$counts
 
 #system(sprintf("multiqc %s", files_location))
-system(paste("multiqc", files_location, sep=""))
+system(paste("multiqc", sep=""))
 sink()

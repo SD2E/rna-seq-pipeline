@@ -2,7 +2,7 @@
   "name": "{{ agave.username }}-{{ app.name }}",
   "version": "{{ app.version }}",
   "executionType": "HPC",
-  "executionSystem": "hpc-tacc-maverick-{{ agave.username }}",
+  "executionSystem": "tacc-wrangler-{{ agave.username }}",
   "parallelism": "SERIAL",
   "deploymentPath": "{{ agave.username }}/apps/{{ app.name }}-{{ app.version }}",
   "deploymentSystem": "data-sd2e-projects-users",
