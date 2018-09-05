@@ -87,10 +87,6 @@ gInterval<-readGff3(gtf, quiet=TRUE)
 
 #Calculate read count data frame
 output <- "ReadCountMatrix_preCAD"
-fc <- featureCounts(files=bam.files,annot.ext=gtf,isGTFAnnotationFile=TRUE,GTF.featureType="gene",isPairedEnd=TRUE,requireBothEndsMapped=FALSE)
+fc <- featureCounts(files=bam.files,annot.ext=gtf,isGTFAnnotationFile=TRUE,GTF.featureType="gene",GTF.attrType="gene",isPairedEnd=TRUE,requireBothEndsMapped=FALSE)
 write.table(fc$counts,paste(output,".tsv",sep=""),quote=F,sep="\t",append=F)
 counts=fc$counts
-
-#system(sprintf("multiqc %s", files_location))
-system(paste("multiqc", sep=""))
-sink()
