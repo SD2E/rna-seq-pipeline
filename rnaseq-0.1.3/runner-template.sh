@@ -32,20 +32,17 @@ fi
 
 if [[ ${r1} =~ \.gz$ ]]; then
    echo READ1 is gzipped, upzipping
-   echo zcat ${r1} > ${r1##*/}
-   zcat ${r1} > ${r1##*/}
-   r1=${r1##*/}
-   mv ${r1} ${r1%.gz}
-   r1=${r1%.gz}
+   echo "zcat ${r1} > $(basename $r1 .gz)"
+   zcat ${r1} > $(basename $r1 .gz)
+   r1=$(basename $r1 .gz)
 else
    echo READ1 is not gzipped
 fi
 if [[ ${r2} =~ \.gz$ ]]; then
-   echo READ2 is gzipped, upzipping
-   zcat ${r2} > ${r2##*/}
-   r2=${r2##*/}
-   mv ${r2} ${r2%.gz}
-   r2=${r2%.gz}
+  echo READ2 is gzipped, upzipping
+  echo "zcat ${r2} > $(basename $r2 .gz)"
+  zcat ${r2} > $(basename $r2 .gz)
+  r2=$(basename $r2 .gz)
 else
    echo READ2 is not gzipped
 fi

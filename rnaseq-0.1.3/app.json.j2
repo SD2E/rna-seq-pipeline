@@ -1,19 +1,17 @@
 {
 	"name": "{{ agave.username }}-{{ app.name }}",
 	"version": "{{ app.version }}",
-	"executionSystem": "hpc-tacc-maverick-{{ agave.username }}",
+	"executionSystem": "tacc-wrangler-{{ agave.username }}",
 	"executionType": "HPC",
 	"parallelism": "SERIAL",
-    "deploymentPath": "{{ agave.username }}/apps/{{ app.name }}-{{ app.version }}",
-    "deploymentSystem": "data-sd2e-projects-users",
-	"defaultProcessorsPerNode": 20,
+  "deploymentPath": "{{ agave.username }}/apps/{{ app.name }}-{{ app.version }}",
+  "deploymentSystem": "data-sd2e-projects-users",
 	"defaultNodeCount": 1,
 	"defaultQueue": "normal",
-	"defaultMemoryPerNode": 256,
 	"defaultMaxRunTime": "01:00:00",
 	"available":true,
     "checkpointable": false,
-	"modules": ["load tacc-singularity/2.3.1"],
+	"modules": ["load tacc-singularity"],
 	"label": "RNASeq",
 	"tags": [
 		"RNA-Seq",
@@ -149,6 +147,16 @@
 				"required": true,
 				"type": "string",
 				"visible": true
+			}
+		},
+		{
+			"id": "CONTAINER_IMAGE",
+			"value": {
+				"default": "{{ docker.organization }}/{{ docker.repo }}:{{ docker.tag }}",
+				"description": "Container Image. Do not edit.",
+				"type": "string",
+				"visible": false,
+				"required": true
 			}
 		}
 	],
