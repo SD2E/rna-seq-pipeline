@@ -1,9 +1,19 @@
 #!/usr/bin/env bash
 
-. _util/container_exec.sh
+# Import Agave runtime extensions
+. _lib/extend-runtime.sh
 
-version=$(cat VERSION)
-CONTAINER_IMAGE="jurrutia/rnaseq:$version"
+# Allow CONTAINER_IMAGE over-ride via local file
+if [ -z "${CONTAINER_IMAGE}" ]
+then
+    if [ -f "./_lib/CONTAINER_IMAGE" ]; then
+        CONTAINER_IMAGE=$(cat ./_lib/CONTAINER_IMAGE)
+    fi
+    if [ -z "${CONTAINER_IMAGE}" ]; then
+        echo "CONTAINER_IMAGE was not set via the app or CONTAINER_IMAGE file"
+        CONTAINER_IMAGE="sd2e/base:ubuntu17"
+    fi
+fi
 
 # resets inputs to paths if inputs are null
 if [ -z ${read1} ]; then

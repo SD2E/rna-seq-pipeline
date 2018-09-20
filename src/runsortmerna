@@ -109,6 +109,9 @@ if [ $paired == 1 ]; then
 fi
 echo R2 is $R2
 
+#R1NAME=${R1NAME%.f*}
+R1NAME=${R1NAME%_001_paired}
+R2NAME=${R2NAME%_001_paired}
 echo RNAME1 is $R1NAME
 echo RNAME2 is $R2NAME
 # trim if we are told to
