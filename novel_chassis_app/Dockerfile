@@ -77,6 +77,7 @@ WORKDIR picard-${PICARD_VERSION}
 RUN ./gradlew shadowJar \
     && mkdir /opt/picard \
     && mv build/libs/picard.jar /opt/picard/picard.jar
+ENV PICARDDIR /opt/picard/picard.jar
 
 # GATK (JAVA)
 WORKDIR /tmp
@@ -117,21 +118,34 @@ ENV CONDA_PATH /opt/miniconda
 RUN wget -nv https://repo.continuum.io/miniconda/Miniconda3-4.3.30-Linux-x86_64.sh -O /tmp/miniconda.sh \
     && bash /tmp/miniconda.sh -p /opt/miniconda -b \
     && rm /tmp/miniconda.sh
-WORKDIR /opt/gatk
 ENV PATH $CONDA_PATH/envs/gatk/bin:$CONDA_PATH/bin:$PATH
-RUN conda env create -n gatk -f /opt/gatk/gatkcondaenv.yml && \
+RUN cd /opt/gatk && conda env create -n gatk -f /opt/gatk/gatkcondaenv.yml && \
     echo "source activate gatk" >> /opt/gatk/gatkenv.rc && \
     conda clean -y -all
 #CMD ["bash", "--init-file", "/opt/gatk/gatkenv.rc"]
+ENV GATK /opt/gatk/gatk.jar
 
-# Install Rsubread
-RUN apt-get -y install r-base
-RUN Rscript -e 'source("https://bioconductor.org/biocLite.R") ; biocLite(); biocLite("Rsubread", dependencies=TRUE)'
+# Install subread
+#RUN apt-get -y install r-base
+#RUN Rscript -e 'source("https://bioconductor.org/biocLite.R") ; biocLite(); biocLite("Rsubread", dependencies=TRUE)'
+RUN wget 'https://sourceforge.net/projects/subread/files/subread-1.6.2/subread-1.6.2-Linux-x86_64.tar.gz' && \
+    tar -zxvf subread-1.6.2-Linux-x86_64.tar.gz && \
+    rm subread-1.6.2-Linux-x86_64.tar.gz && mv subread-1.6.2-Linux-x86_64 /opt/
+ENV featureCounts /opt/subread-1.6.2-Linux-x86_64/bin/featureCounts
+
+# Install RNAseqQC
+RUN wget 'http://www.broadinstitute.org/cancer/cga/tools/rnaseqc/RNA-SeQC_v1.1.8.jar' && \
+    mv RNA-SeQC_v1.1.8.jar /opt/
+ENV RNAseqQC /opt/RNA-SeQC_v1.1.8.jar
+
 
 
 #ADD executables to bath
-ENV PATH "/opt/bin/:$PATH"
+#ENV PATH "/opt/bin/:$PATH"
+ENV PATH "/opt/bwa/:$PATH"
+ENV PATH  "/opt/samtools/bin/:$PATH"
 
 # Add analysis script
 ADD src /src
-ADD test /test
+RUN chmod +x /src/analysis_pipeline.sh
+ADD tests /tests
