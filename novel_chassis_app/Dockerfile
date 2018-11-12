@@ -9,7 +9,7 @@ RUN apt-get update \
     && apt-get install unzip -y \
     && apt-get install less -y \
     && apt-get install libgomp1 -y \
-    && apt-get install build-essential -y \ 
+    && apt-get install build-essential -y \
     && apt-get install bzip2 -y \
     && apt-get install bedtools -y \
     && apt-get install libbz2-dev -y \
@@ -56,7 +56,7 @@ ENV BBMAP_VERSION 38.26
 RUN wget https://sourceforge.net/projects/bbmap/files/BBMap_${BBMAP_VERSION}.tar.gz/download -O bbmap.tar.gz \
     && tar -zxf bbmap.tar.gz \
     && rm bbmap.tar.gz \
-    && mv bbmap /opt/bbmap 
+    && mv bbmap /opt/bbmap
 
 # SAMTOOLS
 WORKDIR /tmp
@@ -77,7 +77,7 @@ WORKDIR picard-${PICARD_VERSION}
 RUN ./gradlew shadowJar \
     && mkdir /opt/picard \
     && mv build/libs/picard.jar /opt/picard/picard.jar
-    
+
 # GATK (JAVA)
 WORKDIR /tmp
 ENV GATK_VERSION 4.0.11.0
@@ -122,5 +122,16 @@ ENV PATH $CONDA_PATH/envs/gatk/bin:$CONDA_PATH/bin:$PATH
 RUN conda env create -n gatk -f /opt/gatk/gatkcondaenv.yml && \
     echo "source activate gatk" >> /opt/gatk/gatkenv.rc && \
     conda clean -y -all
-CMD ["bash", "--init-file", "/opt/gatk/gatkenv.rc"]
+#CMD ["bash", "--init-file", "/opt/gatk/gatkenv.rc"]
 
+# Install Rsubread
+RUN apt-get -y install r-base
+RUN Rscript -e 'source("https://bioconductor.org/biocLite.R") ; biocLite(); biocLite("Rsubread", dependencies=TRUE)'
+
+
+#ADD executables to bath
+ENV PATH "/opt/bin/:$PATH"
+
+# Add analysis script
+ADD src /src
+ADD test /test
