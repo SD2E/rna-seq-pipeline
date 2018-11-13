@@ -73,57 +73,11 @@ RUN ./configure --enable-plugins --prefix=$SAMTOOLS_INSTALL_DIR \
 WORKDIR /tmp
 ENV PICARD_VERSION 2.18.15
 RUN git clone -b ${PICARD_VERSION} --depth 1 https://github.com/broadinstitute/picard.git picard-${PICARD_VERSION}
-WORKDIR picard-${PICARD_VERSION}
-RUN ./gradlew shadowJar \
+RUN cd picard-${PICARD_VERSION} &&\
+    ./gradlew shadowJar \
     && mkdir /opt/picard \
     && mv build/libs/picard.jar /opt/picard/picard.jar
 ENV PICARDDIR /opt/picard/picard.jar
-
-# GATK (JAVA)
-WORKDIR /tmp
-ENV GATK_VERSION 4.0.11.0
-RUN wget https://github.com/broadinstitute/gatk/releases/download/${GATK_VERSION}/gatk-${GATK_VERSION}.zip \
-    && unzip gatk-${GATK_VERSION}.zip  \
-    && mv gatk-${GATK_VERSION} /opt/gatk \
-    && rm gatk-${GATK_VERSION}.zip
-
-WORKDIR /opt/gatk
-#Setup linked jars that may be needed for running gatk
-RUN ln -s $( find * -name "gatk*local.jar" ) gatk.jar \
-    && ln -s $( find * -name "gatk*spark.jar" ) gatk-spark.jar
-
-WORKDIR /tmp
-RUN mkdir /gatkCloneMountPoint \
-    && mkdir /jars \
-    && mkdir .gradle
-
-# Create a simple unit test runner
-RUN echo "source activate gatk" > /tmp/run_unit_tests.sh && \
-    echo "export TEST_JAR=\$( find /jars -name \"gatk*test.jar\" )" >> /tmp/run_unit_tests.sh && \
-    echo "export TEST_DEPENDENCY_JAR=\$( find /jars -name \"gatk*testDependencies.jar\" )" >> /tmp/run_unit_tests.sh && \
-    echo "export GATK_JAR=$( find /opt/gatk -name "gatk*local.jar" )" >> /tmp/run_unit_tests.sh && \
-    echo "cp -rp /gatkCloneMountPoint/src/main/java/* /opt/gatk/srcdir" >> /tmp/run_unit_tests.sh && \
-    echo "export SOURCE_DIR=/opt/gatk/srcdir" >> /tmp/run_unit_tests.sh && \
-    echo "export GRADLE_OPTS=\"-Xmx1024m -Dorg.gradle.daemon=false\"" /tmp/run_unit_tests.sh && \
-    echo "export CP_DIR=/opt/gatk/testClasses" /tmp/run_unit_tests.sh && \
-    echo "ln -s /gatkCloneMountPoint/src/ /gatkCloneMountPoint/scripts/docker/src" >> /tmp/run_unit_tests.sh && \
-    echo "ln -s /gatkCloneMountPoint/build/ /gatkCloneMountPoint/scripts/docker/build" >> /tmp/run_unit_tests.sh && \
-    echo "cd /opt/gatk/ && /gatkCloneMountPoint/gradlew -b /gatkCloneMountPoint/dockertest.gradle testOnPackagedReleaseJar jacocoTestReportOnPackagedReleaseJar -a -p /gatkCloneMountPoint" >> /tmp/run_unit_tests.sh \
-    && cp /tmp/run_unit_tests.sh /opt/gatk \
-    && rm /tmp/run_unit_tests.sh
-
-# Start GATK Python environment
-ENV CONDA_MD5 = "0b80a152332a4ce5250f3c09589c7a81"
-ENV CONDA_PATH /opt/miniconda
-RUN wget -nv https://repo.continuum.io/miniconda/Miniconda3-4.3.30-Linux-x86_64.sh -O /tmp/miniconda.sh \
-    && bash /tmp/miniconda.sh -p /opt/miniconda -b \
-    && rm /tmp/miniconda.sh
-ENV PATH $CONDA_PATH/envs/gatk/bin:$CONDA_PATH/bin:$PATH
-RUN cd /opt/gatk && conda env create -n gatk -f /opt/gatk/gatkcondaenv.yml && \
-    echo "source activate gatk" >> /opt/gatk/gatkenv.rc && \
-    conda clean -y -all
-#CMD ["bash", "--init-file", "/opt/gatk/gatkenv.rc"]
-ENV GATK /opt/gatk/gatk.jar
 
 # Install subread
 #RUN apt-get -y install r-base
@@ -139,13 +93,17 @@ RUN wget 'http://www.broadinstitute.org/cancer/cga/tools/rnaseqc/RNA-SeQC_v1.1.8
 ENV RNAseqQC /opt/RNA-SeQC_v1.1.8.jar
 
 
-
 #ADD executables to bath
 #ENV PATH "/opt/bin/:$PATH"
 ENV PATH "/opt/bwa/:$PATH"
 ENV PATH  "/opt/samtools/bin/:$PATH"
 
+
 # Add analysis script
 ADD src /src
 RUN chmod +x /src/analysis_pipeline.sh
+ENV GATK /src/GenomeAnalysisTK.jar
+RUN pwd
 ADD tests /tests
+RUN chmod +x /tests/test.sh
+WORKDIR /tests/

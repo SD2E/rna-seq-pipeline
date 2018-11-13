@@ -9,7 +9,7 @@
   "defaultProcessorsPerNode": 1,
   "defaultNodeCount": 1,
   "defaultQueue": "normal",
-  "label": "2018-11-12T23:33:05.494452Z",
+  "label": "2018-11-13T17:33:38.663586Z",
   "modules": ["load tacc-singularity"],
   "shortDescription": "",
   "templatePath": "runner-template.sh",

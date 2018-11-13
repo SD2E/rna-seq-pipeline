@@ -28,7 +28,7 @@ OUTDIR='.'
 TEMPDIR='.'
 
 #These are now defined in the Dockerfile, but leaving here for reference
-#GATK=/opt/gatk/gatk.jar
+#GATK=/src/GenomeAnalysisTK.jar
 #featureCounts=/opt/subread-1.6.2-Linux-x86_64/bin/featureCounts
 #RNAseqQC=/opt/RNA-SeQC_v1.1.8.jar
 #PICARDDIR=/opt/picard/picard.jar
@@ -109,12 +109,12 @@ echo ${SAMP}.BWA.DepthOfCoverage "& done(${SAMP}.BWA.hs_metrics)"
 java ${TL}=50 ${HFL}=10 -Xmx4000m -jar ${GATK} -T DepthOfCoverage \
       -L ${TARGETS} -R ${REF} \
       -I ${TEMPDIR}/${outsample}.aligned.duplicates_marked.indel_cleaned.bam \
-      -O ${TEMPDIR}/${outsample}.DepthOfCoverage
+      -o ${TEMPDIR}/${outsample}.DepthOfCoverage
 echo ${SAMP}.BWA.FlagStat "& done(${SAMP}.BWA.hs_metrics)"
 
 java ${TL}=50 ${HFL}=10 -Xmx4000m -jar ${GATK} -T FlagStat -R ${REF} \
       -I ${TEMPDIR}/${outsample}.aligned.duplicates_marked.indel_cleaned.bam \
-      -O ${TEMPDIR}/${outsample}.flagstat.txt
+      -o ${TEMPDIR}/${outsample}.flagstat.txt
 echo ${SAMP}.BWA.validate "& done(${SAMP}.BWA.FlagStat)"
 
 java ${TL}=50 ${HFL}=10 -Xmx4000m -jar ${PICARDDIR} ValidateSamFile ${PICARDOPTS} \
