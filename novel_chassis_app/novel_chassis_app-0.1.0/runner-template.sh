@@ -17,4 +17,6 @@ fi
 #   Example: docker run centos:7 uname -a
 #            container_exec centos:7 uname -a
 
-container_exec ${CONTAINER_IMAGE}
+
+echo container_exec ${CONTAINER_IMAGE} /src/analysis_pipeline.sh ${path_read1} ${path_read2} ${outname} ${path_fasta} ${path_interval_file} ${path_gff} ${path_ref_flat}
+container_exec ${CONTAINER_IMAGE} /src/analysis_pipeline.sh ${path_read1} ${path_read2} ${outname} ${path_fasta} ${path_interval_file} ${path_gff} ${path_ref_flat}

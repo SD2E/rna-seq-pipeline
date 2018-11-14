@@ -33,7 +33,7 @@ TEMPDIR='.'
 #RNAseqQC=/opt/RNA-SeQC_v1.1.8.jar
 #PICARDDIR=/opt/picard/picard.jar
 
-refFlat=/work/05642/usaxena/stampede2/NAND/annotation/modified.ecoli.MG1655.refFlat.txt
+#refFlat=/work/05642/usaxena/stampede2/NAND/annotation/modified.ecoli.MG1655.refFlat.txt
 
 # reference files
 
@@ -41,10 +41,10 @@ REF=$4
 echo $REF
 TARGETS=$5
 echo $TARGETS
-BAITS=$5
-echo $BAITS
 GTF=$6
 echo $GTF
+refFlat=$7
+echo $refFlat
 
 BWAARGS="-q 5 -l 32 -k 2 -t ${NSLOTS} -o 1"
 JAVAOPTS1="${CL}=1 ${TL}=50 ${HFL}=10 -Xmx4000m"
@@ -143,7 +143,7 @@ java ${TL}=50 ${HFL}=10 -Xmx4000m -jar ${PICARDDIR} CollectRnaSeqMetrics \
       OUTPUT=${TEMPDIR}/${outsample}.collect_hs_metrics.txt REF_FLAT=${refFlat}
 echo ${SAMP}.BWA.featureCounts "& done(${SAMP}.BWA.hsmetrics)"
 
-${featureCounts} -T 10 -p -P -M -a ${GTF} input_file1 \
+${featureCounts} -T 10 -p -P -M -a ${GTF} \
       ${TEMPDIR}/${outsample}.aligned.duplicates_marked.indel_cleaned.bam \
       -o ${OUTDIR}/${outsample}.featureCounts
 
