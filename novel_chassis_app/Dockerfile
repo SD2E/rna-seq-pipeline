@@ -100,10 +100,10 @@ ENV PATH  "/opt/samtools/bin/:$PATH"
 
 
 # Add analysis script
+RUN pwd
 ADD src /src
 RUN chmod +x /src/analysis_pipeline.sh
 ENV GATK /src/GenomeAnalysisTK.jar
-RUN pwd
 ADD tests /tests
 RUN chmod +x /tests/test.sh
 WORKDIR /tests/
