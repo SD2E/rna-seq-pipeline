@@ -160,23 +160,27 @@ fi
 
 if [ $TRIM == 1 ]; then
     if [ $paired == 1 ]; then
-        ${FASTQC_DIR}/fastqc ${R1NAME}_rRNA_free_reads.fastq &
-        ${FASTQC_DIR}/fastqc ${R2NAME}_rRNA_free_reads.fastq &
         ${FASTQC_DIR}/fastqc ${R1NAME}_trimmed.fastq &
         ${FASTQC_DIR}/fastqc gzip ${R2NAME}_trimmed.fastq &
         wait
-        gzip ${R1NAME}_rRNA_free_reads.fastq &
-        gzip ${R2NAME}_rRNA_free_reads.fastq &
         gzip ${R1NAME}_trimmed.fastq &
         gzip ${R2NAME}_trimmed.fastq &
         wait
+        if [ $SORT == 1 ]; then
+           ${FASTQC_DIR}/fastqc ${R1NAME}_rRNA_free_reads.fastq &
+           ${FASTQC_DIR}/fastqc ${R2NAME}_rRNA_free_reads.fastq &
+           wait
+           gzip ${R1NAME}_rRNA_free_reads.fastq &
+           gzip ${R2NAME}_rRNA_free_reads.fastq &
+           wait
+        fi
     else
-        ${FASTQC_DIR}/fastqc ${R1NAME}_rRNA_free_reads.fastq &
-        ${FASTQC_DIR}/fastqc ${R1NAME}_trimmed.fastq &
-        wait
-        gzip ${R1NAME}_rRNA_free_reads.fastq &
-        gzip ${R1NAME}_trimmed.fastq &
-        wait
+        ${FASTQC_DIR}/fastqc ${R1NAME}_trimmed.fastq
+        gzip ${R1NAME}_trimmed.fastq
+        if [ $SORT == 1 ]; then
+          ${FASTQC_DIR}/fastqc ${R1NAME}_rRNA_free_reads.fastq
+          gzip ${R1NAME}_rRNA_free_reads.fastq
+        fi
     fi
     echo done with all gzips
 fi

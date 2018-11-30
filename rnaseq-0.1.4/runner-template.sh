@@ -40,6 +40,20 @@ else
   fseqs=${filterseqs}
 fi
 
+if [ ${multiple_lanes} = 1 ] ; then
+  echo "Grouping fastqs from multiple lanes"
+   sample=$(echo $r1 | sed 's/_L0.*//g')
+   OUT_SAMPLE=$(basename ${sample})
+   echo "cat ${sample}*_R1* > ${OUT_SAMPLE}_merged_R1.fastq.gz" &
+   cat ${sample}*_R1* > ${OUT_SAMPLE}_merged_R1.fastq.gz &
+   echo "cat ${sample}*_R2* > ${OUT_SAMPLE}_merged_R2.fastq.gz" &
+   cat ${sample}*_R2* > ${OUT_SAMPLE}_merged_R2.fastq.gz
+   wait
+   r1=${OUT_SAMPLE}_merged_R1.fastq.gz
+   r2=${OUT_SAMPLE}_merged_R2.fastq.gz
+fi
+
+
 if [[ ${r1} =~ \.gz$ ]]; then
    echo READ1 is gzipped, upzipping
    echo "zcat ${r1} > $(basename $r1 .gz)"
@@ -65,6 +79,7 @@ echo sortmerna is ${sortmerna}
 echo minlen is ${minlen}
 echo adaptersfile is ${adaptersfile}
 echo filterseqs is ${fseqs}
+echo multiple_lanes is ${multiple_lanes}
 
 echo DEBUG=1 container_exec ${CONTAINER_IMAGE} /opt/scripts/runsortmerna.sh ${r1} ${r2} ${trim} ${adaptersfile} ${minlen} ${sortmerna} ${fseqs}
 
