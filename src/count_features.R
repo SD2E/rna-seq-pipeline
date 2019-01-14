@@ -111,7 +111,7 @@ write.table(counts,paste(output,".tsv",sep=""),col.names=TRUE,row.names=FALSE,qu
 # The input file is the output of featureCounts
 #
 
-rpkm <- function(counts, lengths) {
+fpkm <- function(counts, lengths) {
   pm <- sum(counts) /1e6
   rpm <- counts/pm
   rpm/(lengths/1000)
@@ -135,12 +135,12 @@ lengths = ftr.cnt[,6]
 
 counts <- ftr.cnt[,7:ncol(ftr.cnt)]
 
-cat('Performing RPKM calculations...')
+cat('Performing FPKM calculations...')
 
-rpkms <- apply(counts, 2, function(x) rpkm(x, lengths) )
-ftr.rpkm <- cbind(gene_id=ftr.cnt[,1], rpkms)
+fpkms <- apply(counts, 2, function(x) fpkm(x, lengths) )
+ftr.fpkm <- cbind(gene_id=ftr.cnt[,1], fpkms)
 
-write.table(ftr.rpkm, paste(output,"_FPKM.tsv",sep=""), sep="\t", row.names=FALSE, quote=FALSE)
+write.table(ftr.fpkm, paste(output,"_FPKM.tsv",sep=""), sep="\t", row.names=FALSE, quote=FALSE)
 cat(' Done.\n\tSaved as ')
 paste(output,"_FPKM.tsv",sep="")
 
@@ -152,4 +152,4 @@ ftr.tpm <- cbind(gene_id=ftr.cnt[,1], tpms)
 
 write.table(ftr.tpm, paste(output,"_TPM.tsv",sep=""), sep="\t", row.names=FALSE, quote=FALSE)
 cat(' Done.\n\tSaved as ')
-paste(output,"_RPKM.tsv",sep="")
+paste(output,"_TPM.tsv",sep="")
