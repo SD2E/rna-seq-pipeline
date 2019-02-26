@@ -17,6 +17,24 @@ fi
 #   Example: docker run centos:7 uname -a
 #            container_exec centos:7 uname -a
 
+HPC_PATH=/work/projects/SD2E-Community/prod/data/
 
-echo container_exec ${CONTAINER_IMAGE} /src/analysis_pipeline.sh ${path_read1} ${path_read2} ${outname} ${path_fasta} ${path_interval_file} ${path_gff} ${path_ref_flat}
-container_exec ${CONTAINER_IMAGE} /src/analysis_pipeline.sh ${path_read1} ${path_read2} ${outname} ${path_fasta} ${path_interval_file} ${path_gff} ${path_ref_flat}
+read1=${HPC_PATH}${path_read1}
+read2=${HPC_PATH}${path_read2}
+fasta=${HPC_PATH}${path_fasta}
+interval_file=${HPC_PATH}${path_interval_file}
+gff=${HPC_PATH}${path_gff}
+ref_flat=${HPC_PATH}${path_ref_flat}
+
+echo the input paramters
+echo read1 is ${read1}
+echo read2 is ${read2}
+echo outname is ${outname}
+echo fasta is ${fasta}
+echo gff is ${gff}
+echo interval_file is ${interval_file}
+echo ref_flat is ${ref_flat}
+
+
+echo container_exec ${CONTAINER_IMAGE} /src/analysis_pipeline.sh ${read1} ${read2} ${outname} ${fasta} ${interval_file} ${gff} ${ref_flat}
+container_exec ${CONTAINER_IMAGE} /src/analysis_pipeline.sh ${read1} ${read2} ${outname} ${fasta} ${interval_file} ${gff} ${ref_flat}
