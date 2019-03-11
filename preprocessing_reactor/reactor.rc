@@ -1,10 +1,10 @@
 # Reactor mandatory settings
-REACTOR_NAME=novel_chassis_reactor
+REACTOR_NAME=preprocessing_reactor
 # REACTOR_DESCRIPTION=
 # REACTOR_ALIAS=reactor-nickname
 
 # Docker settings
 DOCKER_HUB_ORG=jurrutia
-DOCKER_IMAGE_TAG=novel_chassis_reactor
+DOCKER_IMAGE_TAG=preprocessing_reactor
 DOCKER_IMAGE_VERSION=0.1
 DOCKER_USE_COMMIT_HASH=1

@@ -1,0 +1,918 @@
+{
+  "rdf:about": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/manifest/manifest.json",
+  "plan": "https://hub.sd2e.org/user/sd2e/experiment/biofab_yeast_gates_q0_aq_10545/1",
+  "manifest_version": "https://github.com/SD2E/reactors-etl/releases/tag/2",
+  "instrument_configuration": "agave://data-sd2e-community/biofab/instruments/accuri/5539/11272017/cytometer_configuration.json",
+  "samples": [
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s906/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s906.fcs",
+          "checksum": "b4d91c792f884d39d55c0b75cb8d5e2b005b2e7a"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2341_R4668_R25552_R25730/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2341_R4668_R25552_R25730.fcs",
+          "checksum": "0bf518e27f23ca7f8a04d73c729745a6ab7c9a2c"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2367_R4613_R25513_R25755/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2367_R4613_R25513_R25755.fcs",
+          "checksum": "cecafc5c23f3de4472969ca9ce7b2d17d2a9f81e"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2391_R4564_R25465_R25780/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2391_R4564_R25465_R25780.fcs",
+          "checksum": "9aa92365c6758198b3a26da0c376e629c88d1964"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2415_R4521_R25408_R25805/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2415_R4521_R25408_R25805.fcs",
+          "checksum": "b9e17d46104b89ff28a95b11906fe2a3cc09b619"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2439_R4484_R25342_R25830/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2439_R4484_R25342_R25830.fcs",
+          "checksum": "4f99d3f0156075cc19d19c99055127d08e6d45d2"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2341_R4453_R25267_R25855/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2341_R4453_R25267_R25855.fcs",
+          "checksum": "013329885192f15ccce632bb0c2e077a9ed3b517"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2367_R4398_R25183_R25880/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2367_R4398_R25183_R25880.fcs",
+          "checksum": "5ec3f221408483b67658b1382b8f59e1acc151b6"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2391_R4349_R25090_R25905/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2391_R4349_R25090_R25905.fcs",
+          "checksum": "6d61d81544fe289a45b77ff1598f2f70aa088793"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2415_R4306_R24988_R25930/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2415_R4306_R24988_R25930.fcs",
+          "checksum": "c5a97ca4846ffa202da4ce64b816b29b94ba7a78"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2439_R4269_R24877_R25955/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2439_R4269_R24877_R25955.fcs",
+          "checksum": "c623c19bc6b6b3a09951fa83e1f954eceb8e558f"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2341_R4238_R24757_R25980/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2341_R4238_R24757_R25980.fcs",
+          "checksum": "8750a0952db18791fbc12c854617585459bd0678"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2367_R4183_R24628_R26005/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2367_R4183_R24628_R26005.fcs",
+          "checksum": "2ed12c3a008ce2c37f3c0a91c40a630399632b31"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2391_R4134_R24490_R26030/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2391_R4134_R24490_R26030.fcs",
+          "checksum": "8bf2f1470e89c2dcbd0711d50a597f168b049184"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2415_R4091_R24343_R26055/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2415_R4091_R24343_R26055.fcs",
+          "checksum": "44a50729171f878dbf141376b4b86a05945e9fa5"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2439_R4054_R24187_R26080/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2439_R4054_R24187_R26080.fcs",
+          "checksum": "5649551e8da6c5792eacf8dd49ac23134d7e4b87"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2341_R4023_R24022_R26105/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2341_R4023_R24022_R26105.fcs",
+          "checksum": "d93f483de38ab2ab1a60a02152f58c1168474a9f"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2367_R3968_R23848_R26130/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2367_R3968_R23848_R26130.fcs",
+          "checksum": "c2119b4f27824db7c989a7e488d452099e2af4fb"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2391_R3919_R23665_R26155/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2391_R3919_R23665_R26155.fcs",
+          "checksum": "e9d5493c0505cd799ebbb82d9b7b019ae8b238d3"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2415_R3876_R23473_R26180/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2415_R3876_R23473_R26180.fcs",
+          "checksum": "546b25561a14437ac7a883e07ec6c0529840733e"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2439_R3839_R23272_R26205/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2439_R3839_R23272_R26205.fcs",
+          "checksum": "53845b6186908dfda249264ed9c50d5f16684335"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2341_R3808_R23062_R26230/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2341_R3808_R23062_R26230.fcs",
+          "checksum": "6e15bb17e7c37ad1d39a2fb7c6cbe03b44bb4de7"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2367_R3753_R22843_R26255/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2367_R3753_R22843_R26255.fcs",
+          "checksum": "58b374b3c939840796d553d8776810a4ec816b60"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2391_R3704_R22615_R26280/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2391_R3704_R22615_R26280.fcs",
+          "checksum": "0f5a411be2a86367f4383a756786736cff805819"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2415_R3661_R22378_R26305/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2415_R3661_R22378_R26305.fcs",
+          "checksum": "1fc5a065371e750c40593731e350253c25280530"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2439_R3624_R22132_R26330/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2439_R3624_R22132_R26330.fcs",
+          "checksum": "895d2aa8ff817785d53dc2daa66858be89f58661"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2341_R3593_R21877_R26355/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2341_R3593_R21877_R26355.fcs",
+          "checksum": "6e34c594a6ad0fee5a63c59f5749b21ea7c0ca02"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2367_R3538_R21613_R26380/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2367_R3538_R21613_R26380.fcs",
+          "checksum": "8b87bd94bf1e9dcefb6cbeb16e10150e2637f5df"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2391_R3489_R21340_R26405/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2391_R3489_R21340_R26405.fcs",
+          "checksum": "faace18d3710a5b9216621a96f1375478cb9d8a4"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2415_R3446_R21058_R26430/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2415_R3446_R21058_R26430.fcs",
+          "checksum": "d76a029c26898e2e17b666943309551e2c10c5a4"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2439_R3409_R20767_R26455/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2439_R3409_R20767_R26455.fcs",
+          "checksum": "7109b0e3064abe0c55aa737baef659f6a836073b"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2341_R4668_R20467_R26480/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2341_R4668_R20467_R26480.fcs",
+          "checksum": "a78ba8d5010d562983a48cdbee44b3c39800415d"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2367_R4613_R20428_R26505/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2367_R4613_R20428_R26505.fcs",
+          "checksum": "83f498c862ff9938f4b56c7d265613282849534a"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2391_R4564_R20380_R26530/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2391_R4564_R20380_R26530.fcs",
+          "checksum": "be5d70a5b1d869f497028cff5e112b1300256604"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2415_R4521_R20323_R26555/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2415_R4521_R20323_R26555.fcs",
+          "checksum": "a5fd31d0b49a617f72f4ef5a02665d92076f9cb7"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2439_R4484_R20257_R26580/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2439_R4484_R20257_R26580.fcs",
+          "checksum": "365260e70553eaf961a485c9262510c5220ea5c8"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2341_R4453_R20182_R26605/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2341_R4453_R20182_R26605.fcs",
+          "checksum": "cfea79c1d8e2ddcfc9c81dd268d465979cc5c1f4"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2367_R4398_R20098_R26630/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2367_R4398_R20098_R26630.fcs",
+          "checksum": "e28002274f0ca446646255766c31188e44ff0285"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2391_R4349_R20005_R26655/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2391_R4349_R20005_R26655.fcs",
+          "checksum": "69b60e1621f9c2a627b46be0201f37c366017805"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2415_R4306_R19903_R26680/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2415_R4306_R19903_R26680.fcs",
+          "checksum": "8988be821f3dba43cf5fbfe5305162d9c1abfd13"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2439_R4269_R19792_R26705/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2439_R4269_R19792_R26705.fcs",
+          "checksum": "91ee0b4630f124d1bd4048e34cacc282bd28b6cb"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2341_R4238_R19672_R26730/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2341_R4238_R19672_R26730.fcs",
+          "checksum": "d2b02cc1bfb6e4c2d8e50c4296e37ed232129176"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2367_R4183_R19543_R26755/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2367_R4183_R19543_R26755.fcs",
+          "checksum": "801f96944b2e2d6fbd54b47b3407acc529e86b18"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2391_R4134_R19405_R26780/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2391_R4134_R19405_R26780.fcs",
+          "checksum": "26ab2d5073d9bad4c00d24a2521c2ae76e2b3986"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2415_R4091_R19258_R26805/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2415_R4091_R19258_R26805.fcs",
+          "checksum": "57c8fb19fb7707dd386a8c623f45f21b2676f0e5"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2439_R4054_R19102_R26830/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2439_R4054_R19102_R26830.fcs",
+          "checksum": "3609372f428242417f014b2926415fbe95bf56ec"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2341_R4023_R18937_R26855/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2341_R4023_R18937_R26855.fcs",
+          "checksum": "b8959617af75bb79b527e19cf509668991ae3698"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2367_R3968_R18763_R26880/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2367_R3968_R18763_R26880.fcs",
+          "checksum": "7fcc3b562460ad978e175bba1326e1c142f4d3b6"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2391_R3919_R18580_R26905/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2391_R3919_R18580_R26905.fcs",
+          "checksum": "b929e7cf248f949a80cd39dafd33ceb30d8be8a9"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2415_R3876_R18388_R26930/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2415_R3876_R18388_R26930.fcs",
+          "checksum": "46ed77e852f17e6eb2fa482ddb4b872e01c170ea"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2439_R3839_R18187_R26955/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2439_R3839_R18187_R26955.fcs",
+          "checksum": "e79fd1210c977b3eed57e657e4c1aa465a327860"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2341_R3808_R17977_R26980/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2341_R3808_R17977_R26980.fcs",
+          "checksum": "e795ef5c4f0037706fc2d8a19f6852644165cffa"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2367_R3753_R17758_R27005/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2367_R3753_R17758_R27005.fcs",
+          "checksum": "6bca0fb341dba0892de6051c3b73a54207dd3cc3"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2391_R3704_R17530_R27030/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2391_R3704_R17530_R27030.fcs",
+          "checksum": "b35dddb04f9ea772cfbe487a9067574e3f7b6dae"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2415_R3661_R17293_R27055/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2415_R3661_R17293_R27055.fcs",
+          "checksum": "ef6314c1dfbbe7ff9b056bcdcacd8c968569290c"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2439_R3624_R17047_R27080/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2439_R3624_R17047_R27080.fcs",
+          "checksum": "9b1677314bf0b42dc91bdce523da0bde55781d98"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2341_R3593_R16792_R27105/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2341_R3593_R16792_R27105.fcs",
+          "checksum": "d49d4a47a3801f02fb21c11e83083f97c3841f92"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2367_R3538_R16528_R27130/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2367_R3538_R16528_R27130.fcs",
+          "checksum": "686cab40012ecde6a2913e42f70e9b01cb1c27ea"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2391_R3489_R16255_R27155/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2391_R3489_R16255_R27155.fcs",
+          "checksum": "b4122860f44cdfe8789f9780a337c675e179f65b"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2415_R3446_R15973_R27180/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2415_R3446_R15973_R27180.fcs",
+          "checksum": "a56341cebea6295d37d14ac8a4fbd94fd6cb1318"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2439_R3409_R15682_R27205/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2439_R3409_R15682_R27205.fcs",
+          "checksum": "7478d8735664e5ca42783e71ddd8c7fc3257887a"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2341_R4668_R15382_R27230/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2341_R4668_R15382_R27230.fcs",
+          "checksum": "0247de2bcf2932f33b6d5c6b5793136c88143a85"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2367_R4613_R15343_R27255/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2367_R4613_R15343_R27255.fcs",
+          "checksum": "ab9ca317e3519ee629e592f56a8dd7572bef4e24"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2391_R4564_R15295_R27280/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2391_R4564_R15295_R27280.fcs",
+          "checksum": "6d44d0bc78a1bbef2f0b9d47504dd86462ba050d"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2415_R4521_R15238_R27305/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2415_R4521_R15238_R27305.fcs",
+          "checksum": "f9befa52157c3e2a1eb566709ff34eb45ffb5f97"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2439_R4484_R15172_R27330/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2439_R4484_R15172_R27330.fcs",
+          "checksum": "d42b9b80947ab17a31509cd8d222f317f34d48ba"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2341_R4453_R15097_R27355/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2341_R4453_R15097_R27355.fcs",
+          "checksum": "6b820a56d55f29bba414a17524fc5f577d55f10f"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2367_R4398_R15013_R27380/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2367_R4398_R15013_R27380.fcs",
+          "checksum": "e5519bf68cbdf3cefbcd13b3a874aaca2b6a8546"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2391_R4349_R14920_R27405/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2391_R4349_R14920_R27405.fcs",
+          "checksum": "d9fecc12ba1b102d576ad0ace7287b591d989584"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2415_R4306_R14818_R27430/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2415_R4306_R14818_R27430.fcs",
+          "checksum": "89e7a50647d3d73f7092c645e6deeaf1cf08683a"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2439_R4269_R14707_R27455/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2439_R4269_R14707_R27455.fcs",
+          "checksum": "69763fd8857e25ae6c8706a16dd8ad0df85b3d36"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2341_R4238_R14587_R27480/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2341_R4238_R14587_R27480.fcs",
+          "checksum": "2e1c993ef2f278dcfae8405b7fac4585efa940eb"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2367_R4183_R14458_R27505/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2367_R4183_R14458_R27505.fcs",
+          "checksum": "261aec7638ac5c18f3eaedeae7da6320fcf6f628"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2391_R4134_R14320_R27530/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2391_R4134_R14320_R27530.fcs",
+          "checksum": "e1d4acffa67927c1a80b21c178286c7b8fd5ea53"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2415_R4091_R14173_R27555/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2415_R4091_R14173_R27555.fcs",
+          "checksum": "7918b8959d9ef94969be3d6f86b82dc113482314"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2439_R4054_R14017_R27580/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2439_R4054_R14017_R27580.fcs",
+          "checksum": "a8b0212cb01f7d2f26e8e39624fe21c597023555"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2341_R4023_R13852_R27605/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2341_R4023_R13852_R27605.fcs",
+          "checksum": "14a86d2094b3bd94d9442acf971f891010adf503"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2367_R3968_R13678_R27630/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2367_R3968_R13678_R27630.fcs",
+          "checksum": "6077735b70fe3e7bd625dd4b4a94f9f36c6c67b4"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2391_R3919_R13495_R27655/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2391_R3919_R13495_R27655.fcs",
+          "checksum": "c7e3d0916a8a64ee1ace69e82255c3976d71d52f"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2415_R3876_R13303_R27680/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2415_R3876_R13303_R27680.fcs",
+          "checksum": "52c6f9a357fa6a9675cd03896ebbbbb986679bdc"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2439_R3839_R13102_R27705/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2439_R3839_R13102_R27705.fcs",
+          "checksum": "1dec11f19da0c69055df6c77834e0db2fa52e680"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2341_R3808_R12892_R27730/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2341_R3808_R12892_R27730.fcs",
+          "checksum": "072fa92c5e21a8befd638a43c4f46a6c7bdc3753"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2367_R3753_R12673_R27755/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2367_R3753_R12673_R27755.fcs",
+          "checksum": "60b7b37e9993772545826fb6bc24e237c4a4eba4"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2391_R3704_R12445_R27780/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2391_R3704_R12445_R27780.fcs",
+          "checksum": "8d0184c99f8d13c31f72e6c21d74191d014e89ac"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2415_R3661_R12208_R27805/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2415_R3661_R12208_R27805.fcs",
+          "checksum": "acd281e5a84ff13e866dbb23a705f18a95677699"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2439_R3624_R11962_R27830/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2439_R3624_R11962_R27830.fcs",
+          "checksum": "5d922f3d13622b76dc19e5ca5631bfc64d65c00d"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2341_R3593_R11707_R27855/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2341_R3593_R11707_R27855.fcs",
+          "checksum": "1dcddc93e47755fd72bbe22c3fb7aa3e589d74d6"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2367_R3538_R11443_R27880/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2367_R3538_R11443_R27880.fcs",
+          "checksum": "dac17afdcf59d794274aa7fccf052e7d3bdc4e90"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2391_R3489_R11170_R27905/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2391_R3489_R11170_R27905.fcs",
+          "checksum": "bb57381455089c860672af6199d24122ddc3e1b5"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2415_R3446_R10888_R27930/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2415_R3446_R10888_R27930.fcs",
+          "checksum": "d1c27be9d64e095e92b84dbdcb49d9f71de21ff6"
+        }
+      ],
+      "collected": true
+    },
+    {
+      "sample": "https://hub.sd2e.org/user/sd2e/biofab_yeast_gates_q0_aq_10545/s2439_R3409_R10597_R27955/1",
+      "files": [
+        {
+          "file": "agave://data-sd2e-community/biofab/yeast-gates_q0/aq_10545/3/instrument_output/s2439_R3409_R10597_R27955.fcs",
+          "checksum": "c7bba8d506292b37b3a013c7b8aba9c452c201e6"
+        }
+      ],
+      "collected": true
+    }
+  ]
+}

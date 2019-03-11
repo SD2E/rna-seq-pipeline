@@ -1,6 +1,6 @@
 from reactors.utils import Reactor, agaveutils
 from agavepy.agave import Agave
-from datacatalog.managers.pipelinejobs import ManagedPipelineJob as Job
+from datacatalog.managers.pipelinejobs import ReactorManagedPipelineJob as Job
 import json
 import pprint
 
@@ -49,7 +49,7 @@ def manifest(r):
         sample_data['replicate'] = sample['replicate']
         sample_data['arabinose'] = [content['name']['label'] for content in sample['contents'] if content['name']['label'] == 'Larabinose']
         sample_data['IPTG'] = [content['name']['label'] for content in sample['contents'] if content['name']['label'] == 'IPTG']
-        file_name = 'products/v1/58ab5692-9485-525f-a099-202c1a565fd7/850e742e-e67a-5e99-bc04-c60d1eec9a41/f42d3f7f-07dc-596f-86f9-df75083e52cc/large-wasp-20190116T213307Z/preprocessed/' + [file['name'] for file in sample['measurements'][0]['files']][0].split('-')[0]
+        file_name = '/products/v1/58ab5692-9485-525f-a099-202c1a565fd7/850e742e-e67a-5e99-bc04-c60d1eec9a41/f42d3f7f-07dc-596f-86f9-df75083e52cc/large-wasp-20190116T213307Z/preprocessed/' + [file['name'] for file in sample['measurements'][0]['files']][0].split('-')[0]
         sample_data['R1'] = file_name + '-R1_rRNA_free_reads.fastq.gz'
         sample_data['R2'] = file_name + '-R2_rRNA_free_reads.fastq.gz'
         sample_data['measurement_id'] = sample['measurements'][0]['measurement_id']
@@ -57,7 +57,7 @@ def manifest(r):
 
     job_template = {
       "name": "sample_id",
-      "appId": "urrutia-novel_chassis_app-0.1.0",
+      "appId": "urrutia-novel_chassis_app-0.1.1",
       "archive": 'true',
       "archiveSystem": "data-sd2e-community",
       "archivePath": "",
@@ -73,7 +73,8 @@ def manifest(r):
         "path_ref_flat": "/reference/novel_chassis/uma_refs/modified.ecoli.MG1655.refFlat.txt",
         "path_dict_file": "/work/projects/SD2E-Community/prod/data/reference/novel_chassis/uma_refs/MG1655_NAND_Circuit/MG1655_NAND_Circuit.dict",
         "outname": "141667-M9-Kan_MG1655_NAND_Circuit_replicate_4_time_5_hour_NC_E_coli_NAND_37C"
-      }
+      },
+      "notifications": []
     }
 
     for sample,metadata in meta_data.items():
@@ -106,40 +107,46 @@ def manifest(r):
                 'path_dict_file': job_template['parameters']['path_dict_file']
                 }
             }
-        pprint.pprint(r.settings.development.mongodb)
+        pprint.pprint(r.settings.mongodb)
         pprint.pprint(r.settings.pipelines)
         pprint.pprint(metadata['measurement_id'])
         pprint.pprint(sample)
         pprint.pprint(data)
         pprint.pprint(ag)
-        mpj = Job(r.settings.development.mongodb, r.settings.pipelines, measurement_id=metadata['measurement_id'], sample_id=sample, data = data, agave=ag)
+        #mpj = Job(r.settings.development.mongodb, r.settings.pipelines, measurement_id=metadata['measurement_id'], sample_id=sample, data = data, agave=ag)
+        mpj = Job(r, measurement_id=metadata['measurement_id'], data=data)
         mpj.setup()
+        print("JOB UUID: ", mpj.uuid)
         archivePath = mpj.archive_path
         job_template["archivePath"] = archivePath
 
         notif = [{'event': 'RUNNING',
-                  'url': mpj.callback + '&status=${STATUS}'+'&pipeline_id=' + custom_pipeline.pipeline_uuid + '&event=RUNNING'},
+                  "persistent": True,
+                  'url': mpj.callback + '&status=${JOB_STATUS}'},
                  {'event': 'FAILED',
-                  'url': mpj.callback + '&status=${STATUS}' +'&pipeline_id=' + custom_pipeline.pipeline_uuid + '&event=FAILED'},
-                 {'event': 'FINSIHED',
-                  'url': mpj.callback + '&status=${STATUS}'+'&pipeline_id=' + custom_pipeline.pipeline_uuid + '&event=FINISHED'}]
+                  "persistent": False,
+                  'url': mpj.callback + '&status=${JOB_STATUS}'},
+                 {'event': 'ARCHIVING_FINISHED',
+                  "persistent": False,
+                  'url': mpj.callback + '&status=FINISHED'}]
 
-        notifications = job_template["notifications"]
-        if notifications is not None:
-            for item in notifications:
-                notif.append(item)
+        #notifications = job_template["notifications"]
+        #if notifications is not None:
+        #    for item in notifications:
+        #        notif.append(item)
 
         job_template["notifications"] = notif
 
         try:
             job_id = ag.jobs.submit(body=job_template)['id']
             print(json.dumps(job_template, indent=4))
-            mpj.run()
+            mpj.run({"launched": job_id, "sample_id": sample})
+            r.logger.info("Submitted Agave job {}".format(job_id))
         except Exception as e:
-            print(json.dumps(job_def, indent=4))
+            print(json.dumps(job_template, indent=4))
             r.logger.error("Error submitting job: {}".format(e))
             print(e.response.content)
-            return
+
 
 
 

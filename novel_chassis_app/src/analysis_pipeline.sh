@@ -124,15 +124,22 @@ time java ${TL}=50 ${HFL}=10 -Xmx1500m -jar ${PICARDDIR} \
       BAIT_INTERVALS=${TARGETS} \
       BAIT_SET_NAME=rnaseq_genome \
       TARGET_INTERVALS=${TARGETS}
-echo ${SAMP}.BWA.DepthOfCoverage "& done(${SAMP}.BWA.hs_metrics)" | tee -a /dev/stderr
+echo ${SAMP}.Bedtools.genomecov "& done(${SAMP}.BWA.hs_metrics)" | tee -a /dev/stderr
+#echo ${SAMP}.BWA.DepthOfCoverage "& done(${SAMP}.BWA.hs_metrics)" | tee -a /dev/stderr
 
-time java ${TL}=50 ${HFL}=10 -Xmx4000m -jar ${GATK} \
-      -T DepthOfCoverage \
-      -L ${TARGETS} \
-      -R ${REF} \
-      -I ${TEMPDIR}/${outsample}.aligned.duplicates_marked.indel_cleaned.bam \
-      -o ${TEMPDIR}/${outsample}.DepthOfCoverage.tsv
-echo ${SAMP}.BWA.FlagStat "& done(${SAMP}.BWA.DepthOfCoverage)" | tee -a /dev/stderr
+
+# time java ${TL}=50 ${HFL}=10 -Xmx4000m -jar ${GATK} \
+#       -T DepthOfCoverage \
+#       -L ${TARGETS} \
+#       -R ${REF} \
+#       -I ${TEMPDIR}/${outsample}.aligned.duplicates_marked.indel_cleaned.bam \
+#       -o ${TEMPDIR}/${outsample}.DepthOfCoverage.tsv
+# echo ${SAMP}.BWA.FlagStat "& done(${SAMP}.BWA.DepthOfCoverage)" | tee -a /dev/stderr
+
+time bedtools genomecov -ibam \
+      ${TEMPDIR}/${outsample}.aligned.duplicates_marked.indel_cleaned.bam \
+      -bg > ${TEMPDIR}/${outsample}_genome_coverage.bedgraph
+echo ${SAMP}.BWA.FlagStat "& done(${SAMP}.Bedtools.genomecov)" | tee -a /dev/stderr
 
 time java ${TL}=50 ${HFL}=10 -Xmx4000m -jar ${GATK} \
       -T FlagStat \
