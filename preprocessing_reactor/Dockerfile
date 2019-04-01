@@ -11,3 +11,6 @@ RUN pip uninstall --yes datacatalog
 
 # Install from Repo
 RUN pip install --upgrade git+https://github.com/SD2E/python-datacatalog.git@2_0
+
+ENV CATALOG_LOG_VERBOSE=0
+ENV CATALOG_LOG_LEVEL=DEBUG

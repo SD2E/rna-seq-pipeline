@@ -4,6 +4,7 @@ from datacatalog.managers.pipelinejobs import ReactorManagedPipelineJob as Job
 import json
 import pprint
 import copy
+from datacatalog.tokens import get_admin_token, validate_token
 
 
 def manifest(r):
@@ -42,7 +43,21 @@ def manifest(r):
         r.on_failure("failed to load manifest {}".format(manifestUrl), e)
 
     experiment_id = manifest['experiment_id']
+
+    rna_list = []
     for sample in manifest["samples"]:
+        mes_types = [measurement["measurement_type"] for measurement in sample["measurements"]]
+        if mes_types[0] == "RNA_SEQ":
+            rna_list.append(sample)
+
+    for sample in rna_list:
+        norm = [measurement for measurement in sample['measurements'] if measurement['library_prep'] == 'NORMAL'][0]
+        raw = [file for file in norm['files'] if file['lab_label'] == ['RAW']]
+        if len(norm) > 0:
+            norm['files'] = raw
+            sample['measurements'] = [norm]
+
+    for sample in rna_list:
         sample_id = sample['sample_id']
         sampleDict = {}
         filesDict = {}
@@ -71,8 +86,8 @@ def manifest(r):
         inputs = job_def["parameters"]
         #inputs["path_read1"] = '/work/projects/SD2E-Community/prod/data/'+archivePath+'/'+sample['R1'].split('/')[-1]
         #inputs["path_read2"] = '/work/projects/SD2E-Community/prod/data/'+archivePath+'/'+sample['R2'].split('/')[-1]
-        inputs["path_read1"] = '/uploads/ginkgo/201811/Novelchassis-Nand-Gate/' + sampleDict[sample_id]['R1']
-        inputs["path_read2"] = '/uploads/ginkgo/201811/Novelchassis-Nand-Gate/' + sampleDict[sample_id]['R2']
+        inputs["path_read1"] = '/uploads/ginkgo/201901/NovelChassis-NAND-Ecoli-Titration/' + sampleDict[sample_id]['R1']
+        inputs["path_read2"] = '/uploads/ginkgo/201901/NovelChassis-NAND-Ecoli-Titration/' + sampleDict[sample_id]['R2']
         inputs["multiple_lanes"] = sampleDict[sample_id]['multiple_lanes']
         #archivePath = archivePath + "/miniaturized_library_prep/"
         job_def.parameters = inputs
@@ -85,45 +100,39 @@ def manifest(r):
 
         product_patterns = [
             {'patterns': ['.fastq.gz$'],
-            'derived_using': [
-                "agave://data-sd2e-community/"+inputs["path_filterseqs"]
-                ],
+            #'derived_using': [
+                #inputs["path_filterseqs"]
+            #    ],
             'derived_from': [
-                "agave://data-sd2e-community/"+inputs["path_read1"],
-                "agave://data-sd2e-community/"+inputs["path_read2"]
+                inputs["path_read1"],
+                inputs["path_read2"]
                 ]
             }
         ]
 
-        # data = {
-        #     "inputs": [
-        #         "agave://data-sd2e-community/"+inputs["path_read1"],
-        #         "agave://data-sd2e-community/"+inputs["path_read2"]
-        #         ],
-        #     "parameters": {
-        #         k: inputs[k] for k in inputs if k not in ('path_read1', 'path_read2')
-        #         }
-        #     }
         data = {
             "inputs": [
-                "agave://data-sd2e-community/"+inputs["path_read1"],
-                "agave://data-sd2e-community/"+inputs["path_read2"]
+                inputs["path_read1"],
+                inputs["path_read2"]
                 ],
             "parameters": {
                 k: inputs[k] for k in inputs if k in ('path_filterseqs')
                 }
             }
 
+        print("MEASURMENT_ID:")
+        pprint.pprint(measurement_id)
         print("DATA:")
         pprint.pprint(data)
         print("ARCHIVE PATTERNS:")
         pprint.pprint(archive_patterns)
-        print("PRODUCT PATTERNS")
+        print("PRODUCT PATTERNS:")
         pprint.pprint(product_patterns)
 
         mpj = Job(r, measurement_id=measurement_id, data=data, archive_patterns=archive_patterns, product_patterns=product_patterns)
         mpj.setup()
         print("JOB UUID: ", mpj.uuid)
+        r.logger.info("JOB UUID: ", mpj.uuid)
         job_def.archivePath = mpj.archive_path
         #job_def.archivePath = 'test'
 
@@ -137,16 +146,21 @@ def manifest(r):
                   "persistent": False,
                   'url': mpj.callback + '&status=FINISHED'}]
 
-        # notifications = job_template["notifications"]
+        notifications = job_template["notifications"]
         # if notifications is not None:
         #    for item in notifications:
         #        notif.append(item)
+        # akey = copy.copy(r.settings.mongodb.admin_key)
+        # print(akey)
+        # atoken = get_admin_token(akey)
+        # mpj.reset(token=atoken)
 
         job_def["notifications"] = notif
+        print(json.dumps(job_def, indent=4))
         try:
             job_id = ag.jobs.submit(body=job_def)['id']
             print(json.dumps(job_def, indent=4))
-            mpj.run({"launched": job_id, "experiment_id": experiment_id, "sample_id": sample_id })
+            mpj.run({"launched": job_id, "experiment_id": experiment_id, "sample_id": sample_id})
             r.logger.info("Submitted Agave job {}".format(job_id))
         except Exception as e:
             print(json.dumps(job_def, indent=4))
