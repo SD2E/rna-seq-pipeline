@@ -40,7 +40,8 @@ def manifest(r):
         r.on_failure("failed to load manifest {}".format(manifestUrl), e)
 
     experiment_id = manifest['experiment_id']
-    samples = [sample['sample_id'] for sample in manifest['samples']]
+    measurements = [sample['measurements'][0]['measurement_id'] for sample in manifest['samples']]
+    bam_files = [sample['bam_file'] for sample in manifest['samples']]
 
     job_def = copy.copy(r.settings.bundleJob)
     job_def["name"] = experiment_id
@@ -49,12 +50,39 @@ def manifest(r):
     inputs["path_gff"] = "reference/novel_chassis/uma_refs/amin_genes_no_parts_1.1.0.gff"
     inputs["path_bam_dir"] = 'products/v2/106bd127e2d257acb9be11ed06042e68/'
     job_def.parameters = inputs
-    pprint.pprint(experiment_id)
-    pprint.pprint(samples)
-    pprint.pprint(inputs)
-    archive_patterns = [{'processing_level': '2', 'patterns': ['.txt$', '.tsv$' ]}]
-    mpj = Job(r, measurement_id=experiment_id, sample_id=samples, data=inputs, archive_patterns=archive_patterns)
+
+    data = {
+        "inputs": {
+            'path_gff': inputs["path_gff"],
+            'path_bam_dir"': inputs["path_bam_dir"]
+            }
+        }
+    archive_patterns = [
+       {'level': '2', 'patterns': ['.txt$', '.tsv$']}
+    ]
+
+    product_patterns = [
+        {'patterns': ['.txt$', '.tsv$'],
+        'derived_using': [
+            inputs["path_gff"],
+            inputs["path_bam_dir"]
+            ],
+        'derived_from': bam_files
+        }
+    ]
+
+    pprint.pprint(r.settings.pipelines)
+    print("data:")
+    pprint.pprint(data)
+    print("product_patterns:")
+    pprint.pprint(product_patterns)
+    print("archive_patterns:")
+    pprint.pprint(archive_patterns)
+
+    #mpj = Job(r, measurement_id=measurements, data=data, archive_patterns=archive_patterns, product_patterns=product_patterns)
+    mpj = Job(r, experiment_id=experiment_id, data=data, archive_patterns=archive_patterns, product_patterns=product_patterns)
     mpj.setup()
+
     print("JOB UUID: ", mpj.uuid)
     job_def.archivePath = mpj.archive_path
 

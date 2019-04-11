@@ -131,8 +131,8 @@ def manifest(r):
 
         mpj = Job(r, measurement_id=measurement_id, data=data, archive_patterns=archive_patterns, product_patterns=product_patterns)
         mpj.setup()
-        print("JOB UUID: ", mpj.uuid)
-        r.logger.info("JOB UUID: ", mpj.uuid)
+        #print("JOB UUID: ", mpj.uuid)
+        r.logger.info("Submitted Pipeline Job {}".format(mpj.uuid))
         job_def.archivePath = mpj.archive_path
         #job_def.archivePath = 'test'
 
@@ -146,26 +146,26 @@ def manifest(r):
                   "persistent": False,
                   'url': mpj.callback + '&status=FINISHED'}]
 
-        notifications = job_template["notifications"]
+        #notifications = job_template["notifications"]
         # if notifications is not None:
         #    for item in notifications:
         #        notif.append(item)
-        # akey = copy.copy(r.settings.mongodb.admin_key)
-        # print(akey)
-        # atoken = get_admin_token(akey)
-        # mpj.reset(token=atoken)
+        akey = copy.copy(r.settings.mongodb.admin_key)
+        print(akey)
+        atoken = get_admin_token(akey)
+        mpj.reset(token=atoken)
 
         job_def["notifications"] = notif
-        print(json.dumps(job_def, indent=4))
-        try:
-            job_id = ag.jobs.submit(body=job_def)['id']
-            print(json.dumps(job_def, indent=4))
-            mpj.run({"launched": job_id, "experiment_id": experiment_id, "sample_id": sample_id})
-            r.logger.info("Submitted Agave job {}".format(job_id))
-        except Exception as e:
-            print(json.dumps(job_def, indent=4))
-            r.logger.error("Error submitting job: {}".format(e))
-            print(e.response.content)
+        # print(json.dumps(job_def, indent=4))
+        # try:
+        #     job_id = ag.jobs.submit(body=job_def)['id']
+        #     print(json.dumps(job_def, indent=4))
+        #     mpj.run({"launched": job_id, "experiment_id": experiment_id, "sample_id": sample_id})
+        #     r.logger.info("Submitted Agave job {}".format(job_id))
+        # except Exception as e:
+        #     print(json.dumps(job_def, indent=4))
+        #     r.logger.error("Error submitting job: {}".format(e))
+        #     print(e.response.content)
 
 
 
