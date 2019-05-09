@@ -63,10 +63,10 @@ echo ${reverse}
 echo "This is BWA analysis processing"
 
 outsample=${SAMP}.rnaseq.original.bwa
-echo ${SAMP}.BWA.align | tee /dev/stderr
+echo ${SAMP}.BWA.align | tee -a /dev/stderr
 time bwa mem -t 80 ${REF} ${forward} ${reverse} > ${TEMPDIR}/${outsample}.sam
 #The pipe tee /dev/stderr directs the echos to stderr in addition to stdout for debugging
-echo ${SAMP}.BWA.sort "& done(${SAMP}.BWA.align))" | tee /dev/stderr
+echo ${SAMP}.BWA.sort "& done(${SAMP}.BWA.align))" | tee -a /dev/stderr
 
 
 ## Picard processing
@@ -75,7 +75,7 @@ time java ${JAVAOPTS1} -jar ${PICARDDIR} \
       INPUT=${TEMPDIR}/${outsample}.sam \
       OUTPUT=${TEMPDIR}/${outsample}.sorted.sam \
       TMP_DIR=${TEMPDIR} VALIDATION_STRINGENCY=LENIENT
-echo ${SAMP}.BWA.addRG "& done(${SAMP}.BWA.sorted)" | tee /dev/stderr
+echo ${SAMP}.BWA.addRG "& done(${SAMP}.BWA.sorted)" | tee -a /dev/stderr
 
 time java ${JAVAOPTS1} -jar ${PICARDDIR} \
       AddOrReplaceReadGroups \
@@ -86,7 +86,7 @@ time java ${JAVAOPTS1} -jar ${PICARDDIR} \
       RGSM=${outsample} \
       INPUT=${TEMPDIR}/${outsample}.sorted.sam \
       OUTPUT=${TEMPDIR}/${outsample}.RG.bam
-echo ${SAMP}.BWA.mark_duplicates "& done(${SAMP}.BWA.addRG)" | tee /dev/stderr
+echo ${SAMP}.BWA.mark_duplicates "& done(${SAMP}.BWA.addRG)" | tee -a /dev/stderr
 
 time java ${JAVAOPTS1} -jar ${PICARDDIR} \
       MarkDuplicates \
@@ -97,12 +97,11 @@ time java ${JAVAOPTS1} -jar ${PICARDDIR} \
       CREATE_MD5_FILE=TRUE \
       INPUT=${TEMPDIR}/${outsample}.RG.bam \
       OUTPUT=${TEMPDIR}/${outsample}.aligned.duplicates_marked.bam \
-      METRICS_FILE=${TEMPDIR}/${outsample}.duplicate_metrics
-echo ${SAMP}.BWA.indel_realigner "& done(${SAMP}.BWA.mark_duplicates)" | tee /dev/stderr
+      METRICS_FILE=${TEMPDIR}/${outsample}.duplicate_metrics.txt
+echo ${SAMP}.BWA.indel_realigner "& done(${SAMP}.BWA.mark_duplicates)" | tee -a /dev/stderr
 
-time java -Djava.io.tmpdir=${TEMPDIR} ${ASIO}=true ${TL}=50 ${HFL}=10 -Xmx5000m -jar \
-      ${GATK} -T \
-      IndelRealigner -U -R ${REF} \
+time java -Djava.io.tmpdir=${TEMPDIR} ${ASIO}=true ${TL}=50 ${HFL}=10 -Xmx5000m -jar ${GATK} \
+      -T IndelRealigner -U -R ${REF} \
       -o ${TEMPDIR}/${outsample}.aligned.duplicates_marked.indel_cleaned.bam \
       -I ${TEMPDIR}/${outsample}.aligned.duplicates_marked.bam \
       -compress 1 \
@@ -114,65 +113,93 @@ time java -Djava.io.tmpdir=${TEMPDIR} ${ASIO}=true ${TL}=50 ${HFL}=10 -Xmx5000m 
 #java ${ASIO}=true ${TL}=50 ${HFL}=10 -Xmx4000m -jar ${GATK} -T AnalyzeCovariates -R ${REF} -plots ${BASEDIR}/${outsample}.BQSR.pdf -BQSR ${TEMPDIR}/${outsample}.baserecal_data.table -csv ${BASEDIR}/${outsample}.BQSR.csv
 #echo ${SAMP}.BWA.hs_metrics "& done(${SAMP}.BWA.analysecov)"
 
-echo ${SAMP}.BWA.hs_metrics "& done(${SAMP}.BWA.indel_realigner)" | tee /dev/stderr
+echo ${SAMP}.BWA.hs_metrics "& done(${SAMP}.BWA.indel_realigner)" | tee -a /dev/stderr
 time java ${TL}=50 ${HFL}=10 -Xmx1500m -jar ${PICARDDIR} \
       CollectHsMetrics \
       TMP_DIR=${TEMPDIR} \
       VALIDATION_STRINGENCY=LENIENT \
       I=${TEMPDIR}/${outsample}.aligned.duplicates_marked.indel_cleaned.bam \
-      O=${TEMPDIR}/${outsample}.hybrid_selection_metrics \
+      O=${TEMPDIR}/${outsample}.hybrid_selection_metrics.txt \
       REFERENCE_SEQUENCE=${REF} \
       BAIT_INTERVALS=${TARGETS} \
       BAIT_SET_NAME=rnaseq_genome \
       TARGET_INTERVALS=${TARGETS}
-echo ${SAMP}.BWA.DepthOfCoverage "& done(${SAMP}.BWA.hs_metrics)" | tee /dev/stderr
+echo ${SAMP}.Bedtools.genomecov "& done(${SAMP}.BWA.hs_metrics)" | tee -a /dev/stderr
+#echo ${SAMP}.BWA.DepthOfCoverage "& done(${SAMP}.BWA.hs_metrics)" | tee -a /dev/stderr
 
-time java ${TL}=50 ${HFL}=10 -Xmx4000m -jar \
-      ${GATK} -T DepthOfCoverage \
-      -L ${TARGETS} -R ${REF} \
-      -I ${TEMPDIR}/${outsample}.aligned.duplicates_marked.indel_cleaned.bam \
-      -o ${TEMPDIR}/${outsample}.DepthOfCoverage
-echo ${SAMP}.BWA.FlagStat "& done(${SAMP}.BWA.hs_metrics)" | tee /dev/stderr
 
-time java ${TL}=50 ${HFL}=10 -Xmx4000m -jar ${GATK} -T FlagStat -R ${REF} \
+# time java ${TL}=50 ${HFL}=10 -Xmx4000m -jar ${GATK} \
+#       -T DepthOfCoverage \
+#       -L ${TARGETS} \
+#       -R ${REF} \
+#       -I ${TEMPDIR}/${outsample}.aligned.duplicates_marked.indel_cleaned.bam \
+#       -o ${TEMPDIR}/${outsample}.DepthOfCoverage.tsv
+# echo ${SAMP}.BWA.FlagStat "& done(${SAMP}.BWA.DepthOfCoverage)" | tee -a /dev/stderr
+
+time bedtools genomecov -ibam \
+      ${TEMPDIR}/${outsample}.aligned.duplicates_marked.indel_cleaned.bam \
+      -bg > ${TEMPDIR}/${outsample}_genome_coverage.bedgraph
+echo ${SAMP}.BWA.FlagStat "& done(${SAMP}.Bedtools.genomecov)" | tee -a /dev/stderr
+
+time java ${TL}=50 ${HFL}=10 -Xmx4000m -jar ${GATK} \
+      -T FlagStat \
+      -R ${REF} \
       -I ${TEMPDIR}/${outsample}.aligned.duplicates_marked.indel_cleaned.bam \
       -o ${TEMPDIR}/${outsample}.flagstat.txt
-echo ${SAMP}.BWA.validate "& done(${SAMP}.BWA.FlagStat)" | tee /dev/stderr
+echo ${SAMP}.BWA.validate "& done(${SAMP}.BWA.FlagStat)" | tee -a /dev/stderr
 
-time java ${TL}=50 ${HFL}=10 -Xmx4000m -jar ${PICARDDIR} ValidateSamFile ${PICARDOPTS} \
+time java ${TL}=50 ${HFL}=10 -Xmx4000m -jar ${PICARDDIR} \
+      ValidateSamFile \
+      ${PICARDOPTS} \
       CREATE_MD5_FILE=false \
       INPUT=${TEMPDIR}/${outsample}.aligned.duplicates_marked.indel_cleaned.bam \
       OUTPUT=/${TEMPDIR}/${outsample}.validation_metrics \
-      REFERENCE_SEQUENCE=${REF} MODE=SUMMARY IS_BISULFITE_SEQUENCED=false
-echo ${SAMP}.BWA.multiple_metrics "& done(${SAMP}.BWA.validate)" | tee /dev/stderr
+      REFERENCE_SEQUENCE=${REF} \
+      MODE=SUMMARY \
+      IS_BISULFITE_SEQUENCED=false
+echo ${SAMP}.BWA.multiple_metrics "& done(${SAMP}.BWA.validate)" | tee -a /dev/stderr
 
-time java ${TL}=50 ${HFL}=10 -Xmx4000m -jar ${PICARDDIR} CollectMultipleMetrics \
-      VALIDATION_STRINGENCY=LENIENT PROGRAM=null PROGRAM=MeanQualityByCycle \
-      PROGRAM=QualityScoreDistribution PROGRAM=CollectAlignmentSummaryMetrics \
-      PROGRAM=CollectInsertSizeMetrics REFERENCE_SEQUENCE=${REF} \
+time java ${TL}=50 ${HFL}=10 -Xmx4000m -jar ${PICARDDIR} \
+      CollectMultipleMetrics \
+      VALIDATION_STRINGENCY=LENIENT \
+      PROGRAM=null \
+      PROGRAM=MeanQualityByCycle \
+      PROGRAM=QualityScoreDistribution \
+      PROGRAM=CollectAlignmentSummaryMetrics \
+      PROGRAM=CollectInsertSizeMetrics \
+      REFERENCE_SEQUENCE=${REF} \
       INPUT=${TEMPDIR}/${outsample}.aligned.duplicates_marked.indel_cleaned.bam \
-      ASSUME_SORTED=true OUTPUT=${TEMPDIR}/${outsample}.collect_multiple_metrics.txt
-echo ${SAMP}.BWA.rnaseqmetrics "& done(${SAMP}.BWA.multiple_metrics)" | tee /dev/stderr
+      ASSUME_SORTED=true \
+      FILE_EXTENSION=.txt \
+      OUTPUT=${TEMPDIR}/${outsample}.collect_multiple_metrics
+echo ${SAMP}.BWA.rnaseqmetrics "& done(${SAMP}.BWA.multiple_metrics)" | tee -a /dev/stderr
 
-time java ${TL}=50 ${HFL}=10 -Xmx4000m -jar ${RNAseqQC} -r ${REF} \
+time java ${TL}=50 ${HFL}=10 -Xmx4000m -jar ${RNAseqQC} \
+      -r ${REF} \
       -s ${TEMPDIR}/${outsample}.aligned.duplicates_marked.indel_cleaned.bam \
-      -t ${GTF} -o ${TEMPDIR}
-echo ${SAMP}.BWA.RnaSeqMetrics "& done(${SAMP}.BWA.rnaseqmetrics)" | tee /dev/stderr
+      -t ${GTF} \
+      -o ${TEMPDIR}
+echo ${SAMP}.BWA.RnaSeqMetrics "& done(${SAMP}.BWA.rnaseqmetrics)" | tee -a /dev/stderr
 
-java ${TL}=50 ${HFL}=10 -Xmx4000m -jar ${PICARDDIR} CollectRnaSeqMetrics \
+java ${TL}=50 ${HFL}=10 -Xmx4000m -jar ${PICARDDIR} \
+      CollectRnaSeqMetrics \
       INPUT=${TEMPDIR}/${outsample}.aligned.duplicates_marked.indel_cleaned.bam \
       REFERENCE_SEQUENCE=${REF} \
       STRAND_SPECIFICITY=NONE \
-      OUTPUT=${TEMPDIR}/${outsample}.collect_hs_metrics.txt REF_FLAT=${refFlat}
-echo ${SAMP}.BWA.featureCounts "& done(${SAMP}.BWA.hsmetrics)" | tee /dev/stderr
+      OUTPUT=${TEMPDIR}/${outsample}.collect_hs_metrics.txt \
+      REF_FLAT=${refFlat}
+echo ${SAMP}.BWA.featureCounts "& done(${SAMP}.BWA.hsmetrics)" | tee -a /dev/stderr
 
-${featureCounts} -T 10 -p -P -M -a ${GTF} \
-      ${TEMPDIR}/${outsample}.aligned.duplicates_marked.indel_cleaned.bam \
-      -o ${OUTDIR}/${outsample}.featureCounts
-
+time ${featureCounts} -T 10 -p -P -M \
+      -a ${GTF} \
+      ${TEMPDIR}/${outsample}.RG.bam \
+      -o ${OUTDIR}/${outsample}.featureCounts.txt \
+      -t gene \
+      -g gene
+mv ${OUTDIR}/${outsample}.featureCounts.txt.summary ${OUTDIR}/${outsample}.featureCounts.summary.tsv
 #Processing to get vcfS
 #echo ${SAMP}.BWA.haplotyping "& done(${SAMP}.BWA.featureCounts)"
-echo ${SAMP}.BWA.genotyping "& done(${SAMP}.BWA.featureCounts)" | tee /dev/stderr
+echo ${SAMP}.BWA.genotyping "& done(${SAMP}.BWA.featureCounts)" | tee -a /dev/stderr
 #java ${TL}=50 ${HFL}=10 -Xmx4000m -jar ${GATK} -T HaplotypeCaller -R ${REF} \
 #      -I ${TEMPDIR}/${outsample}.aligned.duplicates_marked.indel_cleaned.bam -L ${TARGETS} \
 #      -o ${OUTDIR}/${outsample}.snps.indels.g.vcf -stand_call_conf 20
@@ -182,10 +209,13 @@ echo ${SAMP}.BWA.genotyping "& done(${SAMP}.BWA.featureCounts)" | tee /dev/stder
 #      -o ${OUTDIR}/${outsample}.regenotypeVariants.vcf
 #echo ${SAMP}.BWA.genotyping "& done(${SAMP}.BWA.RegenotypeVariants)"
 
-time java ${TL}=50 ${HFL}=10 -Xmx4000m -jar ${GATK} -T UnifiedGenotyper \
-      -R ${REF} -I ${TEMPDIR}/${outsample}.aligned.duplicates_marked.indel_cleaned.bam \
-      -o ${OUTDIR}/${outsample}.genotypes.vcf --output_mode EMIT_ALL_SITES
-echo ${SAMP}.BWA.libcomplexity "& done(${SAMP}.BWA.genotyping)" | tee /dev/stderr
+time java ${TL}=50 ${HFL}=10 -Xmx4000m -jar ${GATK} \
+      -T UnifiedGenotyper \
+      -R ${REF} \
+      -I ${TEMPDIR}/${outsample}.aligned.duplicates_marked.indel_cleaned.bam \
+      -o ${OUTDIR}/${outsample}.genotypes.vcf \
+      --output_mode EMIT_ALL_SITES
+echo ${SAMP}.BWA.libcomplexity "& done(${SAMP}.BWA.genotyping)" | tee -a /dev/stderr
 #echo ${SAMP}.BWA.rrregno "& done(${SAMP}.BWA.genotyping)"
 
 #java ${TL}=50 ${HFL}=10 -Xmx4000m -jar ${GATK} -T RegenotypeVariants \
@@ -194,17 +224,19 @@ echo ${SAMP}.BWA.libcomplexity "& done(${SAMP}.BWA.genotyping)" | tee /dev/stder
 
 #Library complexity
 #echo ${SAMP}.BWA.libcomplexity "& done(${SAMP}.BWA.rrregno)"
-time java ${JAVAOPTS1} -jar ${PICARDDIR} EstimateLibraryComplexity \
+time java ${JAVAOPTS1} -jar ${PICARDDIR} \
+      EstimateLibraryComplexity \
       INPUT=${TEMPDIR}/${outsample}.aligned.duplicates_marked.indel_cleaned.bam \
       OUTPUT=${TEMPDIR}/${outsample}.lib_complex_metrics.txt
-echo ${SAMP}.BWA.comparemetrics "& done(${SAMP}.BWA.libcomplexity)" | tee /dev/stderr
+#echo ${SAMP}.BWA.comparemetrics
+echo "done(${SAMP}.BWA.libcomplexity)" | tee -a /dev/stderr
 
-time java ${JAVAOPTS1} -jar ${PICARDDIR} CompareMetrics \
-      ${TEMPDIR}/${outsample}.lib_complex_metrics.txt \
-      ${TEMPDIR}/${outsample}.collect_hs_metrics.txt \
-      ${TEMPDIR}/${outsample}.collect_multiple_metrics.txt \
-      ${TEMPDIR}/${outsample}.duplicate_metrics > ${TEMPDIR}/${outsample}.comparemetrics.txt
-echo "& done(${SAMP}.BWA.comparemetrics)" | tee /dev/stderr
+#time java ${JAVAOPTS1} -jar ${PICARDDIR} CompareMetrics \
+#      ${TEMPDIR}/${outsample}.lib_complex_metrics.txt \
+#      ${TEMPDIR}/${outsample}.collect_hs_metrics.txt \
+#      ${TEMPDIR}/${outsample}.collect_multiple_metrics.txt \
+#      ${TEMPDIR}/${outsample}.duplicate_metrics > ${TEMPDIR}/${outsample}.comparemetrics.txt
+#echo "& done(${SAMP}.BWA.comparemetrics)" | tee -a /dev/stderr
 
 end=$(date +%s.%N)
 runtime=$(python -c "print(${end} - ${start})")

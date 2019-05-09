@@ -1,0 +1,1 @@
+/src/analysis_pipeline.sh 9249509-R1.fastq.gz 9249509-R2.fastq.gz 123_test_run refs_for_test/Original_Strain_1_MG1655_WT.fa refs_for_test/Original_Strain_1_MG1655_WT.interval_list refs_for_test/amin_genes.gff 
