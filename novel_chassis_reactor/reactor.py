@@ -66,9 +66,9 @@ def manifest(r, archive_paths):
         sample_data['arabinose'] = [content['value'] for content in sample['contents'] if content['name']['sbh_uri'] == 'https://hub.sd2e.org/user/sd2e/design/Larabinose/1']
         sample_data['IPTG'] = [content['value'] for content in sample['contents'] if content['name']['sbh_uri'] == 'https://hub.sd2e.org/user/sd2e/design/IPTG/1']
         #file_name = '/products/v1/58ab5692-9485-525f-a099-202c1a565fd7/87bf086e-418d-55e4-b222-ecc668c646a5/f42d3f7f-07dc-596f-86f9-df75083e52cc/wired-hare-20190128T220021Z/preprocessed/' + [file['name'] for file in sample['measurements'][0]['files']][0].split('-')[0]
-        sample_data['R1'] = archive_paths[sample_id]["trimmed_R1"]
         #sample_data['R1'] = file_name+"-R1_trimmed.fastq.gz"
         #sample_data['R2'] = file_name+"-R2_trimmed.fastq.gz"
+        sample_data['R1'] = archive_paths[sample_id]["trimmed_R1"]
         sample_data['R2'] = archive_paths[sample_id]["trimmed_R2"]
         sample_data['measurement_id'] = sample['measurements'][0]['measurement_id']
         meta_data[sample_id] = sample_data
@@ -78,7 +78,7 @@ def manifest(r, archive_paths):
       "appId": "urrutia-novel_chassis_app-0.1.1",
       "archive": 'true',
       "archiveSystem": "data-sd2e-community",
-      "batchQueue": "reservation",
+      "batchQueue": "normal",
       "archivePath": "",
       "maxRunTime": "08:00:00",
       "inputs": {
@@ -157,6 +157,8 @@ def manifest(r, archive_paths):
         pprint.pprint(product_patterns)
         print("archive_patterns:")
         pprint.pprint(archive_patterns)
+        print("job template:")
+        pprint.pprint(job_template)
 
         mpj = Job(r, measurement_id=metadata['measurement_id'], data=data, archive_patterns=archive_patterns, product_patterns=product_patterns)
         mpj.setup()
@@ -178,18 +180,17 @@ def manifest(r, archive_paths):
 
 
         job_template["notifications"] = notif
-        print("job template:")
-        pprint.pprint(job_template)
 
         try:
             job_id = ag.jobs.submit(body=job_template)['id']
             print(json.dumps(job_template, indent=4))
-            mpj.run({"launched": job_id, "sample_id": sample, "experiment_id": experiment_id})
             r.logger.info("Submitted Agave job {}".format(job_id))
+            mpj.run({"launched": job_id, "sample_id": sample, "experiment_id": experiment_id})
         except Exception as e:
             print(json.dumps(job_template, indent=4))
             r.logger.error("Error submitting job: {}".format(e))
-            print(e.response.content)
+            #print(e.response.content)
+            print(e)
 
 def mongo_query(r):
     dbURI = '***REMOVED***'
@@ -201,6 +202,7 @@ def mongo_query(r):
     query={}
     #editing manually for now, in future will probably work of exp_id
     query['archive_path'] = {'$regex': '/products/v2/106d3f7f07dc596f86f9df75083e52cc'}
+    #query['archive_path'] = {'$regex': '/products/v1/58ab5692-9485-525f-a099-202c1a565fd7/87bf086e-418d-55e4-b222-ecc668c646a5/f42d3f7f-07dc-596f-86f9-df75083e52cc/wired-hare-20190128T220021Z/preprocessed/'}
     results = []
     #for match in filesdb.find(query):
     for match in jobs.find(query):
