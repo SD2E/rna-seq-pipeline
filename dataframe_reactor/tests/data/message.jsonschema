@@ -1,0 +1,15 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "AbacoMessageAgavePath",
+    "description": "An AWS-like SQS notification",
+    "type": "object",
+    "properties": {
+        "uri": {
+            "type": "string",
+            "format": "uri",
+            "description": "agave:// format resource URI",
+            "pattern": "^(agave):"
+        }
+    },
+    "required": ["uri"]
+}
