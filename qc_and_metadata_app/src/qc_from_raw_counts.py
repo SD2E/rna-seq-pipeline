@@ -1,8 +1,6 @@
 import sys
-import math
 import pandas as pd
 import numpy as np
-from collections import Counter
 
 
 def main():
@@ -54,6 +52,22 @@ def main():
     qc_flag_output_name = get_project_name()
     df.T.loc[qc_cols].to_csv(qc_flag_output_name)
     return
+
+
+def get_group_conditions_from_metadata():
+    return []
+
+
+def get_metadata_dataframe():
+    return []
+
+
+def get_raw_count_dataframe():
+    return []
+
+
+def get_project_name():
+    return ''
 
 
 def tag_low_mapped_reads(dataframe, genes, nmapped=5e5):
@@ -120,15 +134,21 @@ def tag_low_correlation_biological_replicates(dataframe, genes, factors, cc=0.8)
                     sample_corr[samps[1]].append(corr[1])
 
             low_corr_count = {}
+            low_corr_vals = {}
             for sample in sample_corr:
                 low_corr_count[sample] = len([x for x in sample_corr[sample] if x < cc])
+                low_corr_vals[sample] = [x for x in sample_corr[sample] if x < cc]
 
             if len([k for k, v in low_corr_count.items() if v != 0]) == 0:
                 break
 
             worst_corr = [k for k, v in low_corr_count.items() if v == max(low_corr_count.values())]
+            if len(worst_corr) > 1:
+                worst_corr_vals = [low_corr_vals[x] for x in worst_corr]
+                # if there is still more than one equally bad sample just default to popping the first element.
+                worst_corr_min = [i for i, x in enumerate(worst_corr_vals) if x == min(worst_corr_vals)][0]
+                worst_corr = [worst_corr[worst_corr_min]]
             d_.drop(d_.index[worst_corr], axis=0, inplace=True)
-
         df_corr_passed.append(d_)
     df_corr_passed = pd.concat(df_corr_passed)
     dataframe['QC_gcorr'].loc[df_corr_passed.index] = True
