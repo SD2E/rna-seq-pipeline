@@ -121,11 +121,23 @@ def tag_low_correlation_biological_replicates(dataframe, genes, factors, cc=0.8)
     #       count how many other samples it falls below the correlation QC threshold
     #     remove the sample with the most QC violations
     df_corr_passed = []
+    sample_correlations = {}
     for group, d in dataframe_filtered[list(genes) + factors].groupby(factors):
         d_ = d.copy()
         if d_.shape[0] <= 1:
             df_corr_passed.append(d_)
             continue
+
+        # This block collects the sample correlations for metadata annotation
+        samplenames = d_.index
+        for sample in samplenames:
+            non_sample_list = list(samplenames)
+            non_sample_list.remove(sample)
+            sample_corrs = np.corrcoef(d_.loc[sample][genes].values.astype('float64'),
+                                       d_.loc[non_sample_list][genes].values.astype('float64'))
+            sample_correlations[sample] = list(zip(non_sample_list, sample_corrs[0][1:]))
+
+        # Recrusive low correlation drop-out
         while d_.shape[0] > 0:
             d_mat = d_[genes].values.astype('float64')
             corrcoef = np.corrcoef(d_mat)
@@ -167,11 +179,21 @@ def tag_low_correlation_biological_replicates(dataframe, genes, factors, cc=0.8)
             d_.drop(d_.index[worst_corr], axis=0, inplace=True)
 
         df_corr_passed.append(d_)
+
     df_corr_passed = pd.concat(df_corr_passed)
     dataframe['QC_gcorr_BOOL'].loc[df_corr_passed.index] = True
+
+    samples_and_corr = []
+    samplenames_for_corr_df = []
+    for sample in sample_correlations:
+        samplenames_for_corr_df.append(sample)
+        samples_and_corr.append(sample_correlations[sample])
+    dataframe['QC_gcorr_vals'] = np.nan
+    dataframe['QC_gcorr_vals'].loc[samplenames_for_corr_df] = samples_and_corr
     return dataframe
 
 
 if __name__ == "__main__":
-    status = main()
-    sys.exit(status)
+    #status = main()
+    #sys.exit(status)
+    pass
