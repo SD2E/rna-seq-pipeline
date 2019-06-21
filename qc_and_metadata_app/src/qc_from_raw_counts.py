@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 
-def main():
+def sample_coors(factors, df_counts, df_metadata):
     """
     Starting from a raw counts dataframe and metadata dataframe flag all samples below N mapped reads and
     below CC in-group correlation using a recursive drop-out algorithm.
@@ -13,26 +13,30 @@ def main():
 
     # Gather up the experimental test factors.
     # eg. ['timepoint', 'strain', 'temperature', 'Arabinose', 'IPTG']
-    factors = get_group_conditions_from_metadata()
+    #factors = get_group_conditions_from_metadata()
+    # somewhat brittle way to procure metadata keys
+    # grabs metadata keys for the first sample in the
+    # metadata dict, and filters out any existing QC flags
 
     # Depending on the starting point we need to have an initial dataframe.
     # Collect all the raw count dataframes produced in this project.
-    count_dataframes = get_raw_count_dataframe()
+    # count_dataframes = get_raw_count_dataframe()
 
     # These belong to the same project / species so they should have identical gene lists.
     # We assign the gene_id to the index for all dataframes to allow joining.
-    for df in count_dataframes:
-        df.set_index('gene_id', inplace=True)
-    genes = count_dataframes[0].index
+    #for df in count_dataframes:
+    #    df.set_index('gene_id', inplace=True)
+    #genes = count_dataframes[0].index
+    df_counts.set_index('gene_id', inplace=True)
+    genes = df_counts.index
 
     # If theres more than one dataframe, join them.
-    if len(count_dataframes) > 1:
-        df_counts = pd.concat(count_dataframes, axis=1)
-    else:
-        df_counts = count_dataframes[0]
+    # if len(count_dataframes) > 1:
+    #     df_counts = pd.concat(count_dataframes, axis=1)
+    # else:
+    #     df_counts = count_dataframes[0]
 
     # Get the metadata dataframe
-    df_metadata = get_metadata_dataframe()
     df_metadata = df_metadata.set_index('sample_id')
     df_metadata = df_metadata.T
 
@@ -40,18 +44,20 @@ def main():
                   right_index=True).T
 
     df = tag_low_mapped_reads(df, genes, 5e5)
-    print('Filtered out {}/{} ({:.2%}) samples'.format(df[df['QC_nmap'] == False].shape[0], df.shape[0],
-                                                       df[df['QC_nmap'] == False].shape[0] / df.shape[0]))
+    print('Filtered out {}/{} ({:.2%}) samples'.format(df[df['QC_nmap_BOOL'] == False].shape[0], df.shape[0],
+                                                       df[df['QC_nmap_BOOL'] == False].shape[0] / df.shape[0]))
 
 
     df = tag_low_correlation_biological_replicates(df, genes, factors, 0.90)
-    print('Filtered out {}/{} ({:.2%}) samples'.format(df[df['QC_gcorr'] == False].shape[0], df.shape[0],
-                                                       df[df['QC_gcorr'] == False].shape[0] / df.shape[0]))
+    print('Filtered out {}/{} ({:.2%}) samples'.format(df[df['QC_gcorr_BOOL'] == False].shape[0], df.shape[0],
+                                                       df[df['QC_gcorr_BOOL'] == False].shape[0] / df.shape[0]))
 
     qc_cols = [x for x in df.columns if 'QC' in x]
-    qc_flag_output_name = get_project_name()
-    df.T.loc[qc_cols].to_csv(qc_flag_output_name)
-    return
+    met_vals = [x for x in df.columns if x in factors]
+    filter_cols = qc_cols + met_vals
+    #df.T.loc[qc_cols].to_csv(experiment_id + '_metadata.csv')
+    qc_metadata = df.T.loc[filter_cols]
+    return qc_metadata, df
 
 
 def get_group_conditions_from_metadata():
@@ -76,13 +82,14 @@ def tag_low_mapped_reads(dataframe, genes, nmapped=5e5):
     This is not sensitive to prior QC steps so we dont need to filter out BAD flagged
     samples prior to assessment.
     """
-    if 'QC_nmap' not in list(dataframe.columns):
-        dataframe['QC_nmap'] = False
+    if 'QC_nmap_BOOL' not in list(dataframe.columns):
+        dataframe['QC_nmap_BOOL'] = False
 
     dataframe_tagged = dataframe[dataframe[genes].sum(axis=1) > nmapped]
-    dataframe['QC_nmap'].loc[dataframe_tagged.index] = True
+    dataframe['QC_nmap_BOOL'].loc[dataframe_tagged.index] = True
     bad_indexes = [x for x in dataframe.index if x not in dataframe_tagged.index]
-    dataframe['QC_nmap'].loc[bad_indexes] = False
+    dataframe['QC_nmap_BOOL'].loc[bad_indexes] = False
+    dataframe['QC_nmap_NUM'] = dataframe[genes].sum(axis=1)
     return dataframe
 
 
@@ -92,12 +99,13 @@ def tag_low_correlation_biological_replicates(dataframe, genes, factors, cc=0.8)
     This QC checks correlation between samples so previously tagged bad samples
     should be removed prior to assessment.
     """
-    if 'QC_gcorr' not in list(dataframe.columns):
-        dataframe['QC_gcorr'] = False
+    if 'QC_gcorr_BOOL' not in list(dataframe.columns):
+        dataframe['QC_gcorr_BOOL'] = False
 
     # Collect previous QC flags if they exist
     bad_index = []
-    qc_cols = [x for x in dataframe.columns if 'QC' in x if x != 'QC_gcorr']
+    qc_cols = [x for x in dataframe.columns if 'QC' in x if x != 'QC_gcorr_BOOL']
+    print(dataframe.shape)
     if qc_cols:
         for col in qc_cols:
             bad_index.append(list(dataframe[dataframe[col] == False].index))
@@ -115,6 +123,9 @@ def tag_low_correlation_biological_replicates(dataframe, genes, factors, cc=0.8)
     df_corr_passed = []
     for group, d in dataframe_filtered[list(genes) + factors].groupby(factors):
         d_ = d.copy()
+        if d_.shape[0] <= 1:
+            df_corr_passed.append(d_)
+            continue
         while d_.shape[0] > 0:
             d_mat = d_[genes].values.astype('float64')
             corrcoef = np.corrcoef(d_mat)
@@ -136,22 +147,28 @@ def tag_low_correlation_biological_replicates(dataframe, genes, factors, cc=0.8)
             low_corr_count = {}
             low_corr_vals = {}
             for sample in sample_corr:
-                low_corr_count[sample] = len([x for x in sample_corr[sample] if x < cc])
-                low_corr_vals[sample] = [x for x in sample_corr[sample] if x < cc]
+                low_corr_count[sample] = len([x for x
+                                             in sample_corr[sample] if x < cc])
+                low_corr_vals[sample] = [x for x
+                                         in sample_corr[sample] if x < cc]
 
             if len([k for k, v in low_corr_count.items() if v != 0]) == 0:
                 break
 
-            worst_corr = [k for k, v in low_corr_count.items() if v == max(low_corr_count.values())]
+            worst_corr = [k for k, v in low_corr_count.items()
+                          if v == max(low_corr_count.values())]
             if len(worst_corr) > 1:
                 worst_corr_vals = [low_corr_vals[x] for x in worst_corr]
-                # if there is still more than one equally bad sample just default to popping the first element.
-                worst_corr_min = [i for i, x in enumerate(worst_corr_vals) if x == min(worst_corr_vals)][0]
+                # if there is still more than one equally bad sample
+                # just default to popping the first element.
+                worst_corr_min = [i for i, x in enumerate(worst_corr_vals)
+                                  if x == min(worst_corr_vals)][0]
                 worst_corr = [worst_corr[worst_corr_min]]
             d_.drop(d_.index[worst_corr], axis=0, inplace=True)
+
         df_corr_passed.append(d_)
     df_corr_passed = pd.concat(df_corr_passed)
-    dataframe['QC_gcorr'].loc[df_corr_passed.index] = True
+    dataframe['QC_gcorr_BOOL'].loc[df_corr_passed.index] = True
     return dataframe
 
 
