@@ -43,12 +43,12 @@ def sample_coors(factors, df_counts, df_metadata):
     df = pd.merge(df_metadata, df_counts, on=list(df_metadata.columns), how='outer', left_index=True,
                   right_index=True).T
 
-    df = tag_low_mapped_reads(df, genes, 5e5)
+    df = tag_low_mapped_reads(df, genes)
     print('Filtered out {}/{} ({:.2%}) samples'.format(df[df['QC_nmap_BOOL'] == False].shape[0], df.shape[0],
                                                        df[df['QC_nmap_BOOL'] == False].shape[0] / df.shape[0]))
 
 
-    df = tag_low_correlation_biological_replicates(df, genes, factors, 0.90)
+    df = tag_low_correlation_biological_replicates(df, genes, factors)
     print('Filtered out {}/{} ({:.2%}) samples'.format(df[df['QC_gcorr_BOOL'] == False].shape[0], df.shape[0],
                                                        df[df['QC_gcorr_BOOL'] == False].shape[0] / df.shape[0]))
 
