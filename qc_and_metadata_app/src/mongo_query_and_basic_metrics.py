@@ -321,7 +321,8 @@ def main(experiment_id):
     # Get metadata factors from the dict (temp/time/etc)
     factors = [metadata_key for metadata_key
                in meta_data[list(meta_data.keys())[0]]
-               if metadata_key.split("_")[0] != 'QC']
+               if metadata_key.split("_")[0] != 'QC'
+               and metadata_key not in ['replicate', 'arabinose_unit', 'IPTG_unit', 'strain_input_state']]
     # Read in the raw counts file to run the coorelations
     df_counts = pd.read_csv(prefix +
                             dataframe_jobs[experiment_id]['archive_path'] +
