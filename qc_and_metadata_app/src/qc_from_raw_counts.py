@@ -53,9 +53,11 @@ def sample_coors(factors, df_counts, df_metadata):
                                                        df[df['QC_gcorr_BOOL'] == False].shape[0] / df.shape[0]))
 
     qc_cols = [x for x in df.columns if 'QC' in x]
-    met_vals = [x for x in df.columns if x in factors]
+    #met_vals = [x for x in df.columns if x in factors]
+    met_vals = [x for x in df.columns if x in df_metadata.T.columns.tolist()]
     filter_cols = qc_cols + met_vals
-    #df.T.loc[qc_cols].to_csv(experiment_id + '_metadata.csv')
+    # get unique values
+    filter_cols = list(sorted(set(filter_cols), key=filter_cols.index))
     qc_metadata = df.T.loc[filter_cols]
     return qc_metadata, df
 
@@ -105,7 +107,7 @@ def tag_low_correlation_biological_replicates(dataframe, genes, factors, cc=0.8)
     # Collect previous QC flags if they exist
     bad_index = []
     qc_cols = [x for x in dataframe.columns if 'QC' in x if x != 'QC_gcorr_BOOL']
-    print(dataframe.shape)
+    #print(dataframe.shape)
     if qc_cols:
         for col in qc_cols:
             bad_index.append(list(dataframe[dataframe[col] == False].index))
@@ -135,13 +137,16 @@ def tag_low_correlation_biological_replicates(dataframe, genes, factors, cc=0.8)
             non_sample_list.remove(sample)
             sample_corrs = np.corrcoef(d_.loc[sample][genes].values.astype('float64'),
                                        d_.loc[non_sample_list][genes].values.astype('float64'))
-            sample_correlations[sample] = list(zip(non_sample_list, sample_corrs[0][1:]))
+            #sample_correlations[sample] = list(zip(non_sample_list, sample_corrs[0][1:]))
+            sample_correlations[sample] = sample_corrs[0][1:]
 
         # Recrusive low correlation drop-out
-        while d_.shape[0] > 0:
+        while d_.shape[0] > 1:
             d_mat = d_[genes].values.astype('float64')
+            #print(d_mat.shape)
             corrcoef = np.corrcoef(d_mat)
             trius = np.triu_indices(d_mat.shape[0], k=1)
+            #print(trius)
             triu_cc = zip(zip(trius[0], trius[1]), corrcoef[trius])
 
             sample_corr = {}
@@ -185,11 +190,13 @@ def tag_low_correlation_biological_replicates(dataframe, genes, factors, cc=0.8)
 
     samples_and_corr = []
     samplenames_for_corr_df = []
+    #print(sample_correlations)
     for sample in sample_correlations:
         samplenames_for_corr_df.append(sample)
         samples_and_corr.append(sample_correlations[sample])
-    dataframe['QC_gcorr_vals'] = np.nan
-    dataframe['QC_gcorr_vals'].loc[samplenames_for_corr_df] = samples_and_corr
+    #print(samples_and_corr)
+    dataframe['QC_gcorr_NUM_ARRAY'] = np.nan
+    dataframe['QC_gcorr_NUM_ARRAY'].loc[samplenames_for_corr_df] = samples_and_corr
     return dataframe
 
 
