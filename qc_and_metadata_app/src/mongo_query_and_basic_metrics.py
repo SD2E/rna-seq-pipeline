@@ -81,10 +81,10 @@ def metadata_construction(metadata_query_results):
     meta_data = {}
     for sample in metadata_query_results:
         metadata = {}
-        metadata["timepoint"] = sample['timepoint']['value']
-        metadata["strain"] = sample['strain']
-        metadata["temperature"] = sample["temperature"]["value"]
-        metadata["replicate"] = sample['replicate']
+        metadata["Timepoint"] = sample['timepoint']['value']
+        metadata["Strain"] = sample['strain']
+        metadata["Temperature"] = sample["temperature"]["value"]
+        metadata["Replicate"] = sample['replicate']
         # This part is a little messy, lots of room for improvement here.
         # Different labs use different names for arabinose/IPTG
         # but the synbiohub uri's are the same, so we use those
@@ -134,15 +134,15 @@ def metadata_construction(metadata_query_results):
                 # IPTG = "Present"
                 IPTG = 0.00025
                 IPTG_unit = 'M'
-        metadata['arabinose'] = arabinose
-        metadata['arabinose_unit'] = arabinose_unit
+        metadata['Arabinose'] = arabinose
+        metadata['Arabinose_unit'] = arabinose_unit
         metadata['IPTG'] = IPTG
         metadata['IPTG_unit'] = IPTG_unit
         # Another try/except to capture input state where available
         try:
-            metadata['strain_input_state'] = sample["strain_input_state"]
+            metadata['Strain_input_state'] = sample["strain_input_state"]
         except Exception as e:
-            metadata['strain_input_state'] = 'NA'
+            metadata['Strain_input_state'] = 'NA'
 
         metadata['QC_total_RNA_conc_ng_ul_NUM'] = sample['ginkgo_rnaseq_metadata']['total_RNA_conc_ng_ul']
         metadata['QC_volume_for_pooling_NUM'] = sample['ginkgo_rnaseq_metadata']['volume_for_pooling']
@@ -322,7 +322,7 @@ def main(experiment_id):
     factors = [metadata_key for metadata_key
                in meta_data[list(meta_data.keys())[0]]
                if metadata_key.split("_")[0] != 'QC'
-               and metadata_key not in ['replicate', 'arabinose_unit', 'IPTG_unit', 'strain_input_state']]
+               and metadata_key not in ['Replicate', 'Arabinose_unit', 'IPTG_unit', 'Strain_input_state']]
     # Read in the raw counts file to run the coorelations
     df_counts = pd.read_csv(prefix +
                             dataframe_jobs[experiment_id]['archive_path'] +
