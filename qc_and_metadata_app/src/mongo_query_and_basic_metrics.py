@@ -323,6 +323,8 @@ def main(experiment_id):
                in meta_data[list(meta_data.keys())[0]]
                if metadata_key.split("_")[0] != 'QC'
                and metadata_key not in ['Replicate', 'Arabinose_unit', 'IPTG_unit', 'Strain_input_state']]
+
+    print("Metadata factors for replicate groupings: ", factors)
     # Read in the raw counts file to run the coorelations
     df_counts = pd.read_csv(prefix +
                             dataframe_jobs[experiment_id]['archive_path'] +
