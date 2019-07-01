@@ -3,6 +3,8 @@
 # Import Agave runtime extensions
 . _lib/extend-runtime.sh
 
+HPC_PATH=/work/projects/SD2E-Community/prod/data/
+
 # Allow CONTAINER_IMAGE over-ride via local file
 if [ -z "${CONTAINER_IMAGE}" ]
 then
@@ -18,16 +20,16 @@ fi
 # resets inputs to paths if inputs are null
 if [ -z ${read1} ]; then
   echo "no input specified for read1, attempting to pull read1 from path parameter: path_read1"
-  echo read1=${path_read1}
-  r1=${path_read1}
+  echo read1=${HPC_PATH}${path_read1}
+  r1=${HPC_PATH}${path_read1}
 else
   r1=${read1}
 fi
 
 if [ -z ${read2} ]; then
   echo "no input specified for read2, attempting to use path parameter: path_read2"
-  echo read2=${path_read2}
-  r2=${path_read2}
+  echo read2=${HPC_PATH}${path_read2}
+  r2=${HPC_PATH}${path_read2}
 else
   r2=${read2}
 fi
@@ -35,7 +37,7 @@ fi
 if [ -z ${filterseqs} ]; then
   echo "no input specified for filterseqs, attempting to use path parameter: path_filterseqs"
   echo filterseqs=${path_filterseqs}
-  fseqs=${path_filterseqs}
+  fseqs=${HPC_PATH}${path_filterseqs}
 else
   fseqs=${filterseqs}
 fi
