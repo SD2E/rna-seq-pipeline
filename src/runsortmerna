@@ -161,7 +161,7 @@ fi
 if [ $TRIM == 1 ]; then
     if [ $paired == 1 ]; then
         ${FASTQC_DIR}/fastqc ${R1NAME}_trimmed.fastq &
-        ${FASTQC_DIR}/fastqc gzip ${R2NAME}_trimmed.fastq &
+        ${FASTQC_DIR}/fastqc ${R2NAME}_trimmed.fastq &
         wait
         gzip ${R1NAME}_trimmed.fastq &
         gzip ${R2NAME}_trimmed.fastq &
@@ -196,9 +196,9 @@ echo "Reads removed by SortmeRNA: "
 echo $(cat ${R1NAME}_rRNA.fastq|wc -l)/4|bc
 
 
-rm -r $(basename $RNADB_DIR)
-rm *_unpaired.fastq
-rm *_rRNA.fastq
-rm *_rRNA.blast
-rm *_merged-reads.fastq
-rm *unpaired.fastq
+rm -rf $(basename $RNADB_DIR)
+rm -f *_unpaired.fastq
+rm -f *_rRNA.fastq
+rm -f *_rRNA.blast
+rm -f *_merged-reads.fastq
+rm -f *unpaired.fastq
