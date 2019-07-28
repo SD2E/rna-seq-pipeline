@@ -64,7 +64,7 @@ echo "This is BWA analysis processing"
 
 outsample=${SAMP}.rnaseq.original.bwa
 echo ${SAMP}.BWA.align | tee -a /dev/stderr
-time bwa mem -t 80 ${REF} ${forward} ${reverse} > ${TEMPDIR}/${outsample}.sam
+time bwa mem -t 40 ${REF} ${forward} ${reverse} > ${TEMPDIR}/${outsample}.sam
 #The pipe tee /dev/stderr directs the echos to stderr in addition to stdout for debugging
 echo ${SAMP}.BWA.sort "& done(${SAMP}.BWA.align))" | tee -a /dev/stderr
 
