@@ -8,7 +8,7 @@ import pymongo
 import glob
 
 
-def manifest(r, archive_paths):
+def parse_manifest(r):
     ag = r.client  # Agave client
     context = r.context  # Actor context
     m = context.message_dict
@@ -41,6 +41,10 @@ def manifest(r, archive_paths):
     except Exception as e:
         r.on_failure("failed to load manifest {}".format(manifestUrl), e)
 
+    return manifest
+
+def dataframe_jobs(r, manifest, archive_paths):
+
     rna_list = []
     for sample in manifest["samples"]:
         mes_types = [measurement["measurement_type"] for measurement in sample["measurements"]]
@@ -72,13 +76,14 @@ def manifest(r, archive_paths):
     job_def["name"] = experiment_id
     ag = r.client
     parameters = job_def.parameters
-    parameters["path_gff"] = "/reference/novel_chassis/uma_refs/amin_genes_no_parts_1.1.0.gff"
+    parameters["path_gff"] = "/reference/novel_chassis/novel_chassis_2.0_strains_1.0.0.gff"
     job_def.parameters = parameters
 
     data = {
         "inputs": {
             'path_gff': parameters["path_gff"]
-            }
+            },
+        "experiment_id": experiment_id
         }
     archive_patterns = [
        {'level': '2', 'patterns': ['.txt$', '.tsv$']}
@@ -93,13 +98,17 @@ def manifest(r, archive_paths):
         }
     ]
     #mpj = Job(r, measurement_id=measurements, data=data, archive_patterns=archive_patterns, product_patterns=product_patterns)
-    mpj = Job(r, experiment_id=experiment_id, data=data, archive_patterns=archive_patterns, product_patterns=product_patterns)
+    mpj = Job(r, experiment_id=experiment_id, data=data,
+              archive_patterns=archive_patterns,
+              product_patterns=product_patterns)
+              #setup_archive_path=False)
     mpj.setup()
     #ag.files.importData(filePath=mpj.archive_path, systemId='data-sd2e-community', fileName = 'sample_paths.json', fileToUpload=open('sample_paths.json', 'rb'))
     inputs = job_def.inputs
     #inputs["sample_paths"] = 'agave://data-sd2e-community/' + mpj.archive_path + '/sample_paths.json'
     ag.files.importData(filePath='/testing/agavepy_write/', systemId='data-tacc-work-urrutia', fileName = 'sample_paths.json', fileToUpload=open('sample_paths.json', 'rb'))
-    inputs["sample_paths"] = 'agave://data-tacc-work-urrutia/testing/agavepy_write/sample_paths.json'
+    ag.files.importData(filePath=mpj.archive_path, systemId='data-sd2e-community', fileName = 'sample_paths.json', fileToUpload=open('sample_paths.json', 'rb'))
+    inputs["sample_paths"] = 'agave://data-sd2e-community/' + mpj.archive_path + '/sample_paths.json'
     #inputs["sample_paths"] = 'agave://data-tacc-work-urrutia/wrangler/Ginkgo/experiment.ginkgo.19606.19637.19708.19709_NAND_Titration/data_paths.json'
     job_def.inputs = inputs
 
@@ -123,7 +132,7 @@ def manifest(r, archive_paths):
              {'event': 'FAILED',
               "persistent": False,
               'url': mpj.callback + '&status=${JOB_STATUS}'},
-             {'event': 'ARCHIVING_FINISHED',
+             {'event': 'FINISHED',
               "persistent": False,
               'url': mpj.callback + '&status=FINISHED'}]
 
@@ -145,9 +154,7 @@ def manifest(r, archive_paths):
         print(e.response.content)
 
 
-
-
-def mongo_query(r):
+def mongo_query(experiment_id):
     dbURI = '***REMOVED***'
     client = pymongo.MongoClient(dbURI)
     db = client.catalog_staging
@@ -155,7 +162,9 @@ def mongo_query(r):
     jobs = db.jobs
     query={}
     #query['name'] = {'$regex': 'RG.bam'}
-    query['archive_path'] = {'$regex': '/products/v2/106bd127e2d257acb9be11ed06042e68/'}
+    #query['archive_path'] = {'$regex': '/products/v2/106bd127e2d257acb9be11ed06042e68/'}
+    query['data.experiment_id'] = experiment_id
+    print(query)
     #query['archive_path'] = {'$regex': '/products/v2/106d3f7f07dc596f86f9df75083e52cc'}
     bwa_results = []
     #for match in filesdb.find(query):
@@ -180,7 +189,7 @@ def mongo_query(r):
             print(e)
             fail_list.append(sample)
 
-    manifest(r,archive_paths)
+    return archive_paths
 
 
 
@@ -229,8 +238,11 @@ def mongo_query(r):
 def main():
     """Main function"""
     r = Reactor()
-    #manifest(r)
-    mongo_query(r)
+
+    manifest = parse_manifest(r)
+    experiment_id = manifest['experiment_id']
+    archive_paths = mongo_query(experiment_id)
+    dataframe_jobs(r, manifest, archive_paths)
 
 
 if __name__ == '__main__':
