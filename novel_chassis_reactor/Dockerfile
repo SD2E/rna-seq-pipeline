@@ -10,4 +10,4 @@ RUN pip uninstall --yes datacatalog
 # COPY datacatalog /datacatalog
 
 # Install from Repo
-RUN pip install --upgrade git+https://github.com/SD2E/python-datacatalog.git@2_0
+RUN pip install --upgrade git+https://github.com/SD2E/python-datacatalog.git@2_1
