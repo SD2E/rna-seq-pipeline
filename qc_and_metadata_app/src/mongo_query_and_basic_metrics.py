@@ -83,7 +83,8 @@ def metadata_construction(metadata_query_results):
         metadata = {}
         metadata["Timepoint"] = sample['timepoint']['value']
         metadata["Strain"] = sample['strain']
-        metadata["Temperature"] = sample["temperature"]["value"]
+        #metadata["Temperature"] = sample["temperature"]["value"]
+        metadata["Temperature"] = 37
         metadata["Replicate"] = sample['replicate']
         # This part is a little messy, lots of room for improvement here.
         # Different labs use different names for arabinose/IPTG
@@ -144,14 +145,38 @@ def metadata_construction(metadata_query_results):
         except Exception as e:
             metadata['Strain_input_state'] = 'NA'
 
-        metadata['QC_total_RNA_conc_ng_ul_NUM'] = sample['ginkgo_rnaseq_metadata']['total_RNA_conc_ng_ul']
-        metadata['QC_volume_for_pooling_NUM'] = sample['ginkgo_rnaseq_metadata']['volume_for_pooling']
-        metadata['QC_input_rRNA_depletion_ng_NUM'] = sample['ginkgo_rnaseq_metadata']['input_rRNA_depletion_ng']
-        metadata['QC_library_conc_nM_NUM'] = sample['ginkgo_rnaseq_metadata']['library_conc_nM']
-        metadata['QC_H2O_NUM'] = sample['ginkgo_rnaseq_metadata']['H2O']
-        metadata['QC_RQN_NUM'] = sample['ginkgo_rnaseq_metadata']['RQN']
-        metadata['QC_input_rRNA_depletion_ng_uL_NUM'] = sample['ginkgo_rnaseq_metadata']['input_rRNA_depletion_ng_uL']
-        metadata['QC_input_rRNA_depletion_uL_NUM'] = sample['ginkgo_rnaseq_metadata']['input_rRNA_depletion_uL']
+        try:
+            metadata['QC_total_RNA_conc_ng_ul_NUM'] = sample['ginkgo_rnaseq_metadata']['total_RNA_conc_ng_ul']
+        except Exception as e:
+            metadata['QC_total_RNA_conc_ng_ul_NUM'] = 'NA'
+        try:
+            metadata['QC_volume_for_pooling_NUM'] = sample['ginkgo_rnaseq_metadata']['volume_for_pooling']
+        except Exception as e:
+            metadata['QC_volume_for_pooling_NUM'] ='NA'
+        try:
+            metadata['QC_input_rRNA_depletion_ng_NUM'] = sample['ginkgo_rnaseq_metadata']['input_rRNA_depletion_ng']
+        except Exception as e:
+            metadata['QC_input_rRNA_depletion_ng_NUM'] = 'NA'
+        try:
+            metadata['QC_library_conc_nM_NUM'] = sample['ginkgo_rnaseq_metadata']['library_conc_nM']
+        except Exception as e:
+            metadata['QC_library_conc_nM_NUM'] = 'NA'
+        try:
+            metadata['QC_H2O_NUM'] = sample['ginkgo_rnaseq_metadata']['H2O']
+        except Exception as e:
+            metadata['QC_H2O_NUM'] = 'NA'
+        try:
+            metadata['QC_RQN_NUM'] = sample['ginkgo_rnaseq_metadata']['RQN']
+        except Exception as e:
+            metadata['QC_RQN_NUM'] = 'NA'
+        try:
+            metadata['QC_input_rRNA_depletion_ng_uL_NUM'] = sample['ginkgo_rnaseq_metadata']['input_rRNA_depletion_ng_uL']
+        except Exception as e:
+            metadata['QC_input_rRNA_depletion_ng_uL_NUM'] ='NA'
+        try:
+            metadata['QC_input_rRNA_depletion_uL_NUM'] = sample['ginkgo_rnaseq_metadata']['input_rRNA_depletion_uL']
+        except Exception as e:
+            metadata['QC_input_rRNA_depletion_uL_NUM'] = 'NA'
 
         meta_data[sample['sample_id']] = metadata
     return meta_data
@@ -159,22 +184,33 @@ def metadata_construction(metadata_query_results):
 
 
 def crawl_file_system(prefix, meta_data, preprocessing_jobs, alignment_jobs):
+    # This is sub-optimal, every time we run we have to run through all these
+    # output files just to get basic stats.
+    # TODO: run multiqc before this and just pull the ONE multiqc job
+    # TODO: annotate these w/ tags in the data catalog so we don't re-run what
+    # we alredy have
     # Now that we've created our meta_data dictonary
     # we can pull Q30% from FastQC (nested in a zipped .txt file)
     # number reads before mapping (probably also use FastQC results for this)
     # and mapped reads (bwa log?) from the relevant output files
     # and add this to our meta_data dictionary
-    for sample_id,job in preprocessing_jobs.items():
+    for sample_id, job in preprocessing_jobs.items():
         #print(sample_id)
         #prefix = '/home/jupyter/sd2e-community/'
         #prefix = '/work/projects/SD2E-Community/prod/data/'
         fastqc_r1 = prefix + job['archive_path'] + '/' + job['data']['inputs'][0].split('/')[-1].split('_R')[0] + '_R1_001_trimmed_fastqc.zip'
         fastqc_r2 = prefix + job['archive_path'] + '/' + job['data']['inputs'][0].split('/')[-1].split('_R')[0] + '_R2_001_trimmed_fastqc.zip'
         command = "zipgrep 'Total Sequences' " + fastqc_r1 + " | grep 'fastqc_data.txt'"
-        output = subprocess.check_output(command, shell=True, preexec_fn=lambda: signal.signal(signal.SIGPIPE, signal.SIG_DFL))
+        try:
+            output = subprocess.check_output(command, shell=True, preexec_fn=lambda: signal.signal(signal.SIGPIPE, signal.SIG_DFL))
+        except Exception as e:
+            output = 'NA'
         total_counts_r1 = str(output).split('\\t')[-1].split('\\n')[0]
         command = "zipgrep 'Total Sequences' " + fastqc_r2 + " | grep 'fastqc_data.txt'"
-        output = subprocess.check_output(command, shell=True, preexec_fn=lambda: signal.signal(signal.SIGPIPE, signal.SIG_DFL))
+        try:
+            output = subprocess.check_output(command, shell=True, preexec_fn=lambda: signal.signal(signal.SIGPIPE, signal.SIG_DFL))
+        except Exception as e:
+            output = 'NA'
         total_counts_r2 = str(output).split('\\t')[-1].split('\\n')[0]
         #print(total_counts_r1, total_counts_r2)
 
@@ -210,57 +246,68 @@ def crawl_file_system(prefix, meta_data, preprocessing_jobs, alignment_jobs):
         ## pull out the Quality scores section
         ## and calculate %Q30 from that report
         # Unzip the fastqc report to your current wd
-        zip_ref = zipfile.ZipFile(fastqc_r1, 'r')
-        zip_ref.extractall('.')
-        zip_ref.close()
+        try:
+            zip_ref = zipfile.ZipFile(fastqc_r1, 'r')
+            zip_ref.extractall('.')
+            zip_ref.close()
+        except Exception as e:
+            print("couldn't unzip: ", fastqc_r1)
         # pull quality scores from the fastqc_data.txt report
         command = "sed -n '1,/Quality/d;/END_MODULE/q;p' " + fastqc_r1.split('/')[-1].split('.')[0] + "/fastqc_data.txt"
-        output = subprocess.check_output(command, shell=True, preexec_fn=lambda: signal.signal(signal.SIGPIPE, signal.SIG_DFL))
-        #delete the local unzipped folder
-        os.system("rm -rf " + fastqc_r1.split('/')[-1].split('.')[0])
-        # Convert from bytes output to string
-        string_output = output.decode('ascii')
-        # split string output into list of lists based on tabs/newlines
-        list_output = [quality.split('\t') for quality in string_output.split('\n')]
-        # convert the list of lists into a datframe
-        df = pd.DataFrame(list_output, columns = ["quality", "num_reads"], dtype = np.float64)
-        #explictly make quality scores numeric
-        df['quality'] = pd.to_numeric(df['quality'])
-        # sum the total reads
-        total_reads = df.sum()['num_reads']
-        # sum the reads w/ a score over 30
-        count_over_30 = df.loc[df['quality'] >= 30].sum()['num_reads']
-        # simple caluclation to get %q30
-        r1_q30 = count_over_30/total_reads
-        #print(r1_q30)
+        try:
+            output = subprocess.check_output(command, shell=True, preexec_fn=lambda: signal.signal(signal.SIGPIPE, signal.SIG_DFL))
+            os.system("rm -rf " + fastqc_r1.split('/')[-1].split('.')[0])
+             #delete the local unzipped folder
+            # Convert from bytes output to string
+            string_output = output.decode('ascii')
+            # split string output into list of lists based on tabs/newlines
+            list_output = [quality.split('\t') for quality in string_output.split('\n')]
+            # convert the list of lists into a datframe
+            df = pd.DataFrame(list_output, columns = ["quality", "num_reads"], dtype = np.float64)
+            #explictly make quality scores numeric
+            df['quality'] = pd.to_numeric(df['quality'])
+            # sum the total reads
+            total_reads = df.sum()['num_reads']
+            # sum the reads w/ a score over 30
+            count_over_30 = df.loc[df['quality'] >= 30].sum()['num_reads']
+            # simple caluclation to get %q30
+            r1_q30 = count_over_30/total_reads
+            #print(r1_q30)
+        except Exception as e:
+            r1_q30 = 'NA'
+
 
         #now we'll just repeat with R2
         # Unzip the fastqc report to your current wd
-        zip_ref = zipfile.ZipFile(fastqc_r2, 'r')
-        zip_ref.extractall('.')
-        zip_ref.close()
+        try:
+            zip_ref = zipfile.ZipFile(fastqc_r2, 'r')
+            zip_ref.extractall('.')
+            zip_ref.close()
+        except Exception as e:
+            continue
         # pull quality scores from the fastqc_data.txt report
         command = "sed -n '1,/Quality/d;/END_MODULE/q;p' " + fastqc_r2.split('/')[-1].split('.')[0] + "/fastqc_data.txt"
-        output = subprocess.check_output(command, shell=True, preexec_fn=lambda: signal.signal(signal.SIGPIPE, signal.SIG_DFL))
+        try:
+            output = subprocess.check_output(command, shell=True, preexec_fn=lambda: signal.signal(signal.SIGPIPE, signal.SIG_DFL))
         #delete the local unzipped folder
-        os.system("rm -rf " + fastqc_r2.split('/')[-1].split('.')[0])
-        # Convert from bytes output to string
-        string_output = output.decode('ascii')
-        # split string output based on tabs/newlines
-        list_output = [quality.split('\t') for quality in string_output.split('\n')]
-        # convert the list into a datframe
-        df = pd.DataFrame(list_output, columns = ["quality", "num_reads"], dtype = np.float64)
-        # explictly make quality scores numeric
-        df['quality'] = pd.to_numeric(df['quality'])
-        # sum the total reads
-        total_reads = df.sum()['num_reads']
-        # sum the reads w/ a score over 30
-        count_over_30 = df.loc[df['quality'] >= 30].sum()['num_reads']
-        # simple caluclation to get %q30
-        r2_q30 = count_over_30/total_reads
-        #print(r2_q30)
-        # Delete unzipped fastqc reports so they don't clog up WD
-        os.system("rm -rf " + fastqc_r1.split('/')[-1].split('.')[0])
+            os.system("rm -rf " + fastqc_r2.split('/')[-1].split('.')[0])
+            # Convert from bytes output to string
+            string_output = output.decode('ascii')
+            # split string output based on tabs/newlines
+            list_output = [quality.split('\t') for quality in string_output.split('\n')]
+             # convert the list into a datframe
+            df = pd.DataFrame(list_output, columns = ["quality", "num_reads"], dtype = np.float64)
+            # explictly make quality scores numeric
+            df['quality'] = pd.to_numeric(df['quality'])
+            # sum the total reads
+            total_reads = df.sum()['num_reads']
+            # sum the reads w/ a score over 30
+            count_over_30 = df.loc[df['quality'] >= 30].sum()['num_reads']
+            # simple caluclation to get %q30
+            r2_q30 = count_over_30/total_reads
+        except Exception as e:
+            r2_q30 = 'NA'
+
         # Write out to metadata json
         meta_data[sample_id]['QC_trimmed_reads_R1_NUM'] = total_counts_r1
         meta_data[sample_id]['QC_trimmed_reads_R2_NUM'] = total_counts_r2
@@ -295,6 +342,20 @@ def write_to_csv(meta_data, experiment_id):
             wr.writerow(csv_row)
     return
 
+
+def write_dataframes(experiment_id, prefix, dataframe_jobs, qc_metadata, filename):
+    counts = pd.read_csv(prefix +
+                         dataframe_jobs[experiment_id]['archive_path'] +
+                         '/' + filename, sep='\t')
+    counts.set_index('gene_id', inplace=True)
+    counts = pd.merge(qc_metadata, counts,
+                              on=list(qc_metadata.columns),
+                              how='outer',
+                              left_index=True,
+                              right_index=True).T
+    counts.T.to_csv(experiment_id + '_' + filename.split('.')[0] + '.csv')
+    counts.to_csv(experiment_id + '_' + filename.split('.')[0] + '_transposed.csv')
+    return
 
 def main(experiment_id):
     # """Main function"""
@@ -333,35 +394,13 @@ def main(experiment_id):
     (qc_metadata, raw_counts) = sample_coors(factors, df_counts, df_metadata)
     # Write out QC and Metadata dataframe
     qc_metadata.to_csv(experiment_id + '_QC_and_metadata.csv')
-    # Write out raw counts w/ qc/metadata appended, and the transposed version
-    raw_counts.T.to_csv(experiment_id + '_ReadCountMatrix.csv')
-    raw_counts.to_csv(experiment_id + '_ReadCountMatrix_transposed.csv')
-
-    # Read/Write out for FPKM counts
-    FPKM_counts = pd.read_csv(prefix +
-                                 dataframe_jobs[experiment_id]['archive_path'] +
-                                 '/ReadCountMatrix_preCAD_FPKM.tsv', sep='\t')
-    FPKM_counts.set_index('gene_id', inplace=True)
-    FPKM_counts = pd.merge(qc_metadata, FPKM_counts,
-                              on=list(qc_metadata.columns),
-                              how='outer',
-                              left_index=True,
-                              right_index=True).T
-    FPKM_counts.T.to_csv(experiment_id + '_ReadCountMatrix_FPKM.csv')
-    FPKM_counts.to_csv(experiment_id + '_ReadCountMatrix_FPKM_transposed.csv')
-
-    # Read/Write for TPM counts
-    TPM_counts = pd.read_csv(prefix +
-                                dataframe_jobs[experiment_id]['archive_path'] +
-                                '/ReadCountMatrix_preCAD_TPM.tsv', sep='\t')
-    TPM_counts.set_index('gene_id', inplace=True)
-    TPM_counts = pd.merge(qc_metadata, TPM_counts,
-                             on=list(qc_metadata.columns),
-                             how='outer',
-                             left_index=True,
-                             right_index=True).T
-    TPM_counts.T.to_csv(experiment_id + '_ReadCountMatrix_TPM.csv')
-    TPM_counts.to_csv(experiment_id + '_ReadCountMatrix_TPM_transposed.csv')
+    # Write out counts w/ qc/metadata appended, and the transposed versions
+    write_dataframes(experiment_id, prefix, dataframe_jobs, qc_metadata,
+                     'ReadCountMatrix_preCAD.tsv')
+    write_dataframes(experiment_id, prefix, dataframe_jobs, qc_metadata,
+                     'ReadCountMatrix_preCAD_FPKM.tsv')
+    write_dataframes(experiment_id, prefix, dataframe_jobs, qc_metadata,
+                     'ReadCountMatrix_preCAD_TPM.tsv')
 
     return
 

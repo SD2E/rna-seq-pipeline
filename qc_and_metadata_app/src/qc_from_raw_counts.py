@@ -92,6 +92,7 @@ def tag_low_mapped_reads(dataframe, genes, nmapped=5e5):
     bad_indexes = [x for x in dataframe.index if x not in dataframe_tagged.index]
     dataframe['QC_nmap_BOOL'].loc[bad_indexes] = False
     dataframe['QC_nmap_NUM'] = dataframe[genes].sum(axis=1)
+    dataframe['QC_nmap_threshold_NUM'] = nmapped
     return dataframe
 
 
@@ -197,6 +198,7 @@ def tag_low_correlation_biological_replicates(dataframe, genes, factors, cc=0.8)
     #print(samples_and_corr)
     dataframe['QC_gcorr_NUM_ARRAY'] = np.nan
     dataframe['QC_gcorr_NUM_ARRAY'].loc[samplenames_for_corr_df] = samples_and_corr
+    dataframe['QC_gcorr_threshold_NUM'] = cc
     return dataframe
 
 

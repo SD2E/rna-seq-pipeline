@@ -51,13 +51,6 @@ def manifest(r):
             rna_list.append(sample)
 
     for sample in rna_list:
-        norm = [measurement for measurement in sample['measurements'] if measurement['library_prep'] == 'NORMAL'][0]
-        raw = [file for file in norm['files'] if file['lab_label'] == ['RAW']]
-        if len(norm) > 0:
-            norm['files'] = raw
-            sample['measurements'] = [norm]
-
-    for sample in rna_list:
         sample_id = sample['sample_id']
         sampleDict = {}
         filesDict = {}
@@ -86,8 +79,8 @@ def manifest(r):
         inputs = job_def["parameters"]
         #inputs["path_read1"] = '/work/projects/SD2E-Community/prod/data/'+archivePath+'/'+sample['R1'].split('/')[-1]
         #inputs["path_read2"] = '/work/projects/SD2E-Community/prod/data/'+archivePath+'/'+sample['R2'].split('/')[-1]
-        inputs["path_read1"] = '/uploads/ginkgo/201901/NovelChassis-NAND-Ecoli-Titration/' + sampleDict[sample_id]['R1']
-        inputs["path_read2"] = '/uploads/ginkgo/201901/NovelChassis-NAND-Ecoli-Titration/' + sampleDict[sample_id]['R2']
+        inputs["path_read1"] = '/uploads/ginkgo/201905/NovelChassis-NAND2-0-Omics/' + sampleDict[sample_id]['R1']
+        inputs["path_read2"] = '/uploads/ginkgo/201905/NovelChassis-NAND2-0-Omics/' + sampleDict[sample_id]['R2']
         inputs["multiple_lanes"] = sampleDict[sample_id]['multiple_lanes']
         #archivePath = archivePath + "/miniaturized_library_prep/"
         job_def.parameters = inputs
@@ -117,7 +110,9 @@ def manifest(r):
                 ],
             "parameters": {
                 k: inputs[k] for k in inputs if k in ('path_filterseqs')
-                }
+                },
+            "experiment_id": experiment_id,
+            "sample_id": sample_id
             }
 
         print("MEASURMENT_ID:")
@@ -129,21 +124,15 @@ def manifest(r):
         print("PRODUCT PATTERNS:")
         pprint.pprint(product_patterns)
 
-        #Uncomment to reset jobs before running
-        # akey = copy.copy(r.settings.mongodb.admin_key)
-        # print(akey)
-        # atoken = get_admin_token(akey)
-
-        mpj = Job(r, measurement_id=measurement_id, data=data, archive_patterns=archive_patterns, product_patterns=product_patterns)
-
-        #Uncomment to reset jobs before running
-        #mpj.reset(token=atoken)
-
+        mpj = Job(r, measurement_id=measurement_id, data=data,
+                  archive_patterns=archive_patterns,
+                  product_patterns=product_patterns,
+                  setup_archive_path=False)
         mpj.setup()
-        #print("JOB UUID: ", mpj.uuid)
+        print("JOB UUID: ", mpj.uuid)
         r.logger.info("Submitted Pipeline Job {}".format(mpj.uuid))
         job_def.archivePath = mpj.archive_path
-        #job_def.archivePath = 'test'
+        #job_def.archivePath = 'shared-q1-workshop/urrutia/experiment.ginkgo.23121_Novel-chassis_2.0_DNA-seq_strain_verfication/preprocessed/'
 
         notif = [{'event': 'RUNNING',
                   "persistent": True,
@@ -151,14 +140,14 @@ def manifest(r):
                  {'event': 'FAILED',
                   "persistent": False,
                   'url': mpj.callback + '&status=${JOB_STATUS}'},
-                 {'event': 'ARCHIVING_FINISHED',
+                 {'event': 'FINISHED',
                   "persistent": False,
                   'url': mpj.callback + '&status=FINISHED'}]
 
         #notifications = job_template["notifications"]
-        # if notifications is not None:
-        #    for item in notifications:
-        #        notif.append(item)
+        #if notifications is not None:
+        #   for item in notifications:
+        #       notif.append(item)
 
         job_def["notifications"] = notif
         print(json.dumps(job_def, indent=4))
