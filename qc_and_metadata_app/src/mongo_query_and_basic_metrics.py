@@ -83,8 +83,8 @@ def metadata_construction(metadata_query_results):
         metadata = {}
         metadata["Timepoint"] = sample['timepoint']['value']
         metadata["Strain"] = sample['strain']
-        #metadata["Temperature"] = sample["temperature"]["value"]
-        metadata["Temperature"] = 37
+        metadata["Temperature"] = sample["temperature"]["value"]
+        #metadata["Temperature"] = 37
         metadata["Replicate"] = sample['replicate']
         # This part is a little messy, lots of room for improvement here.
         # Different labs use different names for arabinose/IPTG
