@@ -194,7 +194,13 @@ def crawl_file_system(prefix, meta_data, preprocessing_jobs, alignment_jobs):
     # number reads before mapping (probably also use FastQC results for this)
     # and mapped reads (bwa log?) from the relevant output files
     # and add this to our meta_data dictionary
+    # DEV
+    i = 0
     for sample_id, job in preprocessing_jobs.items():
+        # DEV
+        if i == 5:
+            break
+        i++
         #print(sample_id)
         #prefix = '/home/jupyter/sd2e-community/'
         #prefix = '/work/projects/SD2E-Community/prod/data/'
@@ -224,7 +230,7 @@ def crawl_file_system(prefix, meta_data, preprocessing_jobs, alignment_jobs):
         try:
             flagstat = glob.glob(prefix+alignment_jobs[sample_id]['archive_path']+'/*.rnaseq.original.bwa.flagstat.txt')[0]
             #flagstat = prefix + alignment['archive_path'] + '/' + outname + '.rnaseq.original.bwa.flagstat.txt'
-            #print(flagstat)
+            print(flagstat)
             command = "grep 'mapped (' " + flagstat
             output = subprocess.check_output(command, shell=True, preexec_fn=lambda: signal.signal(signal.SIGPIPE, signal.SIG_DFL))
             percent_mapped = str(output).split('(')[-1].split('%')[0]
@@ -316,6 +322,9 @@ def crawl_file_system(prefix, meta_data, preprocessing_jobs, alignment_jobs):
         meta_data[sample_id]['QC_mapped_reads_BOOL'] = bool_mapped
         meta_data[sample_id]['QC_%Q30_R1_NUM'] = r1_q30
         meta_data[sample_id]['QC_%Q30_R2_NUM'] = r2_q30
+
+    # DEV
+    print(meta_data)
 
     return meta_data
 
