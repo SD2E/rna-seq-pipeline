@@ -200,7 +200,7 @@ def crawl_file_system(prefix, meta_data, preprocessing_jobs, alignment_jobs):
         # DEV
         if i == 5:
             break
-        i++
+        i += 1
         #print(sample_id)
         #prefix = '/home/jupyter/sd2e-community/'
         #prefix = '/work/projects/SD2E-Community/prod/data/'
@@ -230,7 +230,10 @@ def crawl_file_system(prefix, meta_data, preprocessing_jobs, alignment_jobs):
         try:
             flagstat = glob.glob(prefix+alignment_jobs[sample_id]['archive_path']+'/*.rnaseq.original.bwa.flagstat.txt')[0]
             #flagstat = prefix + alignment['archive_path'] + '/' + outname + '.rnaseq.original.bwa.flagstat.txt'
+            print(prefix)
+            print(alignment_jobs[sample_id]['archive_path'])
             print(flagstat)
+            print()
             command = "grep 'mapped (' " + flagstat
             output = subprocess.check_output(command, shell=True, preexec_fn=lambda: signal.signal(signal.SIGPIPE, signal.SIG_DFL))
             percent_mapped = str(output).split('(')[-1].split('%')[0]
@@ -323,9 +326,6 @@ def crawl_file_system(prefix, meta_data, preprocessing_jobs, alignment_jobs):
         meta_data[sample_id]['QC_%Q30_R1_NUM'] = r1_q30
         meta_data[sample_id]['QC_%Q30_R2_NUM'] = r2_q30
 
-    # DEV
-    print(meta_data)
-
     return meta_data
 
 
@@ -385,6 +385,10 @@ def main(experiment_id):
     # Add QC info to meta_data dict, reading job output files for this
     meta_data = crawl_file_system(prefix, meta_data, preprocessing_jobs,
                                   alignment_jobs)
+
+    # DEV
+    return
+
     # Convert dictionary to a dataframe, easiest to just write/read to csv
     write_to_csv(meta_data, experiment_id)
     df_metadata = pd.read_csv(experiment_id + '_QC_and_metadata.csv')
