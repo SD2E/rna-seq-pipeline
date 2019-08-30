@@ -1,0 +1,22 @@
+[{
+    "MSG": {"uri":"agave://data-sd2e-community/ingest/testing/validate-copy-trigger/manifest/manifest.json"},
+    "_abaco_Content-Type": "application/json",
+    "_abaco_actor_state": {},
+    "_abaco_username": "taco",
+    "_abaco_actor_dbid": "2ed766bf9ccd145977c",
+    "_abaco_actor_id": "2ed766bf9ccd145977c",
+    "_abaco_execution_id": "a9419c87cbbeef2be9c75",
+    "_abaco_api_server": "",
+    "_abaco_access_token": ""
+},
+{
+    "MSG": {"uri":"s3://sd2e-community/ingest/testing/validate-copy-trigger/manifest/manifest.json"},
+    "_abaco_Content-Type": "application/json",
+    "_abaco_actor_state": {},
+    "_abaco_username": "taco",
+    "_abaco_actor_dbid": "2ed766bf9ccd145977c",
+    "_abaco_actor_id": "2ed766bf9ccd145977c",
+    "_abaco_execution_id": "a9419c87cbbeef2be9c75",
+    "_abaco_api_server": "",
+    "_abaco_access_token": ""
+}]

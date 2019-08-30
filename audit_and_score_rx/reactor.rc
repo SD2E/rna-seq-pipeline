@@ -1,0 +1,9 @@
+# Reactor mandatory settings
+REACTOR_NAME=audit_and_score_rx
+# REACTOR_DESCRIPTION=
+REACTOR_ALIAS=audit-and-score-rx
+
+# Docker settings
+DOCKER_HUB_ORG=enho
+DOCKER_IMAGE_TAG=audit-and-score-rx
+DOCKER_IMAGE_VERSION=0.1.0
