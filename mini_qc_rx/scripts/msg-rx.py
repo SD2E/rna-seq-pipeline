@@ -14,7 +14,7 @@ def send_msg():
 
 def main():
     execId = send_msg()
-    print(actorId, execId)
+    print(execId)
 
 
 if __name__ == "__main__":
