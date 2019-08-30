@@ -18,3 +18,4 @@ fi
 #            container_exec centos:7 uname -a
 
 container_exec ${CONTAINER_IMAGE}
+echo "This is a message from mini_preproc_app"
