@@ -15,7 +15,8 @@
   "templatePath": "runner-template.sh",
   "testPath": "tester.sh",
   "inputs": [],
-  "parameters": [{
+  "parameters": [
+  {
     "id": "CONTAINER_IMAGE",
     "value": {
       "default": "{{ docker.organization }}/{{ docker.repo }}:{{ docker.tag }}",
@@ -31,6 +32,15 @@
       "default": "experiment.ginkgo.19606.19637.19708.19709",
       "description": "",
       "type": "string",
+      "visible": true,
+      "required": true
+  }},
+  {
+    "id": "DEBUG_preproc_max",
+    "value": {
+      "default": 5,
+      "description": "Maximum number of proproc jobs to iterate in crawl_filesystem",
+      "type": "number",
       "visible": true,
       "required": true
     }
