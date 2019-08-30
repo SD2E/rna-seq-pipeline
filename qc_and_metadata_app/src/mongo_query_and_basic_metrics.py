@@ -198,7 +198,7 @@ def crawl_file_system(prefix, meta_data, preprocessing_jobs, alignment_jobs):
     i = 0
     for sample_id, job in preprocessing_jobs.items():
         # DEV
-        if i == 5:
+        if i >= params['DEBUG_preproc_max']:
             break
         i += 1
         #print(sample_id)
@@ -419,4 +419,8 @@ def main(experiment_id):
 
 
 if __name__ == '__main__':
-    main(sys.argv[1])
+    params = {
+        'experiment_id': sys.argv[1],
+        'DEBUG_preproc_max': sys.argv[2]
+    }
+    main(params['experiment_id'])
