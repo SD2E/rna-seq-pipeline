@@ -8,5 +8,7 @@ mini_qc_job:
     archive: True
     maxRunTime: "01:00:00"
     archiveSystem: "data-tacc-work-eho"
+    archivePath: "archive/jobs/${JOB_NAME}-${JOB_ID}"
     parameters:
         experiment_id: "experiment.ginkgo.19606.19637.19708.19709"
+        DEBUG_preproc_max: 1
