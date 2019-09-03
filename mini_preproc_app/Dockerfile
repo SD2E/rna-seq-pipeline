@@ -20,3 +20,5 @@ RUN ln -s /usr/bin/python3 /usr/bin/python
 RUN pwd
 ADD src /src
 RUN chmod +x /src/*
+
+CMD ["python3", "/src/test.py"]
