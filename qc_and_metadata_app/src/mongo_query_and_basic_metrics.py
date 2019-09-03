@@ -265,7 +265,8 @@ def crawl_file_system(prefix, meta_data, preprocessing_jobs, alignment_jobs):
         command = "sed -n '1,/Quality/d;/END_MODULE/q;p' " + fastqc_r1.split('/')[-1].split('.')[0] + "/fastqc_data.txt"
         try:
             output = subprocess.check_output(command, shell=True, preexec_fn=lambda: signal.signal(signal.SIGPIPE, signal.SIG_DFL))
-            os.system("rm -rf " + fastqc_r1.split('/')[-1].split('.')[0])
+            # DEV
+            #os.system("rm -rf " + fastqc_r1.split('/')[-1].split('.')[0])
              #delete the local unzipped folder
             # Convert from bytes output to string
             string_output = output.decode('ascii')
@@ -421,6 +422,6 @@ def main(experiment_id):
 if __name__ == '__main__':
     params = {
         'experiment_id': sys.argv[1],
-        'DEBUG_preproc_max': sys.argv[2]
+        'DEBUG_preproc_max': int(sys.argv[2])
     }
     main(params['experiment_id'])
