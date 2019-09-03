@@ -14,6 +14,7 @@ def submit_agave_job(job_template):
     else:
         r.logger.info("Submitted job {}".format(job_id))
     finally:
+        print("job_template:")
         print(json.dumps(job_template, indent=4))
 
 
@@ -23,7 +24,6 @@ def main():
     r = Reactor()
     r.logger.info(r.settings.mini_qc_job)
     job_template = r.settings.mini_qc_job.copy()
-    job_template['archivePath'] = "archive/jobs/${JOB_NAME}-${JOB_ID}"
     job_template['inputs'] = {}
     submit_agave_job(job_template)
 
