@@ -24,7 +24,6 @@ def main():
     r = Reactor()
     r.logger.info(r.settings.mini_preproc_job)
     job_template = r.settings.mini_preproc_job.copy()
-    job_template['inputs'] = {}
     job_template['parameters'] = {}
     submit_agave_job(job_template)
 
