@@ -22,10 +22,16 @@ def main():
     """Main function"""
     global r
     r = Reactor()
+    r.logger.info(r.list_nonces())
+    r.logger.info('the context is\n{}'.format(r.context))
+
+
+    # DEV
+    return
     job_template = r.settings.audit_and_score_job.copy()
     job_template['inputs'] = {}
     job_template['parameters'] = {}
-    submit_agave_job(job_template)
+    # submit_agave_job(job_template)
 
     # callback = ""
     # job_template.notifs = [
