@@ -1,5 +1,5 @@
 from reactors.utils import Reactor, agaveutils
-from os import getcwd
+from os import getcwd, path
 from urllib.parse import unquote, urlsplit
 import json
 
@@ -64,7 +64,7 @@ def main():
     r = Reactor()
     r.logger.debug(json.dumps(r.context, indent=4))
 
-    # Pull flagstat file path from message context
+    # Pull flagstat file path from reactor context
     try:
         fs_remote_fp = unquote(r.context.flagstat_remote_fp)
     except AttributeError as e:
@@ -76,8 +76,12 @@ def main():
 
     # Download flagstat file to cwd
     # fs_remote_fp = "agave://data-sd2e-community/products/v2/106bd127e2d257acb9be11ed06042e68/PAVyR8Dv1evr40LyJ52dX0DP/OZY85OoqyjJ2jZz2JAqLdR0J/sample.ginkgo.13108575.experiment.ginkgo.19606.19637.19708.19709_MG1655_NAND_Circuit_replicate_4_time_18.0:hours_temp_37.0_arabinose_0.5_mM_IPTG_0.00025_mM.rnaseq.original.bwa.flagstat.txt"
-    flagstat_local = dl_from_agave(fs_remote_fp)
-    r.logger.debug(flagstat_local)
+    fs_fp = dl_from_agave(fs_remote_fp)
+    r.logger.debug("fs_fp=".format(fs_fp))
+
+    # Check file size
+    fs_bytes = path.getsize(fs_fp)
+    r.logger.logger("File is {} bytes".format(fs_bytes))
 
 if __name__ == '__main__':
     main()
