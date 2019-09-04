@@ -65,19 +65,19 @@ def main():
     r.logger.debug(json.dumps(r.context, indent=4))
 
     # Pull flagstat file path from message context
-    # try:
-    #     dl_fp = r.context.dl_fp
-    # except AttributeError as e:
-    #     r.logger.error("Expected Reactor.context to have " + \
-    #                    "attribute dl_fp:\n{}".format(e))
-    # else:
-    #     r.logger.info("Encoded: {}\n".format(r.context.dl_fp))
-    #     r.logger.info("Unencoded: {}\n".format(unquote(r.context.dl_fp)))
+    try:
+        fs_remote_fp = unquote(r.context.flagstat_remote_fp)
+    except AttributeError as e:
+        r.logger.error("Expected Reactor.context to have " +
+                       "attribute flagstat_remote_fp:\n{}".format(e))
+        return
+    else:
+        r.logger.debug("Unencoded fs_remote_fp={}\n".format(fs_remote_fp))
 
     # Download flagstat file to cwd
-    flagstat_remote = "agave://data-sd2e-community/products/v2/106bd127e2d257acb9be11ed06042e68/PAVyR8Dv1evr40LyJ52dX0DP/OZY85OoqyjJ2jZz2JAqLdR0J/sample.ginkgo.13108575.experiment.ginkgo.19606.19637.19708.19709_MG1655_NAND_Circuit_replicate_4_time_18.0:hours_temp_37.0_arabinose_0.5_mM_IPTG_0.00025_mM.rnaseq.original.bwa.flagstat.txt"
-    flagstat_local = dl_from_agave(flagstat_remote)
-    print(flagstat_local)
+    # fs_remote_fp = "agave://data-sd2e-community/products/v2/106bd127e2d257acb9be11ed06042e68/PAVyR8Dv1evr40LyJ52dX0DP/OZY85OoqyjJ2jZz2JAqLdR0J/sample.ginkgo.13108575.experiment.ginkgo.19606.19637.19708.19709_MG1655_NAND_Circuit_replicate_4_time_18.0:hours_temp_37.0_arabinose_0.5_mM_IPTG_0.00025_mM.rnaseq.original.bwa.flagstat.txt"
+    flagstat_local = dl_from_agave(fs_remote_fp)
+    r.logger.debug(flagstat_local)
 
 if __name__ == '__main__':
     main()
