@@ -30,8 +30,7 @@ def main():
     callback = "https://api.sd2e.org/actors/v2/P1Vmggjk0Yg7D/" + \
     "messages?x-nonce=SD2E_pm77GL10QeEk3"
     payload_encode = {
-        'msg2': 'some arbitrary message',
-        'dl_fp': job_template['inputs']['dl_file']
+        'flagstat_remote_fp': job_template['inputs']['dl_file']
     }
     job_template['notifications'] = [{
         'event': 'FINISHED',
