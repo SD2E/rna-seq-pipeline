@@ -1,5 +1,6 @@
 from reactors.utils import Reactor
 import json
+from urllib.parse import urlencode
 
 
 def submit_agave_job(job_template):
@@ -28,23 +29,15 @@ def main():
 
     callback = "https://api.sd2e.org/actors/v2/P1Vmggjk0Yg7D/" + \
     "messages?x-nonce=SD2E_pm77GL10QeEk3"
-    #r.client.actors.sendMessage(actorId=target_actor, body={'message': 'a message'})
-    #callback = "https://ente1285z7vq.x.pipedream.net/"
-    job_template['notifications'] = [
-        # {
-        #     'event': 'RUNNING',
-        #     "persistent": True,
-        #     'url': callback + '&status=${JOB_STATUS}'
-        # }, {
-        #     'event': 'FAILED',
-        #     "persistent": False,
-        #     'url': callback + '&status=${JOB_STATUS}'
-        # },
-        {
-            'event': 'RUNNING',
-            "persistent": False,
-            'url': callback  + '&status=${JOB_STATUS}'
-        }]
+    payload_encode = {
+        'msg2': 'some arbitrary message',
+        'dl_fp': job_template['inputs']['dl_file']
+    }
+    job_template['notifications'] = [{
+        'event': 'FINISHED',
+        "persistent": False,
+        'url': callback + "&status=${JOB_STATUS}&" + urlencode(payload_encode)
+    }]
 
     submit_agave_job(job_template)
 
