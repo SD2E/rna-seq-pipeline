@@ -70,9 +70,7 @@ def main():
     except AttributeError as e:
         r.logger.error("Expected Reactor.context to have " +
                        "attribute flagstat_remote_fp:\n{}".format(e))
-        return
-    else:
-        r.logger.debug("Unencoded fs_remote_fp={}\n".format(fs_remote_fp))
+    r.logger.debug("Unencoded fs_remote_fp={}\n".format(fs_remote_fp))
 
     # Download flagstat file to cwd
     # fs_remote_fp = "agave://data-sd2e-community/products/v2/106bd127e2d257acb9be11ed06042e68/PAVyR8Dv1evr40LyJ52dX0DP/OZY85OoqyjJ2jZz2JAqLdR0J/sample.ginkgo.13108575.experiment.ginkgo.19606.19637.19708.19709_MG1655_NAND_Circuit_replicate_4_time_18.0:hours_temp_37.0_arabinose_0.5_mM_IPTG_0.00025_mM.rnaseq.original.bwa.flagstat.txt"
