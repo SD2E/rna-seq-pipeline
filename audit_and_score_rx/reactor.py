@@ -34,8 +34,8 @@ def dl_from_agave(url):
     assert type(url) == str
     url_split = urlsplit(url)
     filename = url_split[2][url_split[2].rfind("/")+1:]
-    r.logger.debug("url_split={}".format(url_split))
-    r.logger.debug("filename={}".format(filename))
+    #r.logger.debug("url_split={}".format(url_split))
+    #r.logger.debug("filename={}".format(filename))
     try:
         local_fp = agaveutils.agave_download_file(
             agaveClient=r.client,
@@ -64,22 +64,26 @@ def main():
     r = Reactor()
     r.logger.debug(json.dumps(r.context, indent=4))
 
-    # Pull flagstat file path from reactor context
-    try:
-        fs_remote_fp = unquote(r.context.flagstat_remote_fp)
-    except AttributeError as e:
-        r.logger.error("Expected Reactor.context to have " +
-                       "attribute flagstat_remote_fp:\n{}".format(e))
-    r.logger.debug("Unencoded fs_remote_fp={}\n".format(fs_remote_fp))
+    message_dict = getattr(r.context, 'message_dict', {})
+    fs_remote_fp = unquote(getattr(r.context, 'flagstat_remote_fp', ""))
+    if not message_dict:
+        r.error("Failed to pull Reactor.context.message_dict")
+    if not fs_remote_fp:
+        r.on_failure("Failed to pull Reactor.context.flagstat_remote_fp")
 
     # Download flagstat file to cwd
     # fs_remote_fp = "agave://data-sd2e-community/products/v2/106bd127e2d257acb9be11ed06042e68/PAVyR8Dv1evr40LyJ52dX0DP/OZY85OoqyjJ2jZz2JAqLdR0J/sample.ginkgo.13108575.experiment.ginkgo.19606.19637.19708.19709_MG1655_NAND_Circuit_replicate_4_time_18.0:hours_temp_37.0_arabinose_0.5_mM_IPTG_0.00025_mM.rnaseq.original.bwa.flagstat.txt"
-    fs_fp = dl_from_agave(fs_remote_fp)
-    r.logger.debug("fs_fp=".format(fs_fp))
+    try:
+        fs_fp = dl_from_agave(fs_remote_fp)
+    except Exception as e:
+        r.on_failure("Failed to download file from {}".format(fs_remote_fp), e)
+    if not fs_fp:
+        r.on_failure("Failed to download file from {}".format(fs_remote_fp))
 
+    r.logger.debug("fs_fp={}".format(fs_fp))
     # Check file size
     fs_bytes = path.getsize(fs_fp)
-    r.logger.logger("File is {} bytes".format(fs_bytes))
+    r.logger.info("File is {} bytes".format(fs_bytes))
 
 if __name__ == '__main__':
     main()
