@@ -3,34 +3,47 @@
 # DOES NOT RUN IN TESTING ENVIRONMENT
 # Simply curls registered actor using a webhook similar to an Agave job
 # Default message JSON is "tests/data/agave-job-message-01.json"
-# Usage: run_container_nonce.sh (relative/path/to/message.json)
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source "$DIR/common.sh"
+source abaco-common.sh
 
-PASSED_TOKEN=""
-while getopts ":t" opt; do
+MESSAGE_PATH=
+MESSAGE=
+URL=
+while getopts "z:m:u:" opt; do
     case ${opt} in
-        f) PASSED_TOKEN=${OPTARG} ;;
-        \?) echo "Usage: docker-rmi-nones.sh [-f]";;
+        z) TOKEN=${OPTARG} ;;
+        m) MESSAGE_PATH=${OPTARG} ;;
+        u) URL=${OPTARG} ;;
+        \?) echo "Usage: run_container_nonce.sh [ -z AGAVE_REFRESH_TOKEN ] [ -m MESSAGE_PATH ] [ -u URL ]";;
     esac
 done
 
-echo $1
-exit 0
 read_reactor_rc
 detect_ci
 
+# Load URL from ../.ACTOR_NONCE_URL
+if [ -z $URL ]; then
+    if [ -f $DIR/../.ACTOR_NONCE_URL ]; then
+        URL=$(head -1 $DIR/../.ACTOR_NONCE_URL)
+        log "Pulled URL from .ACTOR_NONCE_URL: $URL"
+    else
+        die "No URL was passed, and no nonce was found at $DIR/../.ACTOR_NONCE_URL"
+    fi
+fi
+
 # Load up the message to send
-if [ -z $1 ]; then
+if [ -z $MESSAGE_PATH ]; then
     MESSAGE_PATH="tests/data/agave-job-message-01.json"
-else
-    MESSAGE_PATH=$1
 fi
 if [ -f $MESSAGE_PATH ]; then
-    MESSAGE=$(jq -rc . $MESSAGE_PATH)
+    MESSAGE="${MESSAGE}message="$(jq -r . $MESSAGE_PATH | sed "s/\"/'/g")
 else
     die "No message.json file found at MESSAGE_PATH=$MESSAGE_PATH"
 fi
 
-token=
+# curl command
+cmd="curl -s -H \"Authorization: Bearer $TOKEN\" -d '$MESSAGE' '$URL'"
+echo $cmd
+eval $cmd
