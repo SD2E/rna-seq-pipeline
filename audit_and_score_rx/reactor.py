@@ -62,12 +62,14 @@ def main():
     """Main function"""
     global r
     r = Reactor()
+    ag = r.client
     r.logger.debug(json.dumps(r.context, indent=4))
 
+    # Pull attr from message context
     message_dict = getattr(r.context, 'message_dict', {})
     fs_remote_fp = unquote(getattr(r.context, 'flagstat_remote_fp', ""))
     if not message_dict:
-        r.error("Failed to pull Reactor.context.message_dict")
+        r.on_failure("Failed to pull Reactor.context.message_dict")
     if not fs_remote_fp:
         r.on_failure("Failed to pull Reactor.context.flagstat_remote_fp")
 

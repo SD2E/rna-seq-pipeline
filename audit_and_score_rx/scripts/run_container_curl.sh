@@ -35,7 +35,7 @@ fi
 
 # Load up the message to send
 if [ -z $MESSAGE_PATH ]; then
-    MESSAGE_PATH="tests/data/agave-job-message-01.json"
+    MESSAGE_PATH="tests/data/agave-job-message-02.json"
 fi
 if [ -f $MESSAGE_PATH ]; then
     MESSAGE=$(jq -r 'map_values(tostring)' $MESSAGE_PATH | sed "s/\"/'/g")
