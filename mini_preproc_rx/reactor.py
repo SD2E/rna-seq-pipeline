@@ -27,13 +27,12 @@ def main():
     DEBUG_MODE = getattr(r.settings, "debug", False)
     job_template = r.settings.mini_preproc_job.copy()
     downstream_callback = getattr(r.settings, "downstream_callback", "")
-    job_template['parameters'] = {}
 
     if DEBUG_MODE:
         r.logger.debug("Running in debug mode, skipping downstream webhooks")
     else:
         payload_encode = {
-            'flagstat_remote_fp': job_template['inputs']['dl_file']
+            'flagstat_remote_fp': job_template['inputs']['fs_remote_fp'],
         }
         job_template['notifications'] = [{
             'event': 'FINISHED',
