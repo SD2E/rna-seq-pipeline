@@ -2,6 +2,8 @@
 logs:
   level: DEBUG
   token: ~
+debug: True
+downstream_callback: "https://api.sd2e.org/actors/v2/P1Vmggjk0Yg7D/messages?x-nonce=SD2E_pm77GL10QeEk3"
 mini_preproc_job:
     name: "eho-mini_preproc_app test"
     appId: "eho-mini_preproc_app-0.1.0"

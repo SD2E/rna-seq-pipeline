@@ -24,20 +24,22 @@ def main():
     global r
     r = Reactor()
     r.logger.info(r.settings.mini_preproc_job)
+    DEBUG_MODE = getattr(r.settings, "debug", False)
     job_template = r.settings.mini_preproc_job.copy()
+    downstream_callback = getattr(r.settings, "downstream_callback", "")
     job_template['parameters'] = {}
 
-    callback = "https://api.sd2e.org/actors/v2/P1Vmggjk0Yg7D/" + \
-    "messages?x-nonce=SD2E_pm77GL10QeEk3"
-    payload_encode = {
-        'flagstat_remote_fp': job_template['inputs']['dl_file']
-    }
-    job_template['notifications'] = [{
-        'event': 'FINISHED',
-        "persistent": False,
-        'url': callback + "&status=${JOB_STATUS}&" + urlencode(payload_encode)
-    }]
-
+    if DEBUG_MODE:
+        r.logger.debug("Running in debug mode, skipping downstream webhooks")
+    else:
+        payload_encode = {
+            'flagstat_remote_fp': job_template['inputs']['dl_file']
+        }
+        job_template['notifications'] = [{
+            'event': 'FINISHED',
+            "persistent": False,
+            'url': downstream_callback + "&status=${JOB_STATUS}&" + urlencode(payload_encode)
+        }]
     submit_agave_job(job_template)
 
 
