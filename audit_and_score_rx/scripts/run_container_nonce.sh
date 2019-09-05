@@ -38,12 +38,12 @@ if [ -z $MESSAGE_PATH ]; then
     MESSAGE_PATH="tests/data/agave-job-message-01.json"
 fi
 if [ -f $MESSAGE_PATH ]; then
-    MESSAGE="${MESSAGE}message="$(jq -r . $MESSAGE_PATH | sed "s/\"/'/g")
+    MESSAGE=$(jq -r 'map_values(tostring)' $MESSAGE_PATH | sed "s/\"/'/g")
 else
     die "No message.json file found at MESSAGE_PATH=$MESSAGE_PATH"
 fi
 
 # curl command
-cmd="curl -s -H \"Authorization: Bearer $TOKEN\" -d '$MESSAGE' '$URL'"
+cmd="curl -X POST -s -H \"Authorization: Bearer $TOKEN\" -d \"message=$MESSAGE\" '$URL'"
 echo $cmd
 eval $cmd
