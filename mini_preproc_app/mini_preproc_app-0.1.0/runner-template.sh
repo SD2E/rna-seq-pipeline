@@ -19,3 +19,4 @@ fi
 
 echo container_exec ${CONTAINER_IMAGE} python3 /src/test.py ${dl_file}
 container_exec ${CONTAINER_IMAGE} python3 /src/test.py ${dl_file}
+mv "./$(basename ${dl_file})" ./flagstat_out.txt

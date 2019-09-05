@@ -23,7 +23,7 @@
           "required": true,
           "order": 0,
           "enquote": false,
-          "default": "agave://data-sd2e-community/products/v2/106bd127e2d257acb9be11ed06042e68/PAVyR8Dv1evr40LyJ52dX0DP/OZY85OoqyjJ2jZz2JAqLdR0J/sample.ginkgo.13108575.experiment.ginkgo.19606.19637.19708.19709_MG1655_NAND_Circuit_replicate_4_time_18.0:hours_temp_37.0_arabinose_0.5_mM_IPTG_0.00025_mM.rnaseq.original.bwa.flagstat.txt"
+          "default": ""
       },
       "details": {
           "label": "download file",
@@ -55,5 +55,34 @@
       "required": true
     }
   }],
-  "outputs": []
+  "outputs": [
+      {
+        "id": "flagstat",
+        "value": {
+            "validator": "",
+            "visible": true,
+            "required": true,
+            "order": 0,
+            "enquote": false,
+            "default": "flagstat_out.txt"
+        },
+        "details": {
+            "label": "output flagstat file",
+            "description": "output flagstat file",
+            "argument": null,
+            "showArgument": false,
+            "repeatArgument": false
+        },
+        "semantics": {
+            "minCardinality": 1,
+            "maxCardinality": 1,
+            "ontology": [
+                "xsd:string"
+            ],
+            "fileTypes": [
+                "raw-0"
+            ]
+        }
+      }
+  ]
 }
