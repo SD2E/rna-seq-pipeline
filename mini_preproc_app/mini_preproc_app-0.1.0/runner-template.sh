@@ -17,6 +17,6 @@ fi
 #   Example: docker run centos:7 uname -a
 #            container_exec centos:7 uname -a
 
-echo container_exec ${CONTAINER_IMAGE} python3 /src/test.py ${dl_file}
-container_exec ${CONTAINER_IMAGE} python3 /src/test.py ${dl_file}
-mv "./$(basename ${dl_file})" ./flagstat_out.txt
+echo container_exec ${CONTAINER_IMAGE} python3 /src/test.py ${fs_remote_fp}
+container_exec ${CONTAINER_IMAGE} python3 /src/test.py ${fs_remote_fp}
+mv "./$(basename ${fs_remote_fp})" ./flagstat_out.txt
