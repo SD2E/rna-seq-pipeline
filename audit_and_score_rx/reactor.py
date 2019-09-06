@@ -1,7 +1,9 @@
 from reactors.utils import Reactor, agaveutils
 from os import getcwd, path
+import os
 from urllib.parse import unquote, urlsplit
 import json
+from inspect import getsource as gs
 
 
 def submit_agave_job(job_template):
@@ -65,6 +67,8 @@ def main():
     ag = r.client
     r.logger.debug(json.dumps(r.context, indent=4))
 
+
+    return
     # Pull attr from message context
     message_dict = getattr(r.context, 'message_dict', {})
     fs_remote_fp = unquote(getattr(r.context, 'flagstat_remote_fp', ""))
@@ -73,6 +77,47 @@ def main():
     if not fs_remote_fp:
         r.on_failure("Failed to pull Reactor.context.flagstat_remote_fp")
 
+    try:
+        fs_preproc_fp = [f.value.default for f in
+                         ag.apps.get(appId=message_dict['appId'])['outputs']
+                         if f['id'] == "flagstat"][0]
+    except (AttributeError, IndexError) as e:
+        r.on_failure("Failed to pull default flagstat output from " +
+                     "app definition", e)
+    r.logger.info(fs_preproc_fp)
+
+    #r.logger.info(ag.jobs.get(jobId=jobId))
+    try:
+        response = ag.files.download(systemId='data-tacc-work-eho',
+                                     filePath='archive/jobs/eho-mini_preproc_app-test-fdc4716b-9010-4e84-ae0e-089c51021e5e-007/flagstat_out.txt')
+        r.logger.info(response)
+        r.logger.info(type(response))
+        r.logger.info(dir(response))
+        print(response.text)
+        print(response.url)
+        print(response.request.body)
+        print(response.history)
+        print(response.headers)
+        print(dict(response.json()))
+    except Exception as e:
+        print(e)
+    try:
+        r.logger.info(ag.files.downloadFromDefaultSystem())
+    except Exception as e:
+        print(e)
+    try:
+        r.logger.info(ag.files.importData(systemId='data-tacc-work-eho',
+                                          filePath='archive/jobs/eho-mini_preproc_app-test-fdc4716b-9010-4e84-ae0e-089c51021e5e-007/flagstat_out.txt'))
+    except Exception as e:
+        print(e)
+    try:
+        r.logger.info(ag.files.importToDefaultSystem())
+    except Exception as e:
+        print(e)
+    for f in os.listdir("./"):
+        print(f)
+
+    return
     # Download flagstat file to cwd
     # fs_remote_fp = "agave://data-sd2e-community/products/v2/106bd127e2d257acb9be11ed06042e68/PAVyR8Dv1evr40LyJ52dX0DP/OZY85OoqyjJ2jZz2JAqLdR0J/sample.ginkgo.13108575.experiment.ginkgo.19606.19637.19708.19709_MG1655_NAND_Circuit_replicate_4_time_18.0:hours_temp_37.0_arabinose_0.5_mM_IPTG_0.00025_mM.rnaseq.original.bwa.flagstat.txt"
     try:
