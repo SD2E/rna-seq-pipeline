@@ -1,18 +1,21 @@
 ### To Do
 
 - Find some way to debug on datacatalog
+    - Ask Josh
 - audit_preproc_rx
-    - Set up scripts/run_container_curl.sh with a callback URL that would mimic preprocessing job: `{base_url}?x-nonce=*****&datacatalog_job_uuid=****&tapis_jobId=***&archivePath=**`
-        - Use a pre-existing PipelineJob
-    - Pull
-        - Job retries from datacatalog and/or jobId
-        - See if you can pull Tapis jobId from datacatalog_jobId
-            - Should also be in context.message_dict
-            - Revert to r.context.tapis_jobId if not
-        - Same for archivePath: try to pull from datacatalog
-    - Push
-        - For now, a simple message to a reactor
-    - r.context.force_resubmit to resubmit job despite 3+ retries
+    - Migrate get_from_dcuuid from 20190906_mongo_query to reactor
+    - Outline
+        - Set up scripts/run_container_curl.sh with a callback URL that would mimic preprocessing job: `{base_url}?x-nonce=*****&datacatalog_job_uuid=****&tapis_jobId=***&archivePath=**`
+            - Use a pre-existing PipelineJob
+        - Pull
+            - Job retries from datacatalog and/or jobId
+            - See if you can pull Tapis jobId from datacatalog_jobId
+                - Should also be in context.message_dict
+                - Revert to r.context.tapis_jobId if not
+            - Same for archivePath: try to pull from datacatalog
+        - Push
+            - For now, a simple message to a reactor
+        - r.context.force_resubmit to resubmit job despite 3+ retries
 - audit_align_rx
 - pipeline_uuids
     - preproc = `106d3f7f-07dc-596f-86f9-df75083e52cc`

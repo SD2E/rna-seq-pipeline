@@ -1,11 +1,11 @@
 from reactors.utils import Reactor, agaveutils
 from os import getcwd, path
-import os
 from urllib.parse import unquote, urlsplit
-import json
 from inspect import getsource as gs
 from pprint import pprint as pp
-
+import json
+import os
+import pymongo
 
 def get_datacat_jobs(query={}, projection={}, dbURI="", return_max=-1):
     """Some docs"""
