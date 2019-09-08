@@ -3,9 +3,8 @@
 - Find some way to debug on datacatalog
     - Ask Josh
 - audit_preproc_rx
-    - Migrate get_from_dcuuid from 20190906_mongo_query to reactor
     - Outline
-        - Set up scripts/run_container_curl.sh with a callback URL that would mimic preprocessing job: `{base_url}?x-nonce=*****&datacatalog_job_uuid=****&tapis_jobId=***&archivePath=**`
+        - Set up scripts/run_container_curl.sh with a callback URL that would mimic preprocessing job: `{base_url}?x-nonce=*****&datacatalog_jobId=****&tapis_jobId=***&archivePath=**`
             - Use a pre-existing PipelineJob
         - Pull
             - Job retries from datacatalog and/or jobId
