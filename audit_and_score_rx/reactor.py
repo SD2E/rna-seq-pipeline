@@ -3,8 +3,10 @@ from os import getcwd, path
 from urllib.parse import unquote, urlsplit
 from inspect import getsource as gs
 from pprint import pprint as pp
+from requests.exceptions import HTTPError
 import json
 import os
+from glob import glob
 import pymongo
 
 
@@ -70,7 +72,7 @@ def get_from_dcuuid(datacatalog_uuid, extra_fields=[]):
         # really shouldnt happen since query, projection, and indexing are consistent
         r.on_failure("Error parsing datacatalog_uuid={}".format(datacatalog_uuid), e)
         #raise e
-    return (datacat_response, tapis_jobId)
+    return (datacat_response[0], tapis_jobId)
 
 
 def dl_from_agave(url):
@@ -116,7 +118,7 @@ def main():
     global r
     r = Reactor()
     ag = r.client
-    r.logger.debug(json.dumps(r.context, indent=4))
+    # r.logger.debug(json.dumps(r.context, indent=4))
 
     # pull datacat_jobId from context
     datacat_jobId = '10779ebc-db12-5eac-9fcf-03deb2cb0c70'
@@ -126,11 +128,25 @@ def main():
     # query the MongoDB jobs table
     (datacat_response, tapis_jobId) = get_from_dcuuid(
         datacat_jobId, ['archive_system', 'archive_path'])
+    job_dir = '/work/projects/SD2E-Community/prod/data/' + \
+        datacat_response['archive_path']
     print(tapis_jobId)
     pp(datacat_response)
 
     # agave download files of interest
     r.logger.info("Tapis jobId={}".format(tapis_jobId))
+    zipped_fps = glob(job_dir + "/*.fastq.gz")
+    if len(zipped_fps) < 2:
+        r.logger.error("Found {} *.fastq.gz files at {}".format(
+            len(zipped_fps), job_dir))
+
+    # try:
+    #     print(ag.files.list(systemId=datacat_response['archive_system'],
+    #                         filePath=datacat_response['archive_path']))
+    # except HTTPError as e:
+    #     print(e)
+    # r.logger.info(glob(archive_dir))
+    # r.logger.info(os.listdir(archive_dir))
 
 if __name__ == '__main__':
     main()
