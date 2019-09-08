@@ -1,8 +1,19 @@
-FROM sd2e/reactors:python3
+FROM enho/reactors:datacatalog
 #FROM sd2e/reactors:python3-edge
 
-# reactor.py, config.yml, and message.jsonschema will be automatically
-# added to the container when you run docker build or abaco deploy
+# Manually add reactor.py, config.yml, and message.jsonschema, which
+# is disabled due to removed ONBUILD commands in my reactors base
+# image. I will be compensating for the following lines that were
+# removed from sd2e/reactors:python3 Dockerfile:
 
-# Install from Repo
-RUN pip install --upgrade -qq git+https://github.com/SD2E/python-datacatalog.git@2_1
+# ONBUILD ADD requirements.txt /tmp/requirements.txt
+# ONBUILD RUN pip3 install -r /tmp/requirements.txt
+# ONBUILD ADD reactor.py /
+# ONBUILD ADD config.yml /
+# ONBUILD ADD message.json* /message.jsonschema
+
+ADD requirements.txt /tmp/requirements.txt
+RUN pip3 install -r /tmp/requirements.txt
+ADD reactor.py /
+ADD config.yml /
+ADD message.json* /message.jsonschema
