@@ -128,17 +128,26 @@ def main():
     # query the MongoDB jobs table
     (datacat_response, tapis_jobId) = get_from_dcuuid(
         datacat_jobId, ['archive_system', 'archive_path'])
-    job_dir = '/work/projects/SD2E-Community/prod/data/' + \
+    work_mount = '/work/projects/SD2E-Community/prod/data/' + \
         datacat_response['archive_path']
-    print(tapis_jobId)
+    tapis_mount = datacat_response['archive_system'] + \
+        datacat_response['archive_path']
     pp(datacat_response)
 
-    # agave download files of interest
     r.logger.info("Tapis jobId={}".format(tapis_jobId))
-    zipped_fps = glob(job_dir + "/*.fastq.gz")
-    if len(zipped_fps) < 2:
-        r.logger.error("Found {} *.fastq.gz files at {}".format(
-            len(zipped_fps), job_dir))
+    # make sure /work is mounted
+    if not glob('/work'):
+        r.on_failure("Could not find mounted /work filesystem")
+    # agave download files of interest
+    r1_zipped = glob(work_mount + "/*R1*.fastq.gz")
+    r2_zipped = glob(work_mount + "/*R2*.fastq.gz")
+    if r1_zipped and r2_zipped:
+        print(r1_zipped)
+        print(dl_from_agave(r1_zipped[0]))
+    else:
+        r.on_failure("Could not find fastq files matching {}".format(
+            work_mount + "/*R[12]*.fastq.gz"))
+
 
     # try:
     #     print(ag.files.list(systemId=datacat_response['archive_system'],
