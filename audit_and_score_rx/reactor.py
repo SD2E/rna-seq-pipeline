@@ -1,5 +1,4 @@
 from reactors.utils import Reactor, agaveutils
-from os import getcwd, path
 from urllib.parse import unquote, urlsplit
 from inspect import getsource as gs
 from pprint import pprint as pp
@@ -8,6 +7,7 @@ import json
 import os
 from glob import glob
 import pymongo
+from datacatalog.managers.pipelinejobs import ReactorManagedPipelineJob as Job
 
 
 def get_datacat_jobs(query={}, projection={}, dbURI="", return_max=-1):
@@ -113,6 +113,39 @@ def dl_from_agave(url):
         return local_fp
 
 
+def check_fastq(dir_path, glob_query, min_mb=1.):
+    """Checks for existence and file size for each file in
+    `glob_query`. `dir_path` is prepended to each file name. Returns
+    True if `glob_query` files exist and > `min_mb` MB, False otherwise.
+
+    Args:
+        dir_path (str): directory path prepended to each glob query
+        glob_query (list): list of file names. Glob formats supported
+        min_mb (float): minimum file size threshold in megabytes
+
+    Returns:
+        boolean
+    """
+    if not glob(dir_path):
+        r.on_failure("Could not find directory at {}".format(dir_path))
+        return False
+    for fname in glob_query:
+        fp = dir_path + fname
+        match = glob(fp)
+        if not match:
+            r.logger.error("No file found at '{}'".format(fp))
+            return False
+        elif len(match) < 1:
+            r.logger.warning("{} files found matching {}".format(
+                len(match), fp))
+        size_mb = os.path.getsize(match[0])/1048576.
+        if size_mb < min_mb:
+            r.logger.error("Insufficient file size for " +
+                           "{} ({} MB < {} MB)".format(fp, size_mb, min_mb))
+            return False
+    return True
+
+
 def main():
     """Main function"""
     global r
@@ -120,33 +153,45 @@ def main():
     ag = r.client
     # r.logger.debug(json.dumps(r.context, indent=4))
 
+    sample_args = {
+        "experiments": ['experiment.tacc.10001'],
+        "samples": ['sample.tacc.20001'],
+        "measurements1": ['measurement.tacc.0xDEADBEF1'],
+        "measurements2": ['10483e8d-6602-532a-8941-176ce20dd05a', 'measurement.tacc.0xDEADBEF0'],
+        "measurements3": ['measurement.tacc.0xDEADBEEF', 'measurement.tacc.0xDEADBEF0'],
+        "data_w_inputs": {'alpha': 0.5, 'inputs': ['agave://data-sd2e-community/uploads/tacc/example/345.txt'], 'parameters': {'ref1': 'agave://data-sd2e-community/reference/novel_chassis/uma_refs/MG1655_WT/MG1655_WT.fa'}}
+    }
+
+    mpj_kwargs = {
+        "experiment_id": "eho-dummy-id",
+        "data": {
+            "experiment_id": "experiment.tacc.10001"
+        },
+        "archive_patterns": {},
+        "product_patterns": {}
+    }
+
+    rmpj = ReactorManagedPipelineJob(r, **mpj_kwargs)
+    print(rmpj)
+
+    return
     # pull datacat_jobId from context
-    datacat_jobId = '10779ebc-db12-5eac-9fcf-03deb2cb0c70'
     #datacat_jobId = getattr(r.context, 'datacatalog_jobId', '')
     r.logger.info("Pulled datacatalog jobId={}".format(datacat_jobId))
 
     # query the MongoDB jobs table
     (datacat_response, tapis_jobId) = get_from_dcuuid(
         datacat_jobId, ['archive_system', 'archive_path'])
-    work_mount = '/work/projects/SD2E-Community/prod/data/' + \
-        datacat_response['archive_path']
-    tapis_mount = datacat_response['archive_system'] + \
+    job_dir = '/work/projects/SD2E-Community/prod/data/' + \
         datacat_response['archive_path']
     pp(datacat_response)
 
     r.logger.info("Tapis jobId={}".format(tapis_jobId))
-    # make sure /work is mounted
-    if not glob('/work'):
-        r.on_failure("Could not find mounted /work filesystem")
-    # agave download files of interest
-    r1_zipped = glob(work_mount + "/*R1*.fastq.gz")
-    r2_zipped = glob(work_mount + "/*R2*.fastq.gz")
-    if r1_zipped and r2_zipped:
-        print(r1_zipped)
-        print(dl_from_agave(r1_zipped[0]))
-    else:
-        r.on_failure("Could not find fastq files matching {}".format(
-            work_mount + "/*R[12]*.fastq.gz"))
+    # check for existence and size of fastq files
+    valid = check_fastq(job_dir,
+                        ["/*R1*.fastq.gz", "/*R2*.fastq.gz"],
+                        min_mb=10)
+    print(valid)
 
 
     # try:
