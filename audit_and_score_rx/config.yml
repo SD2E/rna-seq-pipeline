@@ -2,25 +2,4 @@
 logs:
   level: DEBUG
   token: ~
-pipelines:
-    pipeline_uuid: 106d3f7f-07dc-592f-86f9-df75083e52cc
-    pipeline_manager_id: kOYmx234X4K7
-    pipeline_manager_nonce: ~
-    job_manager_id: MEzqaw4rkW12K
-    job_manager_nonce: ~
-    job_indexer_id: Pw3eRxr12ZGmp
-    job_indexer_nonce: ~
-mongodb:
-    database: catalog_staging
-    host: catalog.sd2e.org
-    port: 27020
-    username: catalog
-    password: password
-    admin_key: ~
-audit_and_score_job:
-    name: "eho-audit_and_score-0.1.0_test"
-    appId: "eho-audit_and_score-0.1.0"
-    archive: True
-    maxRunTime: "01:00:00"
-    archiveSystem: "data-tacc-work-eho"
-    archivePath: "archive/jobs/${JOB_NAME}-${JOB_ID}"
+max_retries: 3
