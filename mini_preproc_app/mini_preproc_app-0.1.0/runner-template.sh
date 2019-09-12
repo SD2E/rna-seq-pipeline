@@ -19,4 +19,16 @@ fi
 
 echo container_exec ${CONTAINER_IMAGE} python3 /src/test.py ${fs_remote_fp}
 container_exec ${CONTAINER_IMAGE} python3 /src/test.py ${fs_remote_fp}
-mv "./$(basename ${fs_remote_fp})" ./flagstat_out.txt
+
+if [ -f ./status.txt ]; then
+    s=$(head -1 ./status.txt)
+    echo $s
+    if [ $s == "pass" ]; then
+        touch ./pooR1poo.fastq.gz
+    else
+        touch ./failfile.txt
+    fi
+fi
+
+echo Directory contents are
+ls
