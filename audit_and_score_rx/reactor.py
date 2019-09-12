@@ -5,9 +5,30 @@ from pprint import pprint as pp
 from requests.exceptions import HTTPError
 import json
 import os
+import requests
 from glob import glob
 import pymongo
 from datacatalog.managers.pipelinejobs import ReactorManagedPipelineJob as Job
+
+
+def ag_jobs_resubmit(tapis_link):
+    """Re-submit an Agave/Tapis job. The job is assigned a new uuid,
+    but is submitted with exactly the same definition, parameters, and
+    inputs. In the context of this reactor, this means it will also have
+    the same archivePath. Equivalent to CLI command jobs-resubmit, or
+    curl -sk -H "Authorization: Bearer $TOKEN" -H "Content-Type:
+    application/json" -X POST '`tapis_link`/resubmit'
+    """
+    url = os.path.join(tapis_link, "resubmit")
+    token = agaveutils.get_api_token(r.client)
+    headers = {
+        "Authorization": 'Bearer {}'.format(token),
+        "Content-Type": "application/json"
+    }
+    api_key = ""
+    api_secret = ""
+    response = requests.post(url, headers=headers)
+    return response
 
 
 def get_datacat_jobs(query={}, projection={}, dbURI="", return_max=-1):
@@ -113,7 +134,7 @@ def dl_from_agave(url):
         return local_fp
 
 
-def check_fastq(dir_path, glob_query, min_mb=1.):
+def validate_archive(dir_path, glob_query, min_mb=1.):
     """Checks for existence and file size for each file in
     `glob_query`. `dir_path` is prepended to each file name. Returns
     True if `glob_query` files exist and > `min_mb` MB, False otherwise.
@@ -127,8 +148,12 @@ def check_fastq(dir_path, glob_query, min_mb=1.):
         boolean
     """
     if not glob(dir_path):
-        r.on_failure("Could not find directory at {}".format(dir_path))
+        r.on_failure("Could not find directory at {}".format(dir_path),
+                     FileNotFoundError())
         return False
+    else:
+        r.logger.debug("ls {}".format(dir_path))
+        r.logger.debug(glob(dir_path + "/*"))
     for fname in glob_query:
         fp = dir_path + fname
         match = glob(fp)
@@ -146,13 +171,7 @@ def check_fastq(dir_path, glob_query, min_mb=1.):
     return True
 
 
-def main():
-    """Main function"""
-    global r
-    r = Reactor()
-    ag = r.client
-    # r.logger.debug(json.dumps(r.context, indent=4))
-
+def new_datacat_job():
     sample_args = {
         "experiments": ['experiment.tacc.10001'],
         "samples": ['sample.tacc.20001'],
@@ -171,36 +190,89 @@ def main():
         "product_patterns": {}
     }
 
-    rmpj = ReactorManagedPipelineJob(r, **mpj_kwargs)
+    rmpj = Job(r, **mpj_kwargs)
     print(rmpj)
 
-    return
-    # pull datacat_jobId from context
-    #datacat_jobId = getattr(r.context, 'datacatalog_jobId', '')
-    r.logger.info("Pulled datacatalog jobId={}".format(datacat_jobId))
+def main():
+    """Main function"""
+    global r
+    r = Reactor()
+    ag = r.client
+    r.logger.debug(json.dumps(r.context, indent=4))
+
+    print(dir(ag.token))
+    print(ag.token.api_key)
+    print(ag.token.api_secret)
+    print(ag.token.refresh)
+    print(agaveutils.get_api_token(ag))
+
+    # pull mpj_Id and tapis_jobId from context
+    try:
+        datacat_jobId = r.context['mpjId']
+        tapis_jobId = r.context['tapis_jobId']
+        max_retries = r.settings['max_retries']
+    except KeyError as e:
+        r.on_failure("Failed to pull attr from message context", e)
+    r.logger.info("Validating datacatalog jobId={}".format(datacat_jobId))
+    # rmpj.validate(data={})
+
+    # query Tapis against jobId
+    dummy_tapis_jobId = 'a4564989-2393-4b6a-b4e5-598e5a13929f-007'
+    try:
+        tapis_response = ag.jobs.get(jobId=tapis_jobId)
+    except HTTPError as e:
+        r.on_failure("Error pulling Tapis job", e)
+    try:
+        job_status = tapis_response['status']
+        assert job_status == 'FINISHED'
+        archiveDir = tapis_response['archiveSystem'] + "/" + \
+            tapis_response['archivePath']
+        job_self_link = tapis_response['_links']['self']['href']
+    except KeyError as e:
+        r.on_failure("Could not find attribute", e)
+    except AssertionError as e:
+        r.on_failure("Tapis jobId={} status={}".format(tapis_jobId,
+                                                       job_status))
+    else:
+        r.logger.debug("Tapis jobId={} status={}".format(tapis_jobId,
+                                                         job_status))
+    pp(tapis_response)
 
     # query the MongoDB jobs table
-    (datacat_response, tapis_jobId) = get_from_dcuuid(
-        datacat_jobId, ['archive_system', 'archive_path'])
-    job_dir = '/work/projects/SD2E-Community/prod/data/' + \
-        datacat_response['archive_path']
-    pp(datacat_response)
+    # (datacat_response, _tapis_jobId) = get_from_dcuuid(
+    #     datacat_jobId, ['archive_system', 'archive_path'])
+    # job_dir = '/work/projects/SD2E-Community/prod/data/' + \
+    #     datacat_response['archive_path']
+    # pp(datacat_response)
 
-    r.logger.info("Tapis jobId={}".format(tapis_jobId))
     # check for existence and size of fastq files
-    valid = check_fastq(job_dir,
+    # work_mount = '/work/projects/SD2E-Community/prod/data/' + \
+    #     tapis_response['archivePath']
+    work_mount = '/work/06634/eho/' + tapis_response['archivePath']
+    valid = validate_archive(work_mount,
                         ["/*R1*.fastq.gz", "/*R2*.fastq.gz"],
                         min_mb=10)
-    print(valid)
+    if valid:
+        r.logger.info("Outputs for preprocessing jobId=" +
+                      "{} passed validation".format(tapis_jobId))
+        # rmpj.finished(data={})
+        # ag.actors.sendMessage(actorId='alignment rx',body={'message':''})
+    else:
+        r.logger.error("Outputs for preprocessing jobId=" +
+                       "{} failed validation".format(tapis_jobId))
+        # check if max_retries has been met yet
+        err_file_ct = len(glob(work_mount + "/*.err"))
+        if err_file_ct >= max_retries:
+            r.on_failure("Cannot resubmit jobId={}, max_retries={}".format(
+                tapis_jobId, max_retries) + " has been met or exceeded")
+            return
+        else:
+            # resubmit Tapis job
+            r.logger.debug("Resubmitting Tapis job")
+            response = ag_jobs_resubmit(tapis_link=job_self_link)
+            print(response)
+        # rmpj.fail(data={})
 
-
-    # try:
-    #     print(ag.files.list(systemId=datacat_response['archive_system'],
-    #                         filePath=datacat_response['archive_path']))
-    # except HTTPError as e:
-    #     print(e)
-    # r.logger.info(glob(archive_dir))
-    # r.logger.info(os.listdir(archive_dir))
 
 if __name__ == '__main__':
     main()
