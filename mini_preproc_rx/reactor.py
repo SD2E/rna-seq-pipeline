@@ -32,12 +32,17 @@ def main():
         r.logger.debug("Running in debug mode, skipping downstream webhooks")
     else:
         payload_encode = {
-            'flagstat_remote_fp': job_template['inputs']['fs_remote_fp'],
+            'jobId': ''
+            #'flagstat_remote_fp': job_template['inputs']['fs_remote_fp'],
         }
         job_template['notifications'] = [{
             'event': 'FINISHED',
             "persistent": False,
-            'url': downstream_callback + "&status=${JOB_STATUS}&" + urlencode(payload_encode)
+            'url': downstream_callback + "&mpjId=10779ebc-db12-5eac-9fcf-03deb2cb0c70&status=${JOB_STATUS}&tapis_jobId=${JOB_ID}"
+        }, {
+            'event': 'FINISHED',
+            "persistent": False,
+            'url': 'https://en74zi8xvjn2j.x.pipedream.net?mpjId=10779ebc-db12-5eac-9fcf-03deb2cb0c70&status=${JOB_STATUS}&tapis_jobId=${JOB_ID}'
         }]
     submit_agave_job(job_template)
 
