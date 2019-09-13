@@ -1,17 +1,26 @@
 ### To Do
 
 - audit_preproc_rx
-    - Find where work_mount is based on Tapis job execution system
+    - Under consideration
+        - On status=FAILED, touch a .err in the archiveDir
+        - Submit new job def instead of curling resubmit endpoint
+        - Find where work_mount is based on Tapis app execution system
     - Lots of testing
     - Key points
         - Job resubmission occurs if neither of the following exceed 3:
             - # of error files in archivePath
                 - status=FAILED would bypass
             - # status: FAILED || FINISHED messages sent to MPJ
-                - Would bypass if MPJ is slow (indexing, long message queue, etc.)
+                - Would bypass if MPJ is slow (indexing, long message queue, etc.), OR if it's not receiving webhooks
         - The preprocessing reactor needs to (minimally) send `&mpjId={mpjId}&status=${JOB_STATUS}&tapis_jobId=${JOB_ID}` to:
             - audit_preproc_rx webhook (doesn't need job status actually)
             - mpj.callback (doesn't need its own ID)
+        - Resubmission of old jobs might be weird
+            - The current Tapis notif is to MPJ only
+            - Same notifs at resubmit endpoint, so the auditor will not iterate
+            - If we did want to use for old jobs, append new notif to
+            new job instead of resubmit
+                - But also make sure we're not duplicating notifications
 - audit_align_rx
 - pipeline_uuids
     - preproc = `106d3f7f-07dc-596f-86f9-df75083e52cc`
