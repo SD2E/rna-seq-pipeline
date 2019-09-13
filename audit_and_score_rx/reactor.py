@@ -137,9 +137,11 @@ def main():
 
     # pull from message context and settings
     msg = require_keys(r.context, ['mpjId', 'tapis_jobId'])
-    settings = require_keys(r.settings.options, ['max_retries', 'work_mount',
+    opts = require_keys(r.settings.options, ['max_retries', 'work_mount',
                                                  'min_fastq_mb'])
     r.logger.info("Validating datacatalog jobId={}".format(msg['mpjId']))
+    # send force_resubmit='true' to override max_retries
+    opts['force_resubmit'] = getattr(opts, 'force_resubmit', 'false')
     # rmpj.validating(data={})
 
     # query Tapis against tapis_jobId
@@ -151,12 +153,12 @@ def main():
     job = require_keys(tapis_resp, ['archiveSystem', 'archivePath',
                                     'status', '_links'])
     # job['_link']['self']['href']
-    job['self_link'] = jobs['_links'].get('self', {}).get('href', '')
+    job['self_link'] = job['_links'].get('self', {}).get('href', '')
 
     # check for existence and size of fastq files
-    is_valid = validate_archive(settings['work_mount'] + job['archivePath'],
+    is_valid = validate_archive(opts['work_mount'] + job['archivePath'],
                                 ["/*R1*.fastq.gz", "/*R2*.fastq.gz"],
-                                min_mb=settings['min_fastq_mb'])
+                                min_mb=opts['min_fastq_mb'])
     if job['status'] != 'FINISHED':
         r.on_failure("Tapis jobId={} {}.".format(
             msg['tapis_jobId'], job['status']) + "Skipping resubmission.")
@@ -169,21 +171,24 @@ def main():
         r.logger.error("Outputs for preprocessing jobId=" +
                        "{} failed validation".format(msg['tapis_jobId']))
         num_tapis_msg = count_tapis_msg(msg['mpjId'])
-        err_file_ct = len(glob(settings['work_mount'] +
+        err_file_ct = len(glob(opts['work_mount'] +
                                job['archivePath'] + "/*.err"))
         # Only resubmit if the # error files in the archivePath
         # and Tapis jobs in the datacatalog are both less than max_retries
-        if err_file_ct >= settings['max_retries'] or num_tapis_msg >= settings['max_retries']:
-            r.on_failure("Cannot resubmit jobId={}, max_retries={}".format(
-                msg['tapis_jobId'], settings['max_retries']) +
-                " has been met or exceeded")
-            # rmpj.fail(data={})
-            return
-        else:
-            # resubmit Tapis job
+        r.logger.debug("Found {} *.err files in archivePath and {}".format(
+            err_file_ct, num_tapis_msg) + " Tapis jobs in datacatalog")
+        resubmit = bool((err_file_ct < opts['max_retries']
+                        and num_tapis_msg < opts['max_retries'])
+                        or opts['force_resubmit'] == 'true')
+        if resubmit:
             r.logger.info("Resubmitting Tapis jobId={}".format(msg['tapis_jobId']))
             resubmit_resp = ag_jobs_resubmit(job_self_link=job['self_link'])
-            r.logger.info(resubmit_resp.content)
+            r.logger.info(resubmit_resp.json())
+        else:
+            r.on_failure("Cannot resubmit jobId={}, max_retries={}".format(
+                msg['tapis_jobId'], opts['max_retries']) +
+                " has been met or exceeded")
+            # rmpj.fail(data={})
 
 
 if __name__ == '__main__':
