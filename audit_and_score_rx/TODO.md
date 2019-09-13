@@ -1,20 +1,17 @@
 ### To Do
 
-- Find some way to debug on datacatalog
-    - Ask Josh
 - audit_preproc_rx
-    - Outline
-        - Set up scripts/run_container_curl.sh with a callback URL that would mimic preprocessing job: `{base_url}?x-nonce=*****&datacatalog_jobId=****&tapis_jobId=***&archivePath=**`
-            - Use a pre-existing PipelineJob
-        - Pull
-            - Job retries from datacatalog and/or jobId
-            - See if you can pull Tapis jobId from datacatalog_jobId
-                - Should also be in context.message_dict
-                - Revert to r.context.tapis_jobId if not
-            - Same for archivePath: try to pull from datacatalog
-        - Push
-            - For now, a simple message to a reactor
-        - r.context.force_resubmit to resubmit job despite 3+ retries
+    - Find where work_mount is based on Tapis job execution system
+    - Lots of testing
+    - Key points
+        - Job resubmission occurs if neither of the following exceed 3:
+            - # of error files in archivePath
+                - status=FAILED would bypass
+            - # status: FAILED || FINISHED messages sent to MPJ
+                - Would bypass if MPJ is slow (indexing, long message queue, etc.)
+        - The preprocessing reactor needs to (minimally) send `&mpjId={mpjId}&status=${JOB_STATUS}&tapis_jobId=${JOB_ID}` to:
+            - audit_preproc_rx webhook (doesn't need job status actually)
+            - mpj.callback (doesn't need its own ID)
 - audit_align_rx
 - pipeline_uuids
     - preproc = `106d3f7f-07dc-596f-86f9-df75083e52cc`
