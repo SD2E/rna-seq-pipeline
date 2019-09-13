@@ -1,5 +1,9 @@
 ---
 logs:
-  level: DEBUG
-  token: ~
-max_retries: 3
+    level: DEBUG
+    token: ~
+options:
+    max_retries: 3
+    work_mount: '/work/06634/eho/'
+    # work_mount: '/work/projects/SD2E-Community/prod/data/'
+    min_fastq_mb: 10.
