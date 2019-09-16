@@ -29,7 +29,7 @@ def ag_jobs_resubmit(job_self_link):
     inputs. In the context of this reactor, this means it will also have
     the same archivePath. Equivalent to CLI command jobs-resubmit, or
     curl -sk -H "Authorization: Bearer $TOKEN" -H "Content-Type:
-    application/json" -X POST '`tapis_link`/resubmit'
+    application/json" -X POST '`job_self_link`/resubmit'
     """
     url = os.path.join(job_self_link, "resubmit")
     token = agaveutils.get_api_token(r.client)
@@ -45,7 +45,8 @@ def query_jobs_table(query={}, projection={}, dbURI="", return_max=-1):
     """
     # handle defaults
     if not dbURI:
-        dbURI = '***REMOVED***'
+        dbURI = 'mongodb://readonly***REMOVED***@' + \
+                'catalog.sd2e.org:27020/admin?readPreference=primary'
     # omit projection parameter if you want all fields returned
     args = [query]
     if projection:
@@ -128,6 +129,10 @@ def count_tapis_msg(mpjId):
     return len(tapis_messages)
 
 
+def mpj_update(manager_id, name):
+    r.logger.warning("mpj_update is not yet implemented")
+
+
 def main():
     """Main function"""
     global r
@@ -138,7 +143,7 @@ def main():
     # pull from message context and settings
     msg = require_keys(r.context, ['mpjId', 'tapis_jobId'])
     opts = require_keys(r.settings.options, ['max_retries', 'work_mount',
-                                                 'min_fastq_mb'])
+                                             'min_fastq_mb'])
     r.logger.info("Validating datacatalog jobId={}".format(msg['mpjId']))
     # send force_resubmit='true' to override max_retries
     opts['force_resubmit'] = getattr(opts, 'force_resubmit', 'false')
@@ -185,10 +190,11 @@ def main():
             resubmit_resp = ag_jobs_resubmit(job_self_link=job['self_link'])
             r.logger.info(resubmit_resp.json())
         else:
+            #job_manager_id = opts.get('pipelines', {}).get('job_manager_id', '')
+            #mpj_update(job_manager_id, 'fail')
             r.on_failure("Cannot resubmit jobId={}, max_retries={}".format(
                 msg['tapis_jobId'], opts['max_retries']) +
                 " has been met or exceeded")
-            # rmpj.fail(data={})
 
 
 if __name__ == '__main__':

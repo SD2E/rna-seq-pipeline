@@ -7,3 +7,5 @@ options:
     work_mount: '/work/06634/eho/'
     # work_mount: '/work/projects/SD2E-Community/prod/data/'
     min_fastq_mb: 10.
+pipelines:
+  job_manager_id: MEplaceholderWZoK
