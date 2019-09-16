@@ -23,7 +23,32 @@ def require_keys(dict, keys_list):
     return dict
 
 
-def ag_jobs_resubmit(job_self_link):
+def add_self_to_notifs(tapis_jobId):
+    """docs
+    """
+    url = "https://api.sd2e.org/notifications/v2?associatedUuid={}".format(tapis_jobId)
+    token = agaveutils.get_api_token(r.client)
+    headers = {"Authorization": 'Bearer {}'.format(token),
+               "Content-Type": "application/json"}
+    notifs_resp = requests.get(url, headers=headers)
+    self_nonce_urls = set([n.get('_links', {}).get('actor', '')
+                           for n in r.list_nonces()])
+    # list of events that should webhook to self
+    add_events = ['FINISHED', 'FAILED']
+    for nonce_url in self_nonce_urls:
+        for notif in notifs_resp.json()['result']:
+            if nonce_url in notif['url'] and notif['event'] in add_events:
+                add_events.remove(notif['event'])
+                r.logger.debug(notif)
+    r.logger.debug()
+    for notif in notifs_resp.json()['result']:
+        [].extend([notif for nonce_url in self_nonce_urls
+                                 if nonce_url in notif['url']
+                                 and notif['event'] in ("FINISHED", "FAILED")])
+    #r.logger.debug([n['url'] for n in notifs_resp.json()['result']])
+
+
+def jobs_resubmit(job_self_link, notif_add_self=True):
     """Re-submit an Agave/Tapis job. The job is assigned a new uuid,
     but is submitted with exactly the same definition, parameters, and
     inputs. In the context of this reactor, this means it will also have
@@ -31,12 +56,19 @@ def ag_jobs_resubmit(job_self_link):
     curl -sk -H "Authorization: Bearer $TOKEN" -H "Content-Type:
     application/json" -X POST '`job_self_link`/resubmit'
     """
+    # curl resubmit endpoint
     url = os.path.join(job_self_link, "resubmit")
     token = agaveutils.get_api_token(r.client)
     headers = {"Authorization": 'Bearer {}'.format(token),
                "Content-Type": "application/json"}
-    response = requests.post(url, headers=headers)
-    return response
+    resub_resp = requests.post(url, headers=headers)
+    new_tapis_jobId = resub_resp.json().get('result', {}).get('id')
+    r.logger.info("Resubmitted with new Tapis " +
+                  "jobId={}".format(new_tapis_jobId))
+    r.logger.debug(resub_resp.json())
+
+    # curl notifications endpoint
+    return resub_resp
 
 
 def query_jobs_table(query={}, projection={}, dbURI="", return_max=-1):
@@ -139,7 +171,9 @@ def main():
     r = Reactor()
     ag = r.client
     r.logger.debug(json.dumps(r.context, indent=4))
+    _dev_notifs('f563bc13-b876-45ea-9e8f-b66e9acf963a-007')
 
+    return
     # pull from message context and settings
     msg = require_keys(r.context, ['mpjId', 'tapis_jobId'])
     opts = require_keys(r.settings.options, ['max_retries', 'work_mount',
@@ -187,8 +221,9 @@ def main():
                         or opts['force_resubmit'] == 'true')
         if resubmit:
             r.logger.info("Resubmitting Tapis jobId={}".format(msg['tapis_jobId']))
-            resubmit_resp = ag_jobs_resubmit(job_self_link=job['self_link'])
-            r.logger.info(resubmit_resp.json())
+            resubmit_resp = jobs_resubmit(job_self_link=job['self_link'])
+
+            #assert False
         else:
             #job_manager_id = opts.get('pipelines', {}).get('job_manager_id', '')
             #mpj_update(job_manager_id, 'fail')
