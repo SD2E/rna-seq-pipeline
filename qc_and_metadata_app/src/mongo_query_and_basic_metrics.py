@@ -194,13 +194,7 @@ def crawl_file_system(prefix, meta_data, preprocessing_jobs, alignment_jobs):
     # number reads before mapping (probably also use FastQC results for this)
     # and mapped reads (bwa log?) from the relevant output files
     # and add this to our meta_data dictionary
-    # DEV
-    i = 0
     for sample_id, job in preprocessing_jobs.items():
-        # DEV
-        if i >= params['DEBUG_preproc_max']:
-            break
-        i += 1
         #print(sample_id)
         #prefix = '/home/jupyter/sd2e-community/'
         #prefix = '/work/projects/SD2E-Community/prod/data/'
@@ -230,10 +224,7 @@ def crawl_file_system(prefix, meta_data, preprocessing_jobs, alignment_jobs):
         try:
             flagstat = glob.glob(prefix+alignment_jobs[sample_id]['archive_path']+'/*.rnaseq.original.bwa.flagstat.txt')[0]
             #flagstat = prefix + alignment['archive_path'] + '/' + outname + '.rnaseq.original.bwa.flagstat.txt'
-            print(prefix)
-            print(alignment_jobs[sample_id]['archive_path'])
-            print(flagstat)
-            print()
+            #print(flagstat)
             command = "grep 'mapped (' " + flagstat
             output = subprocess.check_output(command, shell=True, preexec_fn=lambda: signal.signal(signal.SIGPIPE, signal.SIG_DFL))
             percent_mapped = str(output).split('(')[-1].split('%')[0]
@@ -265,8 +256,7 @@ def crawl_file_system(prefix, meta_data, preprocessing_jobs, alignment_jobs):
         command = "sed -n '1,/Quality/d;/END_MODULE/q;p' " + fastqc_r1.split('/')[-1].split('.')[0] + "/fastqc_data.txt"
         try:
             output = subprocess.check_output(command, shell=True, preexec_fn=lambda: signal.signal(signal.SIGPIPE, signal.SIG_DFL))
-            # DEV
-            #os.system("rm -rf " + fastqc_r1.split('/')[-1].split('.')[0])
+            os.system("rm -rf " + fastqc_r1.split('/')[-1].split('.')[0])
              #delete the local unzipped folder
             # Convert from bytes output to string
             string_output = output.decode('ascii')
@@ -386,10 +376,6 @@ def main(experiment_id):
     # Add QC info to meta_data dict, reading job output files for this
     meta_data = crawl_file_system(prefix, meta_data, preprocessing_jobs,
                                   alignment_jobs)
-
-    # DEV
-    return
-
     # Convert dictionary to a dataframe, easiest to just write/read to csv
     write_to_csv(meta_data, experiment_id)
     df_metadata = pd.read_csv(experiment_id + '_QC_and_metadata.csv')
@@ -420,8 +406,4 @@ def main(experiment_id):
 
 
 if __name__ == '__main__':
-    params = {
-        'experiment_id': sys.argv[1],
-        'DEBUG_preproc_max': int(sys.argv[2])
-    }
-    main(params['experiment_id'])
+    main(sys.argv[1])
