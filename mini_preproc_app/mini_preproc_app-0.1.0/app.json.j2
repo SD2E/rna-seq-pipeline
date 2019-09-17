@@ -1,0 +1,88 @@
+{
+  "name": "{{ agave.username }}-{{ app.name }}",
+  "version": "{{ app.version }}",
+  "executionType": "HPC",
+  "executionSystem": "hpc-tacc-hikari-{{ agave.username }}",
+  "parallelism": "SERIAL",
+  "deploymentPath": "apps/{{ app.bundle }}",
+  "deploymentSystem": "data-tacc-work-{{ agave.username }}",
+  "defaultProcessorsPerNode": 1,
+  "defaultNodeCount": 1,
+  "defaultQueue": "unprotected",
+  "label": "{{ date_time.iso8601_micro }}",
+  "modules": ["load tacc-singularity"],
+  "shortDescription": "{{ app.description }}",
+  "templatePath": "runner-template.sh",
+  "testPath": "tester.sh",
+  "inputs": [
+    {
+      "id": "fs_remote_fp",
+      "value": {
+          "validator": "",
+          "visible": true,
+          "required": true,
+          "order": 0,
+          "enquote": false,
+          "default": ""
+      },
+      "details": {
+          "label": "download file",
+          "description": "file to download",
+          "argument": null,
+          "showArgument": false,
+          "repeatArgument": false
+      },
+      "semantics": {
+          "minCardinality": 1,
+          "maxCardinality": 1,
+          "ontology": [
+              "xsd:string"
+          ],
+          "fileTypes": [
+              "raw-0"
+          ]
+      }
+    }
+  ],
+  "parameters": [
+    {
+    "id": "CONTAINER_IMAGE",
+    "value": {
+      "default": "{{ docker.organization }}/{{ docker.repo }}:{{ docker.tag }}",
+      "description": "Container Image. Do not edit.",
+      "type": "string",
+      "visible": false,
+      "required": true
+    }
+  }],
+  "outputs": [
+      {
+        "id": "flagstat",
+        "value": {
+            "validator": "",
+            "visible": true,
+            "required": true,
+            "order": 0,
+            "enquote": false,
+            "default": "flagstat_out.txt"
+        },
+        "details": {
+            "label": "output flagstat file",
+            "description": "output flagstat file",
+            "argument": null,
+            "showArgument": false,
+            "repeatArgument": false
+        },
+        "semantics": {
+            "minCardinality": 1,
+            "maxCardinality": 1,
+            "ontology": [
+                "xsd:string"
+            ],
+            "fileTypes": [
+                "raw-0"
+            ]
+        }
+      }
+  ]
+}
