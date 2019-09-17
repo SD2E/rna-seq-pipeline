@@ -217,15 +217,16 @@ def main():
     global r
     r = Reactor()
     ag = r.client
-    r.logger.debug(json.dumps(r.context, indent=4))
+    # r.logger.debug(json.dumps(r.context, indent=4))
 
     # pull from message context and settings
     msg = require_keys(r.context, ['mpjId', 'tapis_jobId'])
-    opts = require_keys(r.settings.options, ['max_retries',
-                                             'min_fastq_mb', 'notif_add_self'])
-    r.logger.info("Validating datacatalog jobId={}".format(msg['mpjId']))
-    # send force_resubmit='true' to override max_retries
-    opts['force_resubmit'] = getattr(opts, 'force_resubmit', 'false')
+    opts = require_keys(r.settings.options, ['max_retries', 'min_fastq_mb',
+                                             'notif_add_self'])
+    # force_resubmit=bool(True) to override max_retries
+    opts['force_resubmit'] = getattr(opts, 'force_resubmit', False)
+    r.logger.info("Validating datacatalog jobId=" +
+                  "{}, tapis_jobId={}".format(msg['mpjId'], msg['tapis_jobId']))
     # rmpj.validating(data={})
 
     # query Tapis against tapis_jobId
@@ -257,15 +258,14 @@ def main():
         r.logger.error("Outputs for preprocessing jobId=" +
                        "{} failed validation".format(msg['tapis_jobId']))
         num_tapis_msg = count_tapis_msg(msg['mpjId'])
-        err_file_ct = len(glob(os.path.join(archiveSystem,
-                                            job['archivePath'], "*.err")))
+        err_file_ct = len(glob(os.path.join(archiveSystem, job['archivePath'], "*.err")))
         # Only resubmit if the # error files in the archivePath
         # and Tapis jobs in the datacatalog are both less than max_retries
         r.logger.debug("Found {} *.err files in archivePath and {}".format(
             err_file_ct, num_tapis_msg) + " Tapis jobs in datacatalog")
         resubmit = bool((err_file_ct < opts['max_retries']
                         and num_tapis_msg < opts['max_retries'])
-                        or opts['force_resubmit'] == 'true')
+                        or opts['force_resubmit'] is True)
         if resubmit:
             r.logger.info("Resubmitting Tapis jobId={}".format(msg['tapis_jobId']))
             resubmit_resp = jobs_resubmit(job_self_link=job['self_link'],
