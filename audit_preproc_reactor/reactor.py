@@ -49,9 +49,6 @@ def add_self_to_notifs(tapis_jobId):
     # get actor URI for each self.nonce. Should only be one
     self_nonce_urls = set([n.get('_links', {}).get('actor', '')
                            for n in r.list_nonces()])
-    if not self_nonce_urls:
-        self_nonce_urls = set([r.create_webhook()])
-    # debug prints
     _print_webhooks_to_self(tapis_jobId)
     # list of events that should message this reactor
     add_events = ['FINISHED', 'FAILED']
@@ -69,7 +66,7 @@ def add_self_to_notifs(tapis_jobId):
             'associatedUuid': tapis_jobId,
             'event': new_evt,
             'url': "{}&mpjId={}&tapis_jobId={}".format(
-                r.create_webhook(), r.context.mpjId, "${JOB_ID}")
+                r.create_webhook(maxuses=1), r.context.mpjId, "${JOB_ID}")
         }).replace("'", '"').encode()
         new_evt_resp = requests.post("https://api.sd2e.org/notifications/v2",
                                      data=data_binary, headers=headers)
