@@ -23,35 +23,36 @@ def require_keys(dict, keys_list):
     return dict
 
 
-def _get_webhooks_to_self(tapis_jobId):
+def _print_webhooks_to_self(tapis_jobId):
     url = "https://api.sd2e.org/notifications/v2?associatedUuid={}".format(tapis_jobId)
     token = agaveutils.get_api_token(r.client)
     headers = {"Authorization": 'Bearer {}'.format(token),
                "Content-Type": "application/json"}
     notifs_resp = requests.get(url, headers=headers)
+    r.logger.debug("Current webhooks on tapis job={}".format(tapis_jobId))
+    for notif in notifs_resp.json()['result']:
+        r.logger.debug("{}: {}".format(notif['event'], notif['url']))
     return notifs_resp.json()['result']
 
 
 def add_self_to_notifs(tapis_jobId):
     """docs
     """
-    url = "https://api.sd2e.org/notifications/v2?associatedUuid={}".format(tapis_jobId)
+    # get notifications associated with tapis_jobId
     token = agaveutils.get_api_token(r.client)
     headers = {"Authorization": 'Bearer {}'.format(token),
                "Content-Type": "application/json"}
-    notifs_resp = requests.get(url, headers=headers)
+    notifs_resp = requests.get("https://api.sd2e.org/notifications/v2" +
+                               "?associatedUuid={}".format(tapis_jobId),
+                               headers=headers)
     webhooks_to_self = notifs_resp.json()['result']
-
+    # get actor URI for each self.nonce. Should only be one
     self_nonce_urls = set([n.get('_links', {}).get('actor', '')
                            for n in r.list_nonces()])
-    # DEV stuff
-    #r.delete_all_nonces()
-    # print(r.create_webhook())
-    r.logger.debug(_get_webhooks_to_self(tapis_jobId))
-    # return
-
     if not self_nonce_urls:
         self_nonce_urls = set([r.create_webhook()])
+    # debug prints
+    _print_webhooks_to_self(tapis_jobId)
     # list of events that should message this reactor
     add_events = ['FINISHED', 'FAILED']
     # remove from add_events if that event triggers a webhook to self
@@ -68,15 +69,15 @@ def add_self_to_notifs(tapis_jobId):
             'associatedUuid': tapis_jobId,
             'event': new_evt,
             'url': "{}&mpjId={}&tapis_jobId={}".format(
-                r.create_webhook(maxuses=1), r.context.mpjId, "${JOB_ID}")
+                r.create_webhook(), r.context.mpjId, "${JOB_ID}")
         }).replace("'", '"').encode()
         new_evt_resp = requests.post("https://api.sd2e.org/notifications/v2",
                                      data=data_binary, headers=headers)
         if new_evt_resp.json().get('status') != "success":
             r.on_failure("Error creating new notification with " +
                          "data_binary={}".format(data_binary), Exception())
-    r.logger.debug("New job notifications:")
-    r.logger.debug([[x['event'], x['url']] for x in _get_webhooks_to_self(tapis_jobId)])
+    # debug prints
+    _print_webhooks_to_self(tapis_jobId)
 
 
 def jobs_resubmit(job_self_link, notif_add_self=True):
@@ -96,7 +97,7 @@ def jobs_resubmit(job_self_link, notif_add_self=True):
     new_tapis_jobId = resub_resp.json().get('result', {}).get('id')
     r.logger.info("Resubmitted with new Tapis " +
                   "jobId={}".format(new_tapis_jobId))
-    r.logger.debug(resub_resp.json())
+    # r.logger.debug(resub_resp.json())
     # add webhooks to self on FINISHED and FAILED if they do not exist
     if notif_add_self:
         add_self_to_notifs(new_tapis_jobId)
@@ -207,7 +208,7 @@ def main():
     # pull from message context and settings
     msg = require_keys(r.context, ['mpjId', 'tapis_jobId'])
     opts = require_keys(r.settings.options, ['max_retries', 'work_mount',
-                                             'min_fastq_mb'])
+                                             'min_fastq_mb', 'notif_add_self'])
     r.logger.info("Validating datacatalog jobId={}".format(msg['mpjId']))
     # send force_resubmit='true' to override max_retries
     opts['force_resubmit'] = getattr(opts, 'force_resubmit', 'false')
@@ -251,7 +252,8 @@ def main():
                         or opts['force_resubmit'] == 'true')
         if resubmit:
             r.logger.info("Resubmitting Tapis jobId={}".format(msg['tapis_jobId']))
-            resubmit_resp = jobs_resubmit(job_self_link=job['self_link'])
+            resubmit_resp = jobs_resubmit(job_self_link=job['self_link'],
+                                          notif_add_self=opts['notif_add_self'])
         else:
             #job_manager_id = opts.get('pipelines', {}).get('job_manager_id', '')
             #mpj_update(job_manager_id, 'fail')
