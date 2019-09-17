@@ -6,4 +6,4 @@ REACTOR_ALIAS=audit-preproc
 # Docker settings
 DOCKER_HUB_ORG=enho
 DOCKER_IMAGE_TAG=audit-preproc-rx
-DOCKER_IMAGE_VERSION=0.1.0
+DOCKER_IMAGE_VERSION=0.1.1
