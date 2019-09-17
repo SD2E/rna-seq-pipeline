@@ -1,9 +1,12 @@
 ### To Do
 
 - audit_preproc_rx
+    - Check for `status` in context and simply ignore if not FINISHED or FAILED
+    - Refactor under AuditorReactor(object)
+    - Lots of testing on webhook checking/creation
+        - Put this under Jenkins if possible
     - Under consideration
         - On status=FAILED, touch a .err in the archiveDir
-        - Submit new job def instead of curling resubmit endpoint
         - Find where work_mount is based on Tapis app execution system
     - Lots of testing
     - Key points
