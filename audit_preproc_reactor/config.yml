@@ -6,7 +6,7 @@ options:
     max_retries: 3
     notif_add_self: True
     min_fastq_mb: 10.
-    work_mount: '/work/projects/SD2E-Community/prod/data/'
+    # work_mount: '/work/projects/SD2E-Community/prod/data/'
     # work_mount: '/work/06634/eho/'
 pipelines:
   job_manager_id: MEplaceholderWZoK
