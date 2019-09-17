@@ -195,6 +195,23 @@ def mpj_update(manager_id, name):
     r.logger.warning("mpj_update is not yet implemented")
 
 
+def archiveSystem_to_path(systemId):
+    """docs
+    """
+    try:
+        sys_resp = r.client.systems.get(systemId=systemId)
+    except HTTPError as e:
+        r.on_failure("Error getting systemId={} ".format(systemId) +
+                     "from Tapis API", e)
+    rootDir = sys_resp.get('storage', {}).get('rootDir', '')
+    homeDir = sys_resp.get('storage', {}).get('homeDir', '/')
+    path = os.path.normpath(rootDir + homeDir)
+    if path == '/':
+        r.logger.warning("systemId={} homeDir={}.".format(systemId, path) +
+                         " Unusual homeDir path.")
+    return path
+
+
 def main():
     """Main function"""
     global r
@@ -204,7 +221,7 @@ def main():
 
     # pull from message context and settings
     msg = require_keys(r.context, ['mpjId', 'tapis_jobId'])
-    opts = require_keys(r.settings.options, ['max_retries', 'work_mount',
+    opts = require_keys(r.settings.options, ['max_retries',
                                              'min_fastq_mb', 'notif_add_self'])
     r.logger.info("Validating datacatalog jobId={}".format(msg['mpjId']))
     # send force_resubmit='true' to override max_retries
@@ -221,9 +238,11 @@ def main():
                                     'status', '_links'])
     # job['_link']['self']['href']
     job['self_link'] = job['_links'].get('self', {}).get('href', '')
+    # get the /work path from archiveSystem
+    archiveSystem = archiveSystem_to_path(job['archiveSystem'])
 
     # check for existence and size of fastq files
-    is_valid = validate_archive(opts['work_mount'] + job['archivePath'],
+    is_valid = validate_archive(os.path.join(archiveSystem, job['archivePath']),
                                 ["/*R1*.fastq.gz", "/*R2*.fastq.gz"],
                                 min_mb=opts['min_fastq_mb'])
     if job['status'] != 'FINISHED':
@@ -238,8 +257,8 @@ def main():
         r.logger.error("Outputs for preprocessing jobId=" +
                        "{} failed validation".format(msg['tapis_jobId']))
         num_tapis_msg = count_tapis_msg(msg['mpjId'])
-        err_file_ct = len(glob(opts['work_mount'] +
-                               job['archivePath'] + "/*.err"))
+        err_file_ct = len(glob(os.path.join(archiveSystem,
+                                            job['archivePath'], "*.err")))
         # Only resubmit if the # error files in the archivePath
         # and Tapis jobs in the datacatalog are both less than max_retries
         r.logger.debug("Found {} *.err files in archivePath and {}".format(
