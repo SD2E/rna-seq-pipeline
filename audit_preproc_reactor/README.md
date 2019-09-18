@@ -9,7 +9,7 @@ This reactor validates preprocessing job outputs and handles resubmission of the
 }
 ```
 
-Similarly, the message can be passed Tapis job data by adding the reactor's webhook URI (`Reactor().create_webhook(maxuses=10)`) to a Tapis job definition:
+For example, the message can be passed Tapis job data by adding the reactor's webhook URI (`Reactor().create_webhook()`) to a Tapis job definition:
 
 ```python
 {
@@ -20,7 +20,7 @@ Similarly, the message can be passed Tapis job data by adding the reactor's webh
         {
             "event": "FINISHED",
             "persistent": "False",
-            "url": ManagedPipelineJob().callback + "&status=${JOB_STATUS}"
+            "url": "{ManagedPipelineJob.callback}&status=${JOB_STATUS}"
         }, {
             "event": "FINISHED",
             "persistent": "False",
@@ -32,7 +32,7 @@ Similarly, the message can be passed Tapis job data by adding the reactor's webh
 
 Validation is successful if output files `{archivePath}/*R1*.fastq.gz` and `{archivePath}/*R2*.fastq.gz` exist and file size is >= `settings.options.min_fastq_mb` megabytes for each. WIP: update the ManagedPipelineJob to status=VALIDATED by messaging the PipelineJobManager.
 
-Failing validation will trigger a Tapis job resubmission, where the Tapis job is resubmitted with *exactly* the same job definition. Note that job notifications will be the same, so older Tapis jobs will not message this reactor when the resubmitted job finishes. WIP: Reactor checks if its webhook URI exists in the Tapis job notifications, and adds itself if they do not exist, allowing older Tapis jobs to iterate.
+Failing validation will trigger a Tapis job resubmission, where the Tapis job is resubmitted with *exactly* the same job definition. If `settings.options.notif_add_self == True`, the reactor will create a single use webhook and add it to the notifications of the resubmitted job, if a webhook to self does not already exist.
 
 Resubmission will fail if either of the following are true:
 - Greater than or equal to `settings.options.max_retries` Tapis jobs messaged ManagedPipelineJob `mpjId` with `status=[FINISHED | FAILED]`

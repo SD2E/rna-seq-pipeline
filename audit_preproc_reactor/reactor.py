@@ -23,7 +23,61 @@ def require_keys(dict, keys_list):
     return dict
 
 
-def ag_jobs_resubmit(job_self_link):
+def _print_webhooks_to_self(tapis_jobId):
+    url = "https://api.sd2e.org/notifications/v2?associatedUuid={}".format(tapis_jobId)
+    token = agaveutils.get_api_token(r.client)
+    headers = {"Authorization": 'Bearer {}'.format(token),
+               "Content-Type": "application/json"}
+    notifs_resp = requests.get(url, headers=headers)
+    r.logger.debug("Current webhooks on tapis job={}".format(tapis_jobId))
+    for notif in notifs_resp.json()['result']:
+        r.logger.debug("{}: {}".format(notif['event'], notif['url']))
+    return notifs_resp.json()['result']
+
+
+def add_self_to_notifs(tapis_jobId):
+    """docs
+    """
+    # get notifications associated with tapis_jobId
+    token = agaveutils.get_api_token(r.client)
+    headers = {"Authorization": 'Bearer {}'.format(token),
+               "Content-Type": "application/json"}
+    notifs_resp = requests.get("https://api.sd2e.org/notifications/v2" +
+                               "?associatedUuid={}".format(tapis_jobId),
+                               headers=headers)
+    webhooks_to_self = notifs_resp.json()['result']
+    # get actor URI for each self.nonce. Should only be one
+    self_nonce_urls = set([n.get('_links', {}).get('actor', '')
+                           for n in r.list_nonces()])
+    _print_webhooks_to_self(tapis_jobId)
+    # list of events that should message this reactor
+    add_events = ['FINISHED', 'FAILED']
+    # remove from add_events if that event triggers a webhook to self
+    for nonce_url in self_nonce_urls:
+        for notif in webhooks_to_self:
+            if nonce_url in notif['url'] and notif['event'] in add_events:
+                add_events.remove(notif['event'])
+                r.logger.debug("existing webhook for event " +
+                               "{}".format(notif['event']))
+    # add remaining webhooks if they do not exist
+    for new_evt in add_events:
+        r.logger.debug("Creating webhook for event {}".format(new_evt))
+        data_binary = str({
+            'associatedUuid': tapis_jobId,
+            'event': new_evt,
+            'url': "{}&mpjId={}&tapis_jobId={}".format(
+                r.create_webhook(maxuses=1), r.context.mpjId, "${JOB_ID}")
+        }).replace("'", '"').encode()
+        new_evt_resp = requests.post("https://api.sd2e.org/notifications/v2",
+                                     data=data_binary, headers=headers)
+        if new_evt_resp.json().get('status') != "success":
+            r.on_failure("Error creating new notification with " +
+                         "data_binary={}".format(data_binary), Exception())
+    # debug prints
+    _print_webhooks_to_self(tapis_jobId)
+
+
+def jobs_resubmit(job_self_link, notif_add_self=True):
     """Re-submit an Agave/Tapis job. The job is assigned a new uuid,
     but is submitted with exactly the same definition, parameters, and
     inputs. In the context of this reactor, this means it will also have
@@ -31,12 +85,20 @@ def ag_jobs_resubmit(job_self_link):
     curl -sk -H "Authorization: Bearer $TOKEN" -H "Content-Type:
     application/json" -X POST '`job_self_link`/resubmit'
     """
+    # curl resubmit endpoint
     url = os.path.join(job_self_link, "resubmit")
     token = agaveutils.get_api_token(r.client)
     headers = {"Authorization": 'Bearer {}'.format(token),
                "Content-Type": "application/json"}
-    response = requests.post(url, headers=headers)
-    return response
+    resub_resp = requests.post(url, headers=headers)
+    new_tapis_jobId = resub_resp.json().get('result', {}).get('id')
+    r.logger.info("Resubmitted with new Tapis " +
+                  "jobId={}".format(new_tapis_jobId))
+    # r.logger.debug(resub_resp.json())
+    # add webhooks to self on FINISHED and FAILED if they do not exist
+    if notif_add_self:
+        add_self_to_notifs(new_tapis_jobId)
+    return resub_resp
 
 
 def query_jobs_table(query={}, projection={}, dbURI="", return_max=-1):
@@ -133,20 +195,38 @@ def mpj_update(manager_id, name):
     r.logger.warning("mpj_update is not yet implemented")
 
 
+def archiveSystem_to_path(systemId):
+    """docs
+    """
+    try:
+        sys_resp = r.client.systems.get(systemId=systemId)
+    except HTTPError as e:
+        r.on_failure("Error getting systemId={} ".format(systemId) +
+                     "from Tapis API", e)
+    rootDir = sys_resp.get('storage', {}).get('rootDir', '')
+    homeDir = sys_resp.get('storage', {}).get('homeDir', '/')
+    path = os.path.normpath(rootDir + homeDir)
+    if path == '/':
+        r.logger.warning("systemId={} homeDir={}.".format(systemId, path) +
+                         " Unusual homeDir path.")
+    return path
+
+
 def main():
     """Main function"""
     global r
     r = Reactor()
     ag = r.client
-    r.logger.debug(json.dumps(r.context, indent=4))
+    # r.logger.debug(json.dumps(r.context, indent=4))
 
     # pull from message context and settings
     msg = require_keys(r.context, ['mpjId', 'tapis_jobId'])
-    opts = require_keys(r.settings.options, ['max_retries', 'work_mount',
-                                             'min_fastq_mb'])
-    r.logger.info("Validating datacatalog jobId={}".format(msg['mpjId']))
-    # send force_resubmit='true' to override max_retries
-    opts['force_resubmit'] = getattr(opts, 'force_resubmit', 'false')
+    opts = require_keys(r.settings.options, ['max_retries', 'min_fastq_mb',
+                                             'notif_add_self'])
+    # force_resubmit=bool(True) to override max_retries
+    opts['force_resubmit'] = getattr(opts, 'force_resubmit', False)
+    r.logger.info("Validating datacatalog jobId=" +
+                  "{}, tapis_jobId={}".format(msg['mpjId'], msg['tapis_jobId']))
     # rmpj.validating(data={})
 
     # query Tapis against tapis_jobId
@@ -159,9 +239,11 @@ def main():
                                     'status', '_links'])
     # job['_link']['self']['href']
     job['self_link'] = job['_links'].get('self', {}).get('href', '')
+    # get the /work path from archiveSystem
+    archiveSystem = archiveSystem_to_path(job['archiveSystem'])
 
     # check for existence and size of fastq files
-    is_valid = validate_archive(opts['work_mount'] + job['archivePath'],
+    is_valid = validate_archive(os.path.join(archiveSystem, job['archivePath']),
                                 ["/*R1*.fastq.gz", "/*R2*.fastq.gz"],
                                 min_mb=opts['min_fastq_mb'])
     if job['status'] != 'FINISHED':
@@ -176,19 +258,18 @@ def main():
         r.logger.error("Outputs for preprocessing jobId=" +
                        "{} failed validation".format(msg['tapis_jobId']))
         num_tapis_msg = count_tapis_msg(msg['mpjId'])
-        err_file_ct = len(glob(opts['work_mount'] +
-                               job['archivePath'] + "/*.err"))
+        err_file_ct = len(glob(os.path.join(archiveSystem, job['archivePath'], "*.err")))
         # Only resubmit if the # error files in the archivePath
         # and Tapis jobs in the datacatalog are both less than max_retries
         r.logger.debug("Found {} *.err files in archivePath and {}".format(
             err_file_ct, num_tapis_msg) + " Tapis jobs in datacatalog")
         resubmit = bool((err_file_ct < opts['max_retries']
                         and num_tapis_msg < opts['max_retries'])
-                        or opts['force_resubmit'] == 'true')
+                        or opts['force_resubmit'] is True)
         if resubmit:
             r.logger.info("Resubmitting Tapis jobId={}".format(msg['tapis_jobId']))
-            resubmit_resp = ag_jobs_resubmit(job_self_link=job['self_link'])
-            r.logger.info(resubmit_resp.json())
+            resubmit_resp = jobs_resubmit(job_self_link=job['self_link'],
+                                          notif_add_self=opts['notif_add_self'])
         else:
             #job_manager_id = opts.get('pipelines', {}).get('job_manager_id', '')
             #mpj_update(job_manager_id, 'fail')
