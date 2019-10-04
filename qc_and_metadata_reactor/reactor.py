@@ -107,12 +107,11 @@ def submit_job(r, manifest, dataframe_record):
        {'level': '2', 'patterns': ['.csv$']}
     ]
 
-    product_patterns = [
-        {'patterns': ['.csv$'],
-        'derived_using': [],
-        'derived_from': df_files
-        }
-    ]
+    product_patterns = [{
+         'patterns': ['.csv$'],
+         'derived_using': [],
+         'derived_from': df_files
+         }]
 
     mpj = Job(r, experiment_id=experiment_id, data=data,
               archive_patterns=archive_patterns,
