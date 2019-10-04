@@ -41,6 +41,7 @@ def manifest(r):
         manifest = json.load(open(manifestFileName))
     except Exception as e:
         r.on_failure("failed to load manifest {}".format(manifestUrl), e)
+    r.logger.info("Processing: {}".format(manifestPath))
 
     experiment_id = manifest['experiment_id']
 
@@ -124,43 +125,44 @@ def manifest(r):
         print("PRODUCT PATTERNS:")
         pprint.pprint(product_patterns)
 
-        mpj = Job(r, measurement_id=measurement_id, data=data,
-                  archive_patterns=archive_patterns,
-                  product_patterns=product_patterns,
-                  setup_archive_path=False)
-        mpj.setup()
-        print("JOB UUID: ", mpj.uuid)
-        r.logger.info("Submitted Pipeline Job {}".format(mpj.uuid))
-        job_def.archivePath = mpj.archive_path
+        # mpj = Job(r, measurement_id=measurement_id, data=data,
+        #           archive_patterns=archive_patterns,
+        #           product_patterns=product_patterns,
+        #           setup_archive_path=False)
+        # mpj.setup()
+        #print("JOB UUID: ", mpj.uuid)
+        #r.logger.info("Submitted Pipeline Job {}".format(mpj.uuid))
+        #job_def.archivePath = mpj.archive_path
         #job_def.archivePath = 'shared-q1-workshop/urrutia/experiment.ginkgo.23121_Novel-chassis_2.0_DNA-seq_strain_verfication/preprocessed/'
-
-        notif = [{'event': 'RUNNING',
-                  "persistent": True,
-                  'url': mpj.callback + '&status=${JOB_STATUS}'},
-                 {'event': 'FAILED',
-                  "persistent": False,
-                  'url': mpj.callback + '&status=${JOB_STATUS}'},
-                 {'event': 'FINISHED',
-                  "persistent": False,
-                  'url': mpj.callback + '&status=FINISHED'}]
+        #
+        # notif = [{'event': 'RUNNING',
+        #           "persistent": True,
+        #           'url': mpj.callback + '&status=${JOB_STATUS}'},
+        #          {'event': 'FAILED',
+        #           "persistent": False,
+        #           'url': mpj.callback + '&status=${JOB_STATUS}'},
+        #          {'event': 'FINISHED',
+        #           "persistent": False,
+        #           'url': mpj.callback + '&status=FINISHED'}]
 
         #notifications = job_template["notifications"]
         #if notifications is not None:
         #   for item in notifications:
         #       notif.append(item)
 
-        job_def["notifications"] = notif
+        #job_def["notifications"] = notif
         print(json.dumps(job_def, indent=4))
-        try:
-            job_id = ag.jobs.submit(body=job_def)['id']
-            print(json.dumps(job_def, indent=4))
-            mpj.run({"launched": job_id, "experiment_id": experiment_id, "sample_id": sample_id})
-            r.logger.info("Submitted Agave job {}".format(job_id))
-        except Exception as e:
-            print(json.dumps(job_def, indent=4))
-            r.logger.error("Error submitting job: {}".format(e))
-            print(e.response.content)
-
+        # try:
+        #     job_id = ag.jobs.submit(body=job_def)['id']
+        #     print(json.dumps(job_def, indent=4))
+        #     mpj.run({"launched": job_id, "experiment_id": experiment_id, "sample_id": sample_id})
+        #     r.logger.info("Submitted Agave job {}".format(job_id))
+        # except Exception as e:
+        #     print(json.dumps(job_def, indent=4))
+        #     r.logger.error("Error submitting job: {}".format(e))
+        #     print(e.response.content)
+    r.logger.info("Sucessfully Processed: {}".format(manifestPath))
+    r.logger.info("Could've Submitted {} Pipeline Jobs ".format(len(rna_list)))
 
 
 
