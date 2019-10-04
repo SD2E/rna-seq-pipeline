@@ -58,7 +58,8 @@ def alignment(r, archive_paths, manifest):
         sample_data = {}
         sample_id = sample['sample_id']
         #sample_data['timepoint'] = str(sample['measurements'][0]['timepoint']['value']) + ":hours"
-        sample_data['strain'] = sample['strain']['label']
+        #sample_data['strain'] = sample['strain']['label']
+        sample_data['strain'] = '_'.join(sample['strain']['label'].split(' '))
         #sample_data['temperature'] = sample['temperature']['value']
         #sample_data['replicate'] = sample['replicate']
         #sample_data['arabinose'] = [content['value'] for content in sample['contents'] if content['name']['sbh_uri'] == 'https://hub.sd2e.org/user/sd2e/design/Larabinose/1']
@@ -77,9 +78,9 @@ def alignment(r, archive_paths, manifest):
         job_template['name'] = sample
         job_template['parameters']['path_read1'] = metadata['R1']
         job_template['parameters']['path_read2'] = metadata['R2']
-        job_template['parameters']['path_fasta'] = '/reference/novel_chassis/amin_refs/' + metadata['strain'] + '/' + metadata['strain'] + '.fa'
-        job_template['parameters']['path_interval_file'] = '/reference/novel_chassis/amin_refs/' + metadata['strain'] + '/' + metadata['strain'] + '.interval_list'
-        job_template['parameters']['path_dict_file'] = '/reference/novel_chassis/amin_refs/' + metadata['strain'] + '/' + metadata['strain'] + '.dict'
+        job_template['parameters']['path_fasta'] = '/reference/novel_chassis/b_subtilis/' + metadata['strain'] + '/' + metadata['strain'] + '.fa'
+        job_template['parameters']['path_interval_file'] = '/reference/novel_chassis/b_subtilis/' + metadata['strain'] + '/' + metadata['strain'] + '.interval_list'
+        job_template['parameters']['path_dict_file'] = '/reference/novel_chassis/b_subtilis/' + metadata['strain'] + '/' + metadata['strain'] + '.dict'
         job_template['parameters']['outname'] = sample + '_' + metadata['strain']
 
 
