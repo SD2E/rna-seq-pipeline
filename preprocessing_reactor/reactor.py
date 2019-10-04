@@ -46,10 +46,15 @@ def manifest(r):
     experiment_id = manifest['experiment_id']
 
     rna_list = []
+    bad_mes = []
     for sample in manifest["samples"]:
-        mes_types = [measurement["measurement_type"] for measurement in sample["measurements"]]
-        if mes_types[0] == "RNA_SEQ":
-            rna_list.append(sample)
+        mes_types = [measurement["measurement_type"] for
+                     measurement in sample["measurements"]]
+        if mes_types != []:
+            if mes_types[0] == "RNA_SEQ":
+                rna_list.append(sample)
+        if mes_types == []:
+            bad_mes.append(sample)
 
     for sample in rna_list:
         sample_id = sample['sample_id']
