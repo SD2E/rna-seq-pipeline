@@ -2,13 +2,13 @@
   "name": "{{ agave.username }}-{{ app.name }}",
   "version": "{{ app.version }}",
   "executionType": "HPC",
-  "executionSystem": "hpc-tacc-wrangler-{{ agave.username }}",
+  "executionSystem": "hpc-tacc-wrangler-{{ agave.username }}-custom",
   "parallelism": "SERIAL",
   "deploymentPath": "{{ agave.username }}/apps/{{ app.name }}-{{ app.version }}",
   "deploymentSystem": "data-sd2e-projects-users",
   "defaultProcessorsPerNode": 1,
   "defaultNodeCount": 1,
-  "defaultQueue": "hadoop",
+  "defaultQueue": "all",
   "label": "{{ date_time.iso8601_micro }}",
   "modules": ["load tacc-singularity"],
   "shortDescription": "{{ app.description }}",
@@ -16,7 +16,7 @@
   "testPath": "tester.sh",
   "inputs": [
   {
-  "id": "bam_dir",
+  "id": "sample_paths",
   "value": {
     "default": "",
     "order": 0,
