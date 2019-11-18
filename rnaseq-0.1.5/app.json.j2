@@ -1,7 +1,11 @@
 {
 	"name": "{{ agave.username }}-{{ app.name }}",
 	"version": "{{ app.version }}",
+<<<<<<< HEAD:rnaseq-0.1.5/app.json.j2
 	"executionSystem": "hpc-tacc-wrangler-{{ agave.username }}",
+=======
+	"executionSystem": "hpc-tacc-maverick",
+>>>>>>> bfbed93cc4211d038a74c679301dc68225db2493:rnaseq-0.1.3/app.json.j2
 	"executionType": "HPC",
 	"parallelism": "SERIAL",
   "deploymentPath": "{{ agave.username }}/apps/{{ app.name }}-{{ app.version }}",
