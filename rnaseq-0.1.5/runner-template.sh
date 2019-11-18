@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+
+# Import Agave runtime extensions
+. _lib/extend-runtime.sh
+
+HPC_PATH=/work/projects/SD2E-Community/prod/data/
+
+# Allow CONTAINER_IMAGE over-ride via local file
+if [ -z "${CONTAINER_IMAGE}" ]
+then
+    if [ -f "./_lib/CONTAINER_IMAGE" ]; then
+        CONTAINER_IMAGE=$(cat ./_lib/CONTAINER_IMAGE)
+    fi
+    if [ -z "${CONTAINER_IMAGE}" ]; then
+        echo "CONTAINER_IMAGE was not set via the app or CONTAINER_IMAGE file"
+        CONTAINER_IMAGE="sd2e/base:ubuntu17"
+    fi
+fi
+
+# resets inputs to paths if inputs are null
+if [ -z ${read1} ]; then
+  echo "no input specified for read1, attempting to pull read1 from path parameter: path_read1"
+  echo read1=${HPC_PATH}${path_read1}
+  r1=${HPC_PATH}${path_read1}
+else
+  r1=${read1}
+fi
+
+if [ -z ${read2} ]; then
+  echo "no input specified for read2, attempting to use path parameter: path_read2"
+  echo read2=${HPC_PATH}${path_read2}
+  r2=${HPC_PATH}${path_read2}
+else
+  r2=${read2}
+fi
+
+if [ -z ${filterseqs} ]; then
+  echo "no input specified for filterseqs, attempting to use path parameter: path_filterseqs"
+  echo filterseqs=${path_filterseqs}
+  fseqs=${HPC_PATH}${path_filterseqs}
+else
+  fseqs=${filterseqs}
+fi
+
+if [ ${multiple_lanes} = 1 ] ; then
+  echo "Grouping fastqs from multiple lanes"
+   sample=$(echo $r1 | sed 's/_L0.*//g')
+   OUT_SAMPLE=$(basename ${sample})
+   echo "cat ${sample}*_R1* > ${OUT_SAMPLE}_merged_R1.fastq.gz" &
+   cat ${sample}*_R1* > ${OUT_SAMPLE}_merged_R1.fastq.gz &
+   echo "cat ${sample}*_R2* > ${OUT_SAMPLE}_merged_R2.fastq.gz" &
+   cat ${sample}*_R2* > ${OUT_SAMPLE}_merged_R2.fastq.gz
+   wait
+   r1=${OUT_SAMPLE}_merged_R1.fastq.gz
+   r2=${OUT_SAMPLE}_merged_R2.fastq.gz
+fi
+
+
+if [[ ${r1} =~ \.gz$ ]]; then
+   echo READ1 is gzipped, upzipping
+   echo "zcat ${r1} > $(basename $r1 .gz)"
+   zcat ${r1} > $(basename $r1 .gz)
+   r1=$(basename $r1 .gz)
+else
+   echo READ1 is not gzipped
+fi
+if [[ ${r2} =~ \.gz$ ]]; then
+  echo READ2 is gzipped, upzipping
+  echo "zcat ${r2} > $(basename $r2 .gz)"
+  zcat ${r2} > $(basename $r2 .gz)
+  r2=$(basename $r2 .gz)
+else
+   echo READ2 is not gzipped
+fi
+
+echo the input parameters
+echo read1 is ${r1}
+echo read2 is ${r2}
+echo trim is ${trim}
+echo sortmerna is ${sortmerna}
+echo minlen is ${minlen}
+echo adaptersfile is ${adaptersfile}
+echo filterseqs is ${fseqs}
+echo multiple_lanes is ${multiple_lanes}
+
+echo DEBUG=1 container_exec ${CONTAINER_IMAGE} /opt/scripts/runsortmerna.sh ${r1} ${r2} ${trim} ${adaptersfile} ${minlen} ${sortmerna} ${fseqs}
+
+DEBUG=1 container_exec ${CONTAINER_IMAGE} /opt/scripts/runsortmerna.sh ${r1} ${r2} ${trim} ${adaptersfile} ${minlen} ${sortmerna} ${fseqs}
+
+rm $(basename $r1)
+rm $(basename $r2)
