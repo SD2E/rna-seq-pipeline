@@ -13,11 +13,12 @@ library("optparse")
 library("Rsubread")
 library("Rsamtools")
 library("genomeIntervals")
+library("rjson")
 
 
 option_list = list(
   make_option(c("-bpath", "--bamfilespath"), type="character", action="store", default=FALSE,
-              help="Directory path to bam files", metavar="character"),
+              help="JSON dictionary of sampleID: bam file location", metavar="character"),
   make_option(c("-anno", "--annotation"), type="character", action="store", default=FALSE,
               help="Annotation file in gtf/gff/gff3 format", metavar="character"),
   make_option(c("-v", "--verbose"), action="store_true", default=TRUE,
@@ -62,7 +63,9 @@ dir.exists<-function (x)
 #Reading bam files from user's input location
 print(opt$bamfiles)
 print(opt$annotation)
-files_location=file.path(opt$bamfiles)
+files_json <- fromJSON(file = opt$bamfiles)
+#files_df <- as.data.frame(files_json)
+files_location=file.path(files_json)
 # Start writing to an output file
 logfile=paste("files_location", "_log.txt",sep="")
 sink(logfile)
@@ -71,16 +74,25 @@ sink(logfile)
 paste(Sys.Date(), "_and_",Sys.time(),sep="")
 
 
-
-if(dir.exists(files_location)){
-  message("Bam file path exists")
+file_checks <- 0
+for (afile in files_location){
+  if(file.exists(afile)){
+    file_checks <- file_checks + 0
+  } else {
+    file_checks <- file_checks - 1
+    print(afile)
+  }
 }
 
-files_location=opt$bamfiles
+if(file_checks == 0){
+  message("Bam file paths exist")
+} else {
+  message("Not all Bams exist")
+}
+
+#bam.files <- list.files(files_location, pattern = "*/*/*RG.bam$",full.names=TRUE, recursive = TRUE)
+bamFileList <- BamFileList(files_location)
 print(files_location)
-bam.files <- list.files(files_location, pattern = "*RG.bam$",full.names=TRUE, recursive = TRUE)
-bamFileList <- BamFileList(bam.files)
-print(bam.files)
 # Working through annotation file passed by user
 gtf <- opt$annotation
 gInterval<-readGff3(gtf, quiet=TRUE)
@@ -88,10 +100,37 @@ gInterval<-readGff3(gtf, quiet=TRUE)
 #Calculate read count data frame
 output <- "ReadCountMatrix_preCAD"
 #fc <- featureCounts(files=bam.files,annot.ext=gtf,isGTFAnnotationFile=TRUE,GTF.featureType="gene",GTF.attrType="gene",isPairedEnd=TRUE,requireBothEndsMapped=FALSE,countMultiMappingReads=TRUE)
-fc <- featureCounts(files=bam.files,annot.ext=gtf,isGTFAnnotationFile=TRUE,GTF.featureType="gene",GTF.attrType="gene",isPairedEnd=TRUE,requireBothEndsMapped=FALSE)
-prefix=paste('X', gsub('[/,-]','.',files_location), '.', sep = '')
-colnames(fc$counts) <- gsub(prefix,'',colnames(fc$counts))
-colnames(fc$counts) <- gsub('_MG1655.*','',colnames(fc$counts))
+fc <- featureCounts(files=files_location,annot.ext=gtf,isGTFAnnotationFile=TRUE,GTF.featureType="CDS",GTF.attrType="Name",isPairedEnd=TRUE,requireBothEndsMapped=FALSE)
+#prefix=paste('X', gsub('[/,-]','.',files_location), '.', sep = '')
+#colnames(fc$counts) <- gsub(prefix,'',colnames(fc$counts))
+## TODO: stop string parsing and just use the new input sample: path dictionary
+#colnames(fc$counts) <- gsub('.*.sample','sample',colnames(fc$counts))
+#colnames(fc$counts) <- gsub('.MG1655.*','',colnames(fc$counts))
+sample_path_pairs <- list(0)
+for (i in names(files_json)) {
+    sample_id <- i
+    sample_path <- files_json[i]
+    sample_path <- gsub('[-,_,/]','.',sample_path)
+    sample_path <- gsub('.*.sample','sample',sample_path)
+    sample_path <- gsub("\\.\\.","\\.",sample_path)
+    sample_path_pairs[sample_path] <- sample_id
+}
+
+# First tries to use sample ID that was passed in the sample_path.json
+# if they keys don't match it does string parsing on the sample path that was provided
+for (column in colnames(fc$counts)) {
+    if (!is.na(names(sample_path_pairs[column]))) {
+    colnames(fc$counts)[colnames(fc$counts)==column] <- sample_path_pairs[column]
+    print("found")
+  } else {
+    name <- gsub('.*.sample','sample',column)
+    name <- gsub('.B.*', '', name)
+    name <- gsub('.MG1655.*','', name)
+    print("parsing: ")
+    print(name)
+    colnames(fc$counts)[colnames(fc$counts)==column] <- name
+  }
+}
 
 counts <- fc$counts
 counts <- as.data.frame(counts)
@@ -100,7 +139,10 @@ counts <- cbind(gene_id=rownames(counts),counts)
 
 write.table(counts,paste(output,".tsv",sep=""),col.names=TRUE,row.names=FALSE,quote=F,sep="\t",append=F)
 
-
+transposed_counts <- as.data.frame(t(counts[,-1]))
+#colnames(transposed__counts) <- counts[,1]
+transposed_counts <- cbind(sample_id=rownames(transposed_counts),transposed_counts)
+write.table(transposed_counts,paste(output,"_transposed.tsv",sep=""),col.names=TRUE,row.names=FALSE,quote=F,sep="\t",append=F)
 
 
 # Author: Andy Saurin (andrew.saurin@univ-amu.fr)
@@ -144,6 +186,10 @@ write.table(ftr.fpkm, paste(output,"_FPKM.tsv",sep=""), sep="\t", row.names=FALS
 cat(' Done.\n\tSaved as ')
 paste(output,"_FPKM.tsv",sep="")
 
+transposed_fpkm_counts <- as.data.frame(t(ftr.fpkm[,-1]))
+transposed_fpkm_counts <- cbind(sample_id=rownames(transposed_fpkm_counts),transposed_fpkm_counts)
+write.table(transposed_fpkm_counts,paste(output,"_FPKM_transposed.tsv",sep=""),col.names=TRUE,row.names=FALSE,quote=F,sep="\t",append=F)
+
 cat('Performing TPM calculations...')
 
 tpms <- apply(counts, 2, function(x) tpm(x, lengths) )
@@ -153,3 +199,7 @@ ftr.tpm <- cbind(gene_id=ftr.cnt[,1], tpms)
 write.table(ftr.tpm, paste(output,"_TPM.tsv",sep=""), sep="\t", row.names=FALSE, quote=FALSE)
 cat(' Done.\n\tSaved as ')
 paste(output,"_TPM.tsv",sep="")
+
+transposed_tpm_counts <- as.data.frame(t(ftr.tpm[,-1]))
+transposed_tpm_counts <- cbind(sample_id=rownames(transposed_tpm_counts),transposed_tpm_counts)
+write.table(transposed_tpm_counts,paste(output,"_TPM_transposed.tsv",sep=""),col.names=TRUE,row.names=FALSE,quote=F,sep="\t",append=F)
