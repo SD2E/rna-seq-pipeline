@@ -55,16 +55,6 @@ SORT=${6}
 RNADB_DIR=${7}
 
 
-if file --mime-type "${R1}" | grep -q gzip$; then
-    gunzip ${R1} &
-    R1="${R1%.*}"
-fi
-if file --mime-type "${R2}" | grep -q gzip$; then
-    gunzip ${R2} &
-    R2="${R2%.*}"
-fi
-wait
-
 rnadb_config=${RNADB_DIR}/${RNADB_CONFIG}
 
 if [ ! -f $rnadb_config ] ; then
@@ -86,7 +76,8 @@ else
 fi
 
 # get the thread count of this container
-NTHREADS=`cat /proc/cpuinfo | grep processor | wc -l`
+THREADS=`cat /proc/cpuinfo | grep processor | wc -l`
+NTHREADS=$(($CORES - 10))
 paired=1
 
 # if we get the default R2 value of ENOSUCH, this is an unpaired run
@@ -115,46 +106,50 @@ if [ $paired == 1 ]; then
     if [[ $R2 =~ $FASTQ_SUFFIX ]]; then
        R2NAME=${R2::-6}
     fi
-    echo R2 is $R2
 fi
 echo R2 is $R2
 
+#R1NAME=${R1NAME%.f*}
+R1NAME=${R1NAME%_001_paired}
+R2NAME=${R2NAME%_001_paired}
 echo RNAME1 is $R1NAME
 echo RNAME2 is $R2NAME
 # trim if we are told to
 
 if [ $TRIM == 1 ]; then
     if [ $paired == 1 ]; then
-       echo java -jar ${TRIMMOMATIC_DIR}/trimmomatic-0.36.jar PE -phred33 ${R1} ${R2} ${R1NAME}_paired.fastq ${R1NAME}_unpaired.fastq ${R2NAME}_paired.fastq ${R2NAME}_unpaired.fastq ILLUMINACLIP:${TRIMMOMATIC_DIR}/adapters/${ADAPTER} LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:${MINLEN}
-       java -jar ${TRIMMOMATIC_DIR}/trimmomatic-0.36.jar PE -phred33 ${R1} ${R2} ${R1NAME}_paired.fastq ${R1NAME}_unpaired.fastq ${R2NAME}_paired.fastq ${R2NAME}_unpaired.fastq ILLUMINACLIP:${TRIMMOMATIC_DIR}/adapters/${ADAPTER} LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:${MINLEN}
-       echo ${SORTMERNA_DIR}/scripts/merge-paired-reads.sh ${R1NAME}_paired.fastq ${R2NAME}_paired.fastq ${R1NAME}_merged-reads.fastq
-       ${SORTMERNA_DIR}/scripts/merge-paired-reads.sh ${R1NAME}_paired.fastq ${R2NAME}_paired.fastq ${R1NAME}_merged-reads.fastq
+       echo java -jar ${TRIMMOMATIC_DIR}/trimmomatic-0.36.jar PE -phred33 ${R1} ${R2} ${R1NAME}_trimmed.fastq ${R1NAME}_unpaired.fastq ${R2NAME}_trimmed.fastq ${R2NAME}_unpaired.fastq ILLUMINACLIP:${TRIMMOMATIC_DIR}/adapters/${ADAPTER} LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:${MINLEN}
+       java -jar ${TRIMMOMATIC_DIR}/trimmomatic-0.36.jar PE -phred33 ${R1} ${R2} ${R1NAME}_trimmed.fastq ${R1NAME}_unpaired.fastq ${R2NAME}_trimmed.fastq ${R2NAME}_unpaired.fastq ILLUMINACLIP:${TRIMMOMATIC_DIR}/adapters/${ADAPTER} LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:${MINLEN}
+       echo ${SORTMERNA_DIR}/scripts/merge-paired-reads.sh ${R1NAME}_trimmed.fastq ${R2NAME}_trimmed.fastq ${R1NAME}_merged-reads.fastq
+       ${SORTMERNA_DIR}/scripts/merge-paired-reads.sh ${R1NAME}_trimmed.fastq ${R2NAME}_trimmed.fastq ${R1NAME}_merged-reads.fastq
        echo SORT_FILE=${R1NAME}_merged-reads.fastq
        SORT_FILE=${R1NAME}_merged-reads.fastq
     else
-       echo java -jar ${TRIMMOMATIC_DIR}/trimmomatic-0.36.jar SE -phred33 ${R1} ${R1NAME}_paired.fastq ILLUMINACLIP:${TRIMMOMATIC_DIR}/adapters/${ADAPTER} LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:${MINLEN}
-       java -jar ${TRIMMOMATIC_DIR}/trimmomatic-0.36.jar SE -phred33 ${R1} ${R1NAME}_paired.fastq ILLUMINACLIP:${TRIMMOMATIC_DIR}/adapters/${ADAPTER} LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:${MINLEN}
-       echo SORT_FILE=${R1NAME}_paired.fastq
-       SORT_FILE=${R1NAME}_paired.fastq
+       echo java -jar ${TRIMMOMATIC_DIR}/trimmomatic-0.36.jar SE -phred33 ${R1} ${R1NAME}_trimmed.fastq ILLUMINACLIP:${TRIMMOMATIC_DIR}/adapters/${ADAPTER} LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:${MINLEN}
+       java -jar ${TRIMMOMATIC_DIR}/trimmomatic-0.36.jar SE -phred33 ${R1} ${R1NAME}_trimmed.fastq ILLUMINACLIP:${TRIMMOMATIC_DIR}/adapters/${ADAPTER} LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:${MINLEN}
+       echo SORT_FILE=${R1NAME}_trimmed.fastq
+       SORT_FILE=${R1NAME}_trimmed.fastq
     fi
 else
   echo "Skipping TRIMOMATIC step based on users request"
 fi
 
 # sort if we are told to
-
+echo "checking sortmerna"
 if [ $SORT == 1 ]; then
+    rsync -rltv $RNADB_DIR ./
+    RNADB_DIR=$(basename $RNADB_DIR)
     gunzip $RNADB_DIR/*.gz
     if [ $paired == 1 ]; then
-    echo ${SORTMERNA_DIR}/sortmerna --paired_out --ref ${RNADB}  --reads ${SORT_FILE} --num_alignments 1 --fastx --aligned ${R1NAME}_merged --other ${R1NAME}_rna_free_reads -a $NTHREADS --log -v --blast 1
-    ${SORTMERNA_DIR}/sortmerna --paired_out --ref ${RNADB}  --reads ${SORT_FILE} --num_alignments 1 --fastx --aligned ${R1NAME}_merged --other ${R1NAME}_rna_free_reads -a $NTHREADS --log -v --blast 1
-    echo ${SORTMERNA_DIR}/scripts/unmerge-paired-reads.sh ${R1NAME}_rna_free_reads.fastq X${R1NAME}_rna_free_reads.fastq ${R2NAME}_rna_free_reads.fastq
-    ${SORTMERNA_DIR}/scripts/unmerge-paired-reads.sh ${R1NAME}_rna_free_reads.fastq X${R1NAME}_rna_free_reads.fastq ${R2NAME}_rna_free_reads.fastq
-    echo mv X${R1NAME}_rna_free_reads.fastq ${R1NAME}_rna_free_reads.fastq
-    mv X${R1NAME}_rna_free_reads.fastq ${R1NAME}_rna_free_reads.fastq
+    echo ${SORTMERNA_DIR}/sortmerna --paired_out --ref ${RNADB}  --reads ${SORT_FILE} --num_alignments 1 --fastx --aligned ${R1NAME}_rRNA --other ${R1NAME}_rRNA_free_reads -a $NTHREADS --log -v --blast 1
+    ${SORTMERNA_DIR}/sortmerna --paired_out --ref ${RNADB}  --reads ${SORT_FILE} --num_alignments 1 --fastx --aligned ${R1NAME}_rRNA --other ${R1NAME}_rRNA_free_reads -a $NTHREADS --log -v --blast 1
+    echo ${SORTMERNA_DIR}/scripts/unmerge-paired-reads.sh ${R1NAME}_rRNA_free_reads.fastq X${R1NAME}_rRNA_free_reads.fastq ${R2NAME}_rRNA_free_reads.fastq
+    ${SORTMERNA_DIR}/scripts/unmerge-paired-reads.sh ${R1NAME}_rRNA_free_reads.fastq X${R1NAME}_rRNA_free_reads.fastq ${R2NAME}_rRNA_free_reads.fastq
+    echo mv X${R1NAME}_rRNA_free_reads.fastq ${R1NAME}_rRNA_free_reads.fastq
+    mv X${R1NAME}_rRNA_free_reads.fastq ${R1NAME}_rRNA_free_reads.fastq
     else
-        echo ${SORTMERNA_DIR}/sortmerna --ref ${RNADB}  --reads ${SORT_FILE} --num_alignments 1 --fastx --aligned ${R1NAME}_merged --other ${R1NAME}_rna_free_reads -a $NTHREADS --log -v --blast 1
-        ${SORTMERNA_DIR}/sortmerna --ref ${RNADB}  --reads ${SORT_FILE} --num_alignments 1 --fastx --aligned ${R1NAME}_merged --other ${R1NAME}_rna_free_reads -a $NTHREADS --log -v --blast 1
+        echo ${SORTMERNA_DIR}/sortmerna --ref ${RNADB}  --reads ${SORT_FILE} --num_alignments 1 --fastx --aligned ${R1NAME}_rRNA --other ${R1NAME}_rRNA_free_reads -a $NTHREADS --log -v --blast 1
+        ${SORTMERNA_DIR}/sortmerna --ref ${RNADB}  --reads ${SORT_FILE} --num_alignments 1 --fastx --aligned ${R1NAME}_rRNA --other ${R1NAME}_rRNA_free_reads -a $NTHREADS --log -v --blast 1
     fi
 else
   echo "Skipping SORTMERNA step based on users request"
@@ -165,34 +160,45 @@ fi
 
 if [ $TRIM == 1 ]; then
     if [ $paired == 1 ]; then
-        ${FASTQC_DIR}/fastqc ${R1NAME}_rna_free_reads.fastq &
-        ${FASTQC_DIR}/fastqc ${R2NAME}_rna_free_reads.fastq &
-        ${FASTQC_DIR}/fastqc ${R1NAME}_paired.fastq &
-        ${FASTQC_DIR}/fastqc gzip ${R2NAME}_paired.fastq &
+        ${FASTQC_DIR}/fastqc ${R1NAME}_trimmed.fastq &
+        ${FASTQC_DIR}/fastqc ${R2NAME}_trimmed.fastq &
         wait
-        gzip ${R1NAME}_rna_free_reads.fastq &
-        gzip ${R2NAME}_rna_free_reads.fastq &
-        gzip ${R1NAME}_paired.fastq &
-        gzip ${R2NAME}_paired.fastq &
+        gzip ${R1NAME}_trimmed.fastq &
+        gzip ${R2NAME}_trimmed.fastq &
         wait
+        if [ $SORT == 1 ]; then
+           ${FASTQC_DIR}/fastqc ${R1NAME}_rRNA_free_reads.fastq &
+           ${FASTQC_DIR}/fastqc ${R2NAME}_rRNA_free_reads.fastq &
+           wait
+           gzip ${R1NAME}_rRNA_free_reads.fastq &
+           gzip ${R2NAME}_rRNA_free_reads.fastq &
+           wait
+        fi
     else
-        ${FASTQC_DIR}/fastqc ${R1NAME}_rna_free_reads.fastq &
-        ${FASTQC_DIR}/fastqc ${R1NAME}_paired.fastq &
-        wait
-        gzip ${R1NAME}_rna_free_reads.fastq &
-        gzip ${R1NAME}_paired.fastq &
-        wait
+        ${FASTQC_DIR}/fastqc ${R1NAME}_trimmed.fastq
+        gzip ${R1NAME}_trimmed.fastq
+        if [ $SORT == 1 ]; then
+          ${FASTQC_DIR}/fastqc ${R1NAME}_rRNA_free_reads.fastq
+          gzip ${R1NAME}_rRNA_free_reads.fastq
+        fi
     fi
     echo done with all gzips
 fi
 
 
-# and clean up... for now leaving hte free reads unzipped
+# report out and clean up...
 
-rm $R1
-rm $R2
-rm -r $RNADB_DIR
-rm *_merged.fastq
-rm *_merged.blast
-rm *_merged-reads.fastq
-rm *unpaired.fastq
+echo "R1 reads removed by Trimmomatic: "
+echo $(cat ${R1NAME}_unpaired.fastq|wc -l)/4|bc
+echo "R2 reads removed by Trimmomatic: "
+echo $(cat ${R2NAME}_unpaired.fastq|wc -l)/4|bc
+echo "Reads removed by SortmeRNA: "
+echo $(cat ${R1NAME}_rRNA.fastq|wc -l)/4|bc
+
+
+rm -rf $(basename $RNADB_DIR)
+rm -f *_unpaired.fastq
+rm -f *_rRNA.fastq
+rm -f *_rRNA.blast
+rm -f *_merged-reads.fastq
+rm -f *unpaired.fastq
