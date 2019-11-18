@@ -1,4 +1,6 @@
 from reactors.utils import Reactor, agaveutils
+from agavepy.agave import Agave
+from datacatalog.managers.pipelinejobs import ReactorManagedPipelineJob as Job
 from urllib.parse import unquote, urlsplit
 from inspect import getsource as gs
 from pprint import pprint as pp
@@ -90,6 +92,7 @@ def jobs_resubmit(job_self_link, notif_add_self=True):
     token = agaveutils.get_api_token(r.client)
     headers = {"Authorization": 'Bearer {}'.format(token),
                "Content-Type": "application/json"}
+    print(url, headers)
     resub_resp = requests.post(url, headers=headers)
     new_tapis_jobId = resub_resp.json().get('result', {}).get('id')
     r.logger.info("Resubmitted with new Tapis " +
@@ -98,7 +101,31 @@ def jobs_resubmit(job_self_link, notif_add_self=True):
     # add webhooks to self on FINISHED and FAILED if they do not exist
     if notif_add_self:
         add_self_to_notifs(new_tapis_jobId)
-    return resub_resp
+    return new_tapis_jobId
+
+def mpj_reset(mpjId, tapis_jobId):
+    from agavepy.agave import Agave
+    from datacatalog.tokens import get_admin_token
+    from datacatalog.managers.pipelinejobs.jobmanager import JobManager
+    mg_auth = os.getenv('_REACTOR_MONGODB_AUTHN')
+    mongodb={'authn':mg_auth, 'database': 'catalog_staging'}
+    ag = r.client
+    seed = os.getenv('_ATOKEN_SEED')
+    atoken = get_admin_token(seed)
+    job = JobManager(mongodb, agave=ag).load(mpjId)
+    job.reset(token=atoken)
+    job.ready(token=atoken)
+    try:
+        agpy = Agave.restore()
+        new_tapis_id = agpy.jobs.manage(body='{"action":"resubmit"}', jobId=tapis_jobId)['id']
+    except Exception as e:
+        r.logger.error("Error submitting job: {}".format(e))
+        print("Almost definitely an issue with reactor/agavepy Auth")
+    return
+
+    #new_tapis_jobId = jobs_resubmit(job_self_link, notif_add_self=True)
+    mpj.run({"launched": job_id, "experiment_id": experiment_id, "sample_id": sample_id})
+    r.logger.info("Submitted Agave job {}".format(job_id))
 
 
 def query_jobs_table(query={}, projection={}, dbURI="", return_max=-1):
@@ -185,7 +212,7 @@ def count_tapis_msg(mpjId):
     for m in response[0]['history']:
         if type(m.get('data')) != dict:
             continue
-        elif m['data'].get('status') in ("FINISHED", "FAILED"):
+        elif m['data'].get('launched'):
             # == 'FINISHED' || m.get('name') == 'finish':
             tapis_messages.append(m)
     return len(tapis_messages)
@@ -220,7 +247,9 @@ def main():
     # r.logger.debug(json.dumps(r.context, indent=4))
 
     # pull from message context and settings
-    msg = require_keys(r.context, ['mpjId', 'tapis_jobId'])
+    context = r.context  # Actor context
+    m = context.message_dict
+    msg = require_keys(m, ['mpjId', 'tapis_jobId'])
     opts = require_keys(r.settings.options, ['max_retries', 'min_fastq_mb',
                                              'notif_add_self'])
     # force_resubmit=bool(True) to override max_retries
@@ -243,7 +272,8 @@ def main():
     archiveSystem = archiveSystem_to_path(job['archiveSystem'])
 
     # check for existence and size of fastq files
-    is_valid = validate_archive(os.path.join(archiveSystem, job['archivePath']),
+    is_valid = validate_archive(os.path.join(
+                                archiveSystem + job['archivePath']),
                                 ["/*R1*.fastq.gz", "/*R2*.fastq.gz"],
                                 min_mb=opts['min_fastq_mb'])
     if job['status'] != 'FINISHED':
@@ -258,7 +288,11 @@ def main():
         r.logger.error("Outputs for preprocessing jobId=" +
                        "{} failed validation".format(msg['tapis_jobId']))
         num_tapis_msg = count_tapis_msg(msg['mpjId'])
-        err_file_ct = len(glob(os.path.join(archiveSystem, job['archivePath'], "*.err")))
+        # resetting pipeline jobs actually deletes everything in the
+        # archivePath (or it's supposed to), good idea but I'm
+        # going to remove this
+        #err_file_ct = len(glob(os.path.join(archiveSystem + job['archivePath'], "*.err")))
+
         # Only resubmit if the # error files in the archivePath
         # and Tapis jobs in the datacatalog are both less than max_retries
         r.logger.debug("Found {} *.err files in archivePath and {}".format(

@@ -3,6 +3,7 @@ FROM sd2e/reactors:python3
 #FROM sd2e/reactors:python3-edge
 
 RUN pip3 install pymongo
+RUN pip install --upgrade git+https://github.com/SD2E/python-datacatalog.git@2_2
 
 # If using enho/reactors:datacatalog base image:
 # Manually add reactor.py, config.yml, and message.jsonschema, which
