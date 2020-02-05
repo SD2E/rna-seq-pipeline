@@ -48,8 +48,9 @@ def dataframe_jobs(r, manifest, archive_paths):
     rna_list = []
     for sample in manifest["samples"]:
         mes_types = [measurement["measurement_type"] for measurement in sample["measurements"]]
-        if mes_types[0] == "RNA_SEQ":
-            rna_list.append(sample)
+        if mes_types != []:
+            if mes_types[0] == "RNA_SEQ":
+                rna_list.append(sample)
     for sample in rna_list:
         norm = [measurement for measurement in sample['measurements'] if measurement['library_prep'] == 'NORMAL'][0]
         raw = [file for file in norm['files'] if file['lab_label'] == ['RAW']]
@@ -76,7 +77,7 @@ def dataframe_jobs(r, manifest, archive_paths):
     job_def["name"] = experiment_id
     ag = r.client
     parameters = job_def.parameters
-    parameters["path_gff"] = "/reference/novel_chassis/novel_chassis_2.0_strains_1.0.0.gff"
+    parameters["path_gff"] = "/reference/novel_chassis/b_subtilis/b_subtilis_strains_1.0.1.gff"
     job_def.parameters = parameters
 
     data = {
@@ -106,7 +107,7 @@ def dataframe_jobs(r, manifest, archive_paths):
     #ag.files.importData(filePath=mpj.archive_path, systemId='data-sd2e-community', fileName = 'sample_paths.json', fileToUpload=open('sample_paths.json', 'rb'))
     inputs = job_def.inputs
     #inputs["sample_paths"] = 'agave://data-sd2e-community/' + mpj.archive_path + '/sample_paths.json'
-    ag.files.importData(filePath='/testing/agavepy_write/', systemId='data-tacc-work-urrutia', fileName = 'sample_paths.json', fileToUpload=open('sample_paths.json', 'rb'))
+    #ag.files.importData(filePath='/testing/agavepy_write/', systemId='data-tacc-work-urrutia', fileName = 'sample_paths.json', fileToUpload=open('sample_paths.json', 'rb'))
     ag.files.importData(filePath=mpj.archive_path, systemId='data-sd2e-community', fileName = 'sample_paths.json', fileToUpload=open('sample_paths.json', 'rb'))
     inputs["sample_paths"] = 'agave://data-sd2e-community/' + mpj.archive_path + '/sample_paths.json'
     #inputs["sample_paths"] = 'agave://data-tacc-work-urrutia/wrangler/Ginkgo/experiment.ginkgo.19606.19637.19708.19709_NAND_Titration/data_paths.json'
@@ -164,6 +165,7 @@ def mongo_query(experiment_id):
     #query['name'] = {'$regex': 'RG.bam'}
     #query['archive_path'] = {'$regex': '/products/v2/106bd127e2d257acb9be11ed06042e68/'}
     query['data.experiment_id'] = experiment_id
+    query['pipeline_uuid'] = '106bd127-e2d2-57ac-b9be-11ed06042e68'
     print(query)
     #query['archive_path'] = {'$regex': '/products/v2/106d3f7f07dc596f86f9df75083e52cc'}
     bwa_results = []
@@ -178,7 +180,8 @@ def mongo_query(experiment_id):
 
     for sample in bwa_results:
         try:
-            sample_id = [data['data'] for data in sample['history'] if data['name'] == 'run'][0]['sample_id']
+            #sample_id = [data['data'] for data in sample['history'] if data['name'] == 'run'][0]['sample_id']
+            sample_id = sample['data']['sample_id']
             path = '/work/projects/SD2E-Community/prod/data/' + sample['archive_path']+ '/'
             try:
                 bwa=glob.glob(path + sample_id + "*RG.bam")[0]

@@ -191,12 +191,13 @@ def tag_low_correlation_biological_replicates(dataframe, genes, factors, cc=0.8)
 
     samples_and_corr = []
     samplenames_for_corr_df = []
-    #print(sample_correlations)
     for sample in sample_correlations:
         samplenames_for_corr_df.append(sample)
         samples_and_corr.append(sample_correlations[sample])
-    #print(samples_and_corr)
+    #print(sample_correlations)
     dataframe['QC_gcorr_NUM_ARRAY'] = np.nan
+    #print(samplenames_for_corr_df)
+    #print(samples_and_corr)
     dataframe['QC_gcorr_NUM_ARRAY'].loc[samplenames_for_corr_df] = samples_and_corr
     dataframe['QC_gcorr_threshold_NUM'] = cc
     return dataframe

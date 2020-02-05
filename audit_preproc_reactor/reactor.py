@@ -10,6 +10,7 @@ import os
 import requests
 from glob import glob
 import pymongo
+import copy
 
 
 def require_keys(dict, keys_list):
@@ -103,7 +104,7 @@ def jobs_resubmit(job_self_link, notif_add_self=True):
         add_self_to_notifs(new_tapis_jobId)
     return new_tapis_jobId
 
-def mpj_reset(mpjId, tapis_jobId):
+def mpj_reset(mpjId, tapis_jobId, experiment_id, sample_id):
     from agavepy.agave import Agave
     from datacatalog.tokens import get_admin_token
     from datacatalog.managers.pipelinejobs.jobmanager import JobManager
@@ -111,21 +112,27 @@ def mpj_reset(mpjId, tapis_jobId):
     mongodb={'authn':mg_auth, 'database': 'catalog_staging'}
     ag = r.client
     seed = os.getenv('_ATOKEN_SEED')
+    os.environ["CATALOG_ADMIN_TOKEN_KEY"] = seed
     atoken = get_admin_token(seed)
     job = JobManager(mongodb, agave=ag).load(mpjId)
+    r.logger.error("Resetting job: {}".format(mpjId))
     job.reset(token=atoken)
-    job.ready(token=atoken)
     try:
-        agpy = Agave.restore()
-        new_tapis_id = agpy.jobs.manage(body='{"action":"resubmit"}', jobId=tapis_jobId)['id']
+        job.ready(token=atoken)
+    except Exception as e:
+        print("can't set to ready ", job.state)
+    try:
+        #agpy = Agave.restore()
+        #new_tapis_id = agpy.jobs.manage(body='{"action":"resubmit"}', jobId=tapis_jobId)['id']
+        new_tapis_id = ag.jobs.manage(body='{"action":"resubmit"}', jobId=tapis_jobId)['id']
+        job.run({"launched": new_tapis_id, "experiment_id": experiment_id, "sample_id": sample_id})
+        r.logger.info("Tapis job resubmitted: {}".format(new_tapis_id))
     except Exception as e:
         r.logger.error("Error submitting job: {}".format(e))
+        print(e)
         print("Almost definitely an issue with reactor/agavepy Auth")
     return
 
-    #new_tapis_jobId = jobs_resubmit(job_self_link, notif_add_self=True)
-    mpj.run({"launched": job_id, "experiment_id": experiment_id, "sample_id": sample_id})
-    r.logger.info("Submitted Agave job {}".format(job_id))
 
 
 def query_jobs_table(query={}, projection={}, dbURI="", return_max=-1):
@@ -154,7 +161,7 @@ def query_jobs_table(query={}, projection={}, dbURI="", return_max=-1):
     return results
 
 
-def validate_archive(dir_path, glob_query, min_mb=1.):
+def validate_archive(dir_path, glob_query, min_mb=0.0):
     """Checks for existence and file size for each file in
     `glob_query`. `dir_path` is prepended to each file name. Returns
     True if `glob_query` files exist and > `min_mb` MB, False otherwise.
@@ -174,12 +181,14 @@ def validate_archive(dir_path, glob_query, min_mb=1.):
     elif not glob(dir_path + "/*.err"):
         r.logger.warning("No error files found in archive directory" +
                          format(dir_path))
+
+    file_names = []
     for fname in glob_query:
         fp = dir_path + fname
         match = glob(fp)
         if not match:
             r.logger.error("No file found at '{}'".format(fp))
-            return False
+            return False, 'NA'
         elif len(match) < 1:
             r.logger.warning("{} files found matching {}".format(
                 len(match), fp))
@@ -187,8 +196,10 @@ def validate_archive(dir_path, glob_query, min_mb=1.):
         if size_mb < min_mb:
             r.logger.error("Insufficient file size for " +
                            "{} ({} MB < {} MB)".format(fp, size_mb, min_mb))
-            return False
-    return True
+            return False, 'NA'
+        os.path.normpath(match[0].split('/work/projects/SD2E-Community/prod/data')[1])
+        file_names.append(match[0].split('/work/projects/SD2E-Community/prod/data')[1])
+    return True, file_names
 
 
 def count_tapis_msg(mpjId):
@@ -199,11 +210,11 @@ def count_tapis_msg(mpjId):
         'uuid': mpjId,
         'history': {'$elemMatch': {'data.launched': {'$exists': True}}}
     }
-    projection = {
-        'history': 1 #{'$elemMatch': {'data.launched': {'$exists': True}}}
-    }
+    # projection = {
+    #     'history': 1 #{'$elemMatch': {'data.launched': {'$exists': True}}}
+    # }
     # query db
-    response = query_jobs_table(query=query, projection=projection)
+    response = query_jobs_table(query=query, projection={})
     if not response:
         r.logger.error("Jobs table found no jobs querying against query={}".format(query))
         return int(0)
@@ -215,11 +226,29 @@ def count_tapis_msg(mpjId):
         elif m['data'].get('launched'):
             # == 'FINISHED' || m.get('name') == 'finish':
             tapis_messages.append(m)
-    return len(tapis_messages)
+            experiment_id = m['data'].get('experiment_id')
+            sample_id = m['data'].get('sample_id')
+            measurement_id = response[0]['child_of']
+            state = response[0]['state']
+    return len(tapis_messages), experiment_id, sample_id, measurement_id, state
 
 
-def mpj_update(manager_id, name):
-    r.logger.warning("mpj_update is not yet implemented")
+def mpj_validate(mpjId):
+    from datacatalog.managers.pipelinejobs.jobmanager import JobManager
+    mg_auth = os.getenv('_REACTOR_MONGODB_AUTHN')
+    mongodb={'authn':mg_auth, 'database': 'catalog_staging'}
+    ag = r.client
+    job = JobManager(mongodb, agave=ag).load(mpjId)
+    if job.state != 'FINISHED':
+        #job.finish()
+        r.logger.error("Cannot Validate job in " +
+                       "{} state".format(job.state))
+    else:
+        job.validate()
+        job.validated()
+        r.logger.info("Pipeline job validated: " +
+                       "{}".format(mpjId))
+    return
 
 
 def archiveSystem_to_path(systemId):
@@ -247,20 +276,29 @@ def main():
     # r.logger.debug(json.dumps(r.context, indent=4))
 
     # pull from message context and settings
-    context = r.context  # Actor context
-    m = context.message_dict
-    msg = require_keys(m, ['mpjId', 'tapis_jobId'])
-    opts = require_keys(r.settings.options, ['max_retries', 'min_fastq_mb',
-                                             'notif_add_self'])
+    context=r.context  # Actor context
+    print(json.dumps(context, indent=4))
+    mpjId=context.mpjId
+    m=context.message_dict
+    tapis_jobId=m['id']
+    if m['status'] != 'FINISHED':
+        r.on_failure("Tapis jobId={} has status {}.".format(
+            tapis_jobId, m['status']) + "Skipping validation.")
+        exit(0)
+
+    opts=require_keys(r.settings.options, ['max_retries', 'min_fastq_mb',
+                                           'notif_add_self'])
     # force_resubmit=bool(True) to override max_retries
     opts['force_resubmit'] = getattr(opts, 'force_resubmit', False)
+    if 'force_resubmit' in m:
+        opts['force_resubmit'] = True
     r.logger.info("Validating datacatalog jobId=" +
-                  "{}, tapis_jobId={}".format(msg['mpjId'], msg['tapis_jobId']))
+                  "{}, tapis_jobId={}".format(mpjId, tapis_jobId))
     # rmpj.validating(data={})
 
     # query Tapis against tapis_jobId
     try:
-        tapis_resp = ag.jobs.get(jobId=msg['tapis_jobId'])
+        tapis_resp = ag.jobs.get(jobId=tapis_jobId)
     except HTTPError as e:
         r.on_failure("Error pulling jobId from Tapis API", e)
     # Make sure we have the necessary keys
@@ -271,23 +309,49 @@ def main():
     # get the /work path from archiveSystem
     archiveSystem = archiveSystem_to_path(job['archiveSystem'])
 
+    out_files = ["/*R1*trimmed*.fastq.gz", "/*R2*trimmed*.fastq.gz"]
+    try:
+        if context.analysis_type:
+            if context.analysis_type == 'alignment':
+                analysis_type = 'alignment'
+                out_files = ["/*RG.bam", "/*RG.bai"]
+            else:
+                analysis_type = 'preprocessing'
+    except Exception as e:
+        analysis_type = 'preprocessing'
+        print(e)
+
     # check for existence and size of fastq files
-    is_valid = validate_archive(os.path.join(
+    is_valid, file_names = validate_archive(os.path.join(
                                 archiveSystem + job['archivePath']),
-                                ["/*R1*.fastq.gz", "/*R2*.fastq.gz"],
+                                out_files,
                                 min_mb=opts['min_fastq_mb'])
-    if job['status'] != 'FINISHED':
-        r.on_failure("Tapis jobId={} {}.".format(
-            msg['tapis_jobId'], job['status']) + "Skipping resubmission.")
-    elif is_valid:
+
+    if is_valid:
         r.logger.info("Outputs for preprocessing jobId=" +
-                      "{} passed validation".format(msg['tapis_jobId']))
+                      "{} passed validation".format(tapis_jobId))
+        num_tapis_msg, experiment_id, sample_id, measurement_id, state = count_tapis_msg(mpjId)
+        #if state == 'RUNNING':
+
+
         # rmpj.validated(data={})
         # ag.actors.sendMessage(actorId='alignment rx',body={'message':''})
+        alignment_rx = copy.copy(r.settings.pipelines)['alignment_rx']
+        if analysis_type == 'preprocessing':
+            r.send_message(alignment_rx,
+                           {
+                               'experiment_id': experiment_id,
+                               'sample_id': sample_id,
+                               'measurement_id': measurement_id,
+                               'file_names': file_names
+                           }
+                           )
+        if analysis_type == 'alignment':
+            mpj_validate(mpjId)
     else:
         r.logger.error("Outputs for preprocessing jobId=" +
-                       "{} failed validation".format(msg['tapis_jobId']))
-        num_tapis_msg = count_tapis_msg(msg['mpjId'])
+                       "{} failed validation".format(tapis_jobId))
+        num_tapis_msg, experiment_id, sample_id, measurement_id, status = count_tapis_msg(mpjId)
         # resetting pipeline jobs actually deletes everything in the
         # archivePath (or it's supposed to), good idea but I'm
         # going to remove this
@@ -295,20 +359,20 @@ def main():
 
         # Only resubmit if the # error files in the archivePath
         # and Tapis jobs in the datacatalog are both less than max_retries
-        r.logger.debug("Found {} *.err files in archivePath and {}".format(
-            err_file_ct, num_tapis_msg) + " Tapis jobs in datacatalog")
-        resubmit = bool((err_file_ct < opts['max_retries']
-                        and num_tapis_msg < opts['max_retries'])
+        r.logger.debug("Found {}".format(num_tapis_msg) +
+                       " Tapis jobs in datacatalog")
+        resubmit = bool(num_tapis_msg < opts['max_retries']
                         or opts['force_resubmit'] is True)
         if resubmit:
-            r.logger.info("Resubmitting Tapis jobId={}".format(msg['tapis_jobId']))
-            resubmit_resp = jobs_resubmit(job_self_link=job['self_link'],
-                                          notif_add_self=opts['notif_add_self'])
+            r.logger.info("Resubmitting Tapis jobId={}".format(tapis_jobId))
+            mpj_reset(mpjId, tapis_jobId, experiment_id, sample_id)
+            #resubmit_resp = jobs_resubmit(job_self_link=job['self_link'],
+                                          #notif_add_self=opts['notif_add_self'])
         else:
             #job_manager_id = opts.get('pipelines', {}).get('job_manager_id', '')
             #mpj_update(job_manager_id, 'fail')
             r.on_failure("Cannot resubmit jobId={}, max_retries={}".format(
-                msg['tapis_jobId'], opts['max_retries']) +
+                tapis_jobId, opts['max_retries']) +
                 " has been met or exceeded")
 
 

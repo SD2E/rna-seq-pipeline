@@ -74,8 +74,10 @@ def submit_job(r, manifest, dataframe_record):
     rna_list = []
     for sample in manifest["samples"]:
         mes_types = [measurement["measurement_type"] for measurement in sample["measurements"]]
-        if mes_types[0] == "RNA_SEQ":
-            rna_list.append(sample)
+        if mes_types != []:
+            if mes_types[0] == "RNA_SEQ":
+                rna_list.append(sample)
+
     for sample in rna_list:
         norm = [measurement for measurement in sample['measurements'] if measurement['library_prep'] == 'NORMAL'][0]
         raw = [file for file in norm['files'] if file['lab_label'] == ['RAW']]

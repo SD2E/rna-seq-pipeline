@@ -116,8 +116,9 @@ def metadata_construction(metadata_query_results):
                 # then I hard code it here
                 print("No arabinose concentration available for ", sample['sample_id'])
                 # arabinose = 'Present'
-                arabinose = 0.025
-                arabinose_unit = 'M'
+                #arabinose = 0.025
+                arabinose = 'NA'
+                arabinose_unit = 'NA'
         # I use the same approcah for IPTG concentration/units
         IPTG_content = [content for content in sample['sample_contents']
                     if content['name']['sbh_uri'] ==
@@ -133,10 +134,90 @@ def metadata_construction(metadata_query_results):
             except Exception as e:
                 print("No IPTG concentration available for ", sample['sample_id'])
                 # IPTG = "Present"
-                IPTG = 0.00025
-                IPTG_unit = 'M'
+                #IPTG = 0.00025
+                IPTG = 'NA'
+                IPTG_unit = 'NA'
+        Vanillic_acid_content = [content for content in sample['sample_contents']
+                    if content['name']['sbh_uri'] ==
+                    'https://hub.sd2e.org/user/sd2e/design/Vanillic0x20Acid/1']
+        if not Vanillic_acid_content:
+            Vanillic_acid = 0
+            # IPTG_unit = 'NA'
+            Vanillic_acid_unit = 'M'
+        if Vanillic_acid_content:
+            try:
+                Vanillic_acid = Vanillic_acid_content[0]['value']
+                Vanillic_acid_unit = Vanillic_acid_content[0]['unit']
+            except Exception as e:
+                print("No Vanillic_acid concentration available for ", sample['sample_id'])
+                # IPTG = "Present"
+                #IPTG = 0.00025
+                Vanillic_acid = 'NA'
+                Vanillic_acid_unit = 'NA'
+
+        Cuminic_acid_content = [content for content in sample['sample_contents']
+                    if content['name']['sbh_uri'] ==
+                    'https://hub.sd2e.org/user/sd2e/design/Cuminic0x20Acid/1']
+        if not Cuminic_acid_content:
+            Cuminic_acid = 0
+            # Cuminic_acid_unit = 'NA'
+            Cuminic_acid_unit = 'M'
+        if Cuminic_acid_content:
+            try:
+                Cuminic_acid = Cuminic_acid_content[0]['value']
+                Cuminic_acid_unit = Cuminic_acid_content[0]['unit']
+            except Exception as e:
+                print("No Cuminic Acid concentration available for ", sample['sample_id'])
+                # IPTG = "Present"
+                #IPTG = 0.00025
+                Cuminic_acid = 'NA'
+                Cuminic_acid_unit = 'NA'
+
+        Xylose_content = [content for content in sample['sample_contents']
+                    if content['name']['sbh_uri'] ==
+                    'https://hub.sd2e.org/user/sd2e/design/Xylose/1']
+        if not Xylose_content:
+            Xylose = 0
+            # Xylose_unit = 'NA'
+            Xylose_unit = 'M'
+        if Xylose_content:
+            try:
+                Xylose = Xylose_content[0]['value']
+                Xylose_unit = Xylose_content[0]['unit']
+            except Exception as e:
+                print("No Xylose concentration available for ", sample['sample_id'])
+                # Xylose = "Present"
+                #Xylose = 0.00025
+                Xylose = 'NA'
+                Xylose_unit = 'NA'
+
+        Dextrose_content = [content for content in sample['sample_contents']
+                    if content['name']['sbh_uri'] ==
+                    'https://hub.sd2e.org/user/sd2e/design/sigma_G8270/1']
+        if not Dextrose_content:
+            Dextrose = 0
+            # Dextrose_unit = 'NA'
+            Dextrose_unit = 'M'
+        if Dextrose_content:
+            try:
+                Dextrose = Dextrose_content[0]['value']
+                Dextrose_unit = Dextrose_content[0]['unit']
+            except Exception as e:
+                print("No Dextrose concentration available for ", sample['sample_id'])
+                # Dextrose = "Present"
+                #Dextrose = 0.00025
+                Dextrose = 'NA'
+                Dextrose_unit = 'NA'
         metadata['Arabinose'] = arabinose
         metadata['Arabinose_unit'] = arabinose_unit
+        metadata['Cuminic_acid'] = Cuminic_acid
+        metadata['Cuminic_acid_unit'] = Cuminic_acid_unit
+        metadata['Vanillic_acid'] = Vanillic_acid
+        metadata['Vanillic_acid_unit'] = Vanillic_acid_unit
+        metadata['Xylose'] = Xylose
+        metadata['Xylose_unit'] = Xylose_unit
+        metadata['Dextrose'] = Dextrose
+        metadata['Dextrose_unit'] = Dextrose_unit
         metadata['IPTG'] = IPTG
         metadata['IPTG_unit'] = IPTG_unit
         # Another try/except to capture input state where available
@@ -383,7 +464,12 @@ def main(experiment_id):
     factors = [metadata_key for metadata_key
                in meta_data[list(meta_data.keys())[0]]
                if metadata_key.split("_")[0] != 'QC'
-               and metadata_key not in ['Replicate', 'Arabinose_unit', 'IPTG_unit', 'Strain_input_state']]
+               and metadata_key not in ['Replicate', 'Arabinose_unit',
+                                        'IPTG_unit', 'Strain_input_state',
+                                        'Vanillic_acid_unit', 'Dextrose_unit',
+                                        'Cuminic_acid_unit', 'Xylose_unit']
+               and all(value[metadata_key] == 0 for value in meta_data.values()) == False
+               and all(value[metadata_key] == 'NA' for value in meta_data.values()) == False]
 
     print("Metadata factors for replicate groupings: ", factors)
     # Read in the raw counts file to run the coorelations

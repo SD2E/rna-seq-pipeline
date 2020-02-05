@@ -1,1 +1,8 @@
 {"uri":"agave://data-sd2e-community/uploads/ginkgo/201901/NovelChassis-NAND-Ecoli-Titration/metadata-66bc85d7463b-latest.json"}
+
+
+{"uri":"agave://data-tacc-work-urrutia/wrangler/Ginkgo/experiment.ginkgo.29649_NovelChassis-Bacillus-WT-Characterization/resub.json",
+  "manifestPathOverwrite": "uploads/ginkgo/202001/NovelChassis-Bacillus-WT-Characterization"}
+
+  {"uri":"agave://data-tacc-work-urrutia/wrangler/Ginkgo/experiment.ginkgo.29422_B-subtilis-inducer-RNASeq/resub.json",
+    "manifestPathOverwrite": "uploads/ginkgo/202001/Plan-Requirements-B-subtilis-inducer-RNASeq"}
