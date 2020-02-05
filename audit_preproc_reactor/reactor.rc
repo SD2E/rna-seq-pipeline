@@ -6,4 +6,4 @@ REACTOR_ALIAS=audit-preproc
 # Docker settings
 DOCKER_HUB_ORG=jurrutia
 DOCKER_IMAGE_TAG=audit-preproc
-DOCKER_IMAGE_VERSION=0.1.1
+DOCKER_IMAGE_VERSION=0.1.2

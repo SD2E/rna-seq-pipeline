@@ -5,9 +5,15 @@ logs:
 options:
     max_retries: 3
     notif_add_self: True
-    min_fastq_mb: 10.
+    min_fastq_mb: 0.0
     force_resubmit: False
     # work_mount: '/work/projects/SD2E-Community/prod/data/'
     # work_mount: '/work/06634/eho/'
 pipelines:
-  job_manager_id: MEplaceholderWZoK
+  pipeline_manager_id: pipelines-manager.prod
+  pipeline_manager_nonce: ~
+  job_manager_id: jobs-manager.prod
+  job_manager_nonce: ~
+  job_indexer_id: jobs-indexer.prod
+  job_indexer_nonce: ~
+  alignment_rx: alignment_rx.prod
