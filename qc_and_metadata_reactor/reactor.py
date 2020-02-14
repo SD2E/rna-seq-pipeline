@@ -143,7 +143,7 @@ def submit_job(r, manifest, dataframe_record):
               'url': mpj.callback + '&status=${JOB_STATUS}'},
              {'event': 'FINISHED',
               "persistent": False,
-              'url': mpj.callback + '&status=FINISHED'}]
+              'url': mpj.callback + '&status=${JOB_STATUS}'}]
 
     #notifications = job_template["notifications"]
     #if notifications is not None:
@@ -186,7 +186,7 @@ def submit_job(r, manifest, dataframe_record):
     #          {'event': 'FAILED',
     #           'url': custom_pipeline.callback + '&status=${STATUS}' +'&pipeline_id=' + custom_pipeline.pipeline_uuid + '&event=FAILED'},
     #          {'event': 'FINSIHED',
-    #           'url': custom_pipeline.callback + '&status=${STATUS}'+'&pipeline_id=' + custom_pipeline.pipeline_uuid + '&event=FINISHED'}]
+    #           'url': custom_pipeline.callback + '&status=${STATUS}'+'&pipeline_id=' + custom_pipeline.pipeline_uuid + '&event=${JOB_STATUS}'}]
     # notifications = job_def["notifications"]
     # if notifications is not None:
     #     for item in notifications:

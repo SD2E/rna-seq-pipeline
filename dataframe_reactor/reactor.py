@@ -135,7 +135,7 @@ def dataframe_jobs(r, manifest, archive_paths):
               'url': mpj.callback + '&status=${JOB_STATUS}'},
              {'event': 'FINISHED',
               "persistent": False,
-              'url': mpj.callback + '&status=FINISHED'}]
+              'url': mpj.callback + '&status=${JOB_STATUS}'}]
 
     #notifications = job_template["notifications"]
     #if notifications is not None:
