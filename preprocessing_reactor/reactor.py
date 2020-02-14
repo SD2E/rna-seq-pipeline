@@ -162,10 +162,10 @@ def manifest(r):
                   'url': mpj.callback + '&status=${JOB_STATUS}'},
                  {'event': 'FINISHED',
                   "persistent": False,
-                  'url': mpj.callback + '&status=FINISHED'},
+                  'url': mpj.callback + '&status=${JOB_STATUS}'},
                   {'event': 'FINISHED',
                    "persistent": False,
-                   'url': audit_rnaseq_callback + '&status=FINISHED' +
+                   'url': audit_rnaseq_callback + '&status=${JOB_STATUS}' +
                    '&analysis_type=preprocessing' +
                    '&mpjId=' + mpj.uuid}]
 

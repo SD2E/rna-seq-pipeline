@@ -144,7 +144,7 @@ def alignment(r, archive_paths, manifest):
                   'url': mpj.callback + '&status=${JOB_STATUS}'},
                  {'event': 'FINISHED',
                   "persistent": False,
-                  'url': mpj.callback + '&status=FINISHED'}]
+                  'url': mpj.callback + '&status=${JOB_STATUS}'}]
 
 
 
