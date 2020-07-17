@@ -237,17 +237,30 @@ def mpj_validate(mpjId):
     from datacatalog.managers.pipelinejobs.jobmanager import JobManager
     mg_auth = os.getenv('_REACTOR_MONGODB_AUTHN')
     mongodb={'authn':mg_auth, 'database': 'catalog_staging'}
-    ag = r.client
-    job = JobManager(mongodb, agave=ag).load(mpjId)
-    if job.state != 'FINISHED':
-        #job.finish()
-        r.logger.error("Cannot Validate job in " +
-                       "{} state".format(job.state))
-    else:
-        job.validate()
-        job.validated()
-        r.logger.info("Pipeline job validated: " +
-                       "{}".format(mpjId))
+    #ag = r.client
+    #job = JobManager(mongodb, agave=ag).load(mpjId)
+    # if job.state != 'FINISHED':
+    #     #job.finish()
+    #     r.logger.error("Cannot Validate job in " +
+    #                    "{} state".format(job.state))
+    # else:
+    #     #job.validate()
+    #     #job.validated()
+    #     jobs_manager = copy.copy(r.settings.pipelines)['job_manager_id']
+    #     r.send_message(jobs_manager,
+    #                    {
+    #                        'uuid': mpjId,
+    #                        'name': 'validate'
+    #                    }
+    #                    )
+    #     r.send_message(jobs_manager,
+    #                    {
+    #                        'uuid': mpjId,
+    #                        'name': 'validated'
+    #                    }
+    #                    )
+    #     r.logger.info("Pipeline job validated: " +
+    #                    "{}".format(mpjId))
     return
 
 
@@ -309,7 +322,8 @@ def main():
     # get the /work path from archiveSystem
     archiveSystem = archiveSystem_to_path(job['archiveSystem'])
 
-    out_files = ["/*R1*trimmed*.fastq.gz", "/*R2*trimmed*.fastq.gz"]
+    #out_files = ["/*R1*trimmed*.fastq.gz", "/*R2*trimmed*.fastq.gz"]
+    out_files = ["/*1_*rimmed*.fastq.gz", "/*2_*rimmed*.fastq.gz"]
     try:
         if context.analysis_type:
             if context.analysis_type == 'alignment':
@@ -346,6 +360,7 @@ def main():
                                'file_names': file_names
                            }
                            )
+            mpj_validate(mpjId)
         if analysis_type == 'alignment':
             mpj_validate(mpjId)
     else:

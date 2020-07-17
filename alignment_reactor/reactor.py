@@ -18,9 +18,9 @@ def alignment(r):
     measurement_id = m['measurement_id']
     files = m['file_names']
     for file in files:
-        if any(R1 in file for R1 in ["_R1_","_R1.","-R1-","-R1."]):
+        if any(R1 in file for R1 in ["_R1_","_R1.","-R1-","-R1.", "_1_"]):
             R1 = file
-        elif any(R2 in file for R2 in ["_R2_","_R2.","-R2-","-R2."]):
+        elif any(R2 in file for R2 in ["_R2_","_R2.","-R2-","-R2.", "_2_"]):
             R2 = file
         else:
             r.logger.error("Could not determine R1/R2 readmates")
@@ -32,9 +32,10 @@ def alignment(r):
     job_template['name'] = sample_id
     job_template['parameters']['path_read1'] = R1
     job_template['parameters']['path_read2'] = R2
-    job_template['parameters']['path_fasta'] = '/reference/novel_chassis/b_subtilis/' + strain + '/' + strain + '.fa'
-    job_template['parameters']['path_interval_file'] = '/reference/novel_chassis/b_subtilis/' + strain + '/' + strain + '.interval_list'
-    job_template['parameters']['path_dict_file'] = '/reference/novel_chassis/b_subtilis/' + strain + '/' + strain + '.dict'
+    job_template['parameters']['path_fasta'] = '/reference/novel_chassis/' + strain + '/' + strain + '.fa'
+    job_template['parameters']['path_interval_file'] = '/reference/novel_chassis/' + strain + '/' + strain + '.interval_list'
+    job_template['parameters']['path_dict_file'] = '/reference/novel_chassis/' + strain + '/' + strain + '.dict'
+    job_template['parameters']['path_gff'] = '/reference/novel_chassis/' + strain + '/' + strain + '.gff'
     job_template['parameters']['outname'] = sample_id + '_' + strain
 
 

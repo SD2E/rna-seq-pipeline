@@ -27,6 +27,7 @@ def mongo_query(experiment_id):
     query = {}
     #query['history.data.experiment_id'] = 'experiment.ginkgo.19606.19637.19708.19709'
     query['history.data.experiment_id'] = experiment_id
+    query['state'] = {'$in': ["FINISHED", 'VALIDATING', 'VALIDATED', 'INDEXING']}
 
     # We'll create seperate lists for each type of job
     preprocessing_jobs = {}
@@ -279,8 +280,10 @@ def crawl_file_system(prefix, meta_data, preprocessing_jobs, alignment_jobs):
         #print(sample_id)
         #prefix = '/home/jupyter/sd2e-community/'
         #prefix = '/work/projects/SD2E-Community/prod/data/'
-        fastqc_r1 = prefix + job['archive_path'] + '/' + job['data']['inputs'][0].split('/')[-1].split('_R')[0] + '_R1_001_trimmed_fastqc.zip'
-        fastqc_r2 = prefix + job['archive_path'] + '/' + job['data']['inputs'][0].split('/')[-1].split('_R')[0] + '_R2_001_trimmed_fastqc.zip'
+        #fastqc_r1 = prefix + job['archive_path'] + '/' + job['data']['inputs'][0].split('/')[-1].split('_R')[0] + '_R1_001_trimmed_fastqc.zip'
+        #fastqc_r2 = prefix + job['archive_path'] + '/' + job['data']['inputs'][0].split('/')[-1].split('_R')[0] + '_R2_001_trimmed_fastqc.zip'
+        fastqc_r1 = prefix + job['archive_path'] + '/' + job['data']['inputs'][0].split('/')[-1].split('.fastq.gz')[0] + '_trimmed_fastqc.zip'
+        fastqc_r2 = prefix + job['archive_path'] + '/' + job['data']['inputs'][1].split('/')[-1].split('.fastq.gz')[0] + '_trimmed_fastqc.zip'
         command = "zipgrep 'Total Sequences' " + fastqc_r1 + " | grep 'fastqc_data.txt'"
         try:
             output = subprocess.check_output(command, shell=True, preexec_fn=lambda: signal.signal(signal.SIGPIPE, signal.SIG_DFL))
@@ -461,15 +464,16 @@ def main(experiment_id):
     write_to_csv(meta_data, experiment_id)
     df_metadata = pd.read_csv(experiment_id + '_QC_and_metadata.csv')
     # Get metadata factors from the dict (temp/time/etc)
-    factors = [metadata_key for metadata_key
-               in meta_data[list(meta_data.keys())[0]]
-               if metadata_key.split("_")[0] != 'QC'
-               and metadata_key not in ['Replicate', 'Arabinose_unit',
-                                        'IPTG_unit', 'Strain_input_state',
-                                        'Vanillic_acid_unit', 'Dextrose_unit',
-                                        'Cuminic_acid_unit', 'Xylose_unit']
-               and all(value[metadata_key] == 0 for value in meta_data.values()) == False
-               and all(value[metadata_key] == 'NA' for value in meta_data.values()) == False]
+    # factors = [metadata_key for metadata_key
+    #            in meta_data[list(meta_data.keys())[0]]
+    #            if metadata_key.split("_")[0] != 'QC'
+    #            and metadata_key not in ['Replicate', 'Arabinose_unit',
+    #                                     'IPTG_unit', 'Strain_input_state',
+    #                                     'Vanillic_acid_unit', 'Dextrose_unit',
+    #                                     'Cuminic_acid_unit', 'Xylose_unit']
+    #            and all(value[metadata_key] == 0 for value in meta_data.values()) == False
+    #            and all(value[metadata_key] == 'NA' for value in meta_data.values()) == False]
+    factors =['Timepoint','Dextrose']
 
     print("Metadata factors for replicate groupings: ", factors)
     # Read in the raw counts file to run the coorelations

@@ -71,9 +71,9 @@ def manifest(r):
                  if file["lab_label"] == ["RAW"]]
 
         for file in files:
-            if any(R1 in file for R1 in ["_R1_","_R1.","-R1-","-R1."]):
+            if any(R1 in file for R1 in ["_R1_","_R1.","-R1-","-R1.", "_1.fa"]):
                 readDirection = "R1"
-            if any(R2 in file for R2 in ["_R2_","_R2.","-R2-","-R2."]):
+            if any(R2 in file for R2 in ["_R2_","_R2.","-R2-","-R2.", "_2.fa"]):
                 readDirection = "R2"
             print(readDirection + " " + file)
 

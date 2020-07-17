@@ -57,7 +57,7 @@ def dataframe_query(experiment_id):
     #query['history.data.experiment_id'] = 'experiment.ginkgo.19606.19637.19708.19709'
     query['history.data.experiment_id'] = experiment_id
     query["pipeline_uuid"] = "106231a1-0c78-5067-b53b-11a33f4e1495"
-    query['state'] = 'FINISHED'
+    query['state'] = {'$in': ["FINISHED", 'VALIDATING', 'VALIDATED', 'INDEXING']}
     dataframe_record = []
     for job in jobs_table.find(query):
         dataframe_record.append(job)
