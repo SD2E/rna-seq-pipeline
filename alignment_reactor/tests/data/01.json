@@ -1,1 +1,6 @@
-{"uri":"agave://data-tacc-work-urrutia/wrangler/Ginkgo/experiment.ginkgo.19606.19637.19708.19709_NAND_Titration/nc_resub.json"}
+{
+     "experiment_id": experiment_id,
+     "sample_id": sample_id,
+     "measurement_id": measurement_id,
+     "file_names": ["file_names"]
+     }

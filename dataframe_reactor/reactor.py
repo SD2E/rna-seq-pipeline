@@ -77,7 +77,7 @@ def dataframe_jobs(r, manifest, archive_paths):
     job_def["name"] = experiment_id
     ag = r.client
     parameters = job_def.parameters
-    parameters["path_gff"] = "/reference/novel_chassis/b_subtilis/b_subtilis_strains_1.0.1.gff"
+    parameters["path_gff"] = "/reference/novel_chassis/Pseudomonas_putida_KT2440/Pseudomonas_putida_KT2440_genes_only.gff"
     job_def.parameters = parameters
 
     data = {
@@ -166,6 +166,7 @@ def mongo_query(experiment_id):
     #query['archive_path'] = {'$regex': '/products/v2/106bd127e2d257acb9be11ed06042e68/'}
     query['data.experiment_id'] = experiment_id
     query['pipeline_uuid'] = '106bd127-e2d2-57ac-b9be-11ed06042e68'
+    query['state'] = {'$in': ["FINISHED", 'VALIDATING', 'VALIDATED', 'INDEXING']}
     print(query)
     #query['archive_path'] = {'$regex': '/products/v2/106d3f7f07dc596f86f9df75083e52cc'}
     bwa_results = []
