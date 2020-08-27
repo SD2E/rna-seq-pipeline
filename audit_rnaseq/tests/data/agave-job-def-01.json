@@ -1,0 +1,19 @@
+{
+    "name": "eho-mini_preproc_app test",
+    "appId": "eho-mini_preproc_app-0.1.0",
+    "archive": true,
+    "maxRunTime": "01:00:00",
+    "archiveSystem": "data-tacc-work-eho",
+    "archivePath": "archive/jobs/audit_preproc_rx_test",
+    "inputs": {
+        "fs_remote_fp": "agave://data-tacc-work-eho/data/test/status.txt"
+    },
+    "parameters": {},
+    "notifications": [
+        {
+            "event": "FINISHED",
+            "persistent": false,
+            "url": "https://en74zi8xvjn2j.x.pipedream.net?mpjId=10779ebc-db12-5eac-9fcf-03deb2cb0c70&status=${JOB_STATUS}&tapis_jobId=${JOB_ID}"
+        }
+    ]
+}

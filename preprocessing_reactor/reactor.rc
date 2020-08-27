@@ -5,6 +5,6 @@ REACTOR_NAME=test_preprocessing_reactor
 
 # Docker settings
 DOCKER_HUB_ORG=jurrutia
-DOCKER_IMAGE_TAG=test_preprocessing_reactor
-DOCKER_IMAGE_VERSION=0.2
+DOCKER_IMAGE_TAG=preprocessing_reactor
+DOCKER_IMAGE_VERSION=0.3
 DOCKER_USE_COMMIT_HASH=1
