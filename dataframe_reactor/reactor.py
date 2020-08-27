@@ -48,8 +48,9 @@ def dataframe_jobs(r, manifest, archive_paths):
     rna_list = []
     for sample in manifest["samples"]:
         mes_types = [measurement["measurement_type"] for measurement in sample["measurements"]]
-        if mes_types[0] == "RNA_SEQ":
-            rna_list.append(sample)
+        if mes_types != []:
+            if mes_types[0] == "RNA_SEQ":
+                rna_list.append(sample)
     for sample in rna_list:
         norm = [measurement for measurement in sample['measurements'] if measurement['library_prep'] == 'NORMAL'][0]
         raw = [file for file in norm['files'] if file['lab_label'] == ['RAW']]
@@ -76,7 +77,11 @@ def dataframe_jobs(r, manifest, archive_paths):
     job_def["name"] = experiment_id
     ag = r.client
     parameters = job_def.parameters
+<<<<<<< HEAD
     parameters["path_gff"] = "/reference/novel_chassis/b_subtilis/b_subtilis_strains_1.0.1.gff"
+=======
+    parameters["path_gff"] = "/reference/novel_chassis/Pseudomonas_putida_KT2440/Pseudomonas_putida_KT2440_genes_only.gff"
+>>>>>>> 420b7e8d67febcc65d6120b869b58c2e468d81ad
     job_def.parameters = parameters
 
     data = {
@@ -134,7 +139,7 @@ def dataframe_jobs(r, manifest, archive_paths):
               'url': mpj.callback + '&status=${JOB_STATUS}'},
              {'event': 'FINISHED',
               "persistent": False,
-              'url': mpj.callback + '&status=FINISHED'}]
+              'url': mpj.callback + '&status=${JOB_STATUS}'}]
 
     #notifications = job_template["notifications"]
     #if notifications is not None:
@@ -165,6 +170,7 @@ def mongo_query(experiment_id):
     #query['archive_path'] = {'$regex': '/products/v2/106bd127e2d257acb9be11ed06042e68/'}
     query['data.experiment_id'] = experiment_id
     query['pipeline_uuid'] = '106bd127-e2d2-57ac-b9be-11ed06042e68'
+    query['state'] = {'$in': ["FINISHED", 'VALIDATING', 'VALIDATED', 'INDEXING']}
     print(query)
     #query['archive_path'] = {'$regex': '/products/v2/106d3f7f07dc596f86f9df75083e52cc'}
     bwa_results = []

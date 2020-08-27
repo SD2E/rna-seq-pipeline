@@ -57,7 +57,7 @@ def dataframe_query(experiment_id):
     #query['history.data.experiment_id'] = 'experiment.ginkgo.19606.19637.19708.19709'
     query['history.data.experiment_id'] = experiment_id
     query["pipeline_uuid"] = "106231a1-0c78-5067-b53b-11a33f4e1495"
-    query['state'] = 'FINISHED'
+    query['state'] = {'$in': ["FINISHED", 'VALIDATING', 'VALIDATED', 'INDEXING']}
     dataframe_record = []
     for job in jobs_table.find(query):
         dataframe_record.append(job)
@@ -74,8 +74,10 @@ def submit_job(r, manifest, dataframe_record):
     rna_list = []
     for sample in manifest["samples"]:
         mes_types = [measurement["measurement_type"] for measurement in sample["measurements"]]
-        if mes_types[0] == "RNA_SEQ":
-            rna_list.append(sample)
+        if mes_types != []:
+            if mes_types[0] == "RNA_SEQ":
+                rna_list.append(sample)
+
     for sample in rna_list:
         norm = [measurement for measurement in sample['measurements'] if measurement['library_prep'] == 'NORMAL'][0]
         raw = [file for file in norm['files'] if file['lab_label'] == ['RAW']]
@@ -140,7 +142,7 @@ def submit_job(r, manifest, dataframe_record):
               'url': mpj.callback + '&status=${JOB_STATUS}'},
              {'event': 'FINISHED',
               "persistent": False,
-              'url': mpj.callback + '&status=FINISHED'}]
+              'url': mpj.callback + '&status=${JOB_STATUS}'}]
 
     #notifications = job_template["notifications"]
     #if notifications is not None:
@@ -183,7 +185,7 @@ def submit_job(r, manifest, dataframe_record):
     #          {'event': 'FAILED',
     #           'url': custom_pipeline.callback + '&status=${STATUS}' +'&pipeline_id=' + custom_pipeline.pipeline_uuid + '&event=FAILED'},
     #          {'event': 'FINSIHED',
-    #           'url': custom_pipeline.callback + '&status=${STATUS}'+'&pipeline_id=' + custom_pipeline.pipeline_uuid + '&event=FINISHED'}]
+    #           'url': custom_pipeline.callback + '&status=${STATUS}'+'&pipeline_id=' + custom_pipeline.pipeline_uuid + '&event=${JOB_STATUS}'}]
     # notifications = job_def["notifications"]
     # if notifications is not None:
     #     for item in notifications:

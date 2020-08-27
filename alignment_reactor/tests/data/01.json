@@ -1,0 +1,6 @@
+{
+     "experiment_id": experiment_id,
+     "sample_id": sample_id,
+     "measurement_id": measurement_id,
+     "file_names": ["file_names"]
+     }
