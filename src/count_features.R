@@ -17,9 +17,9 @@ library("rjson")
 
 
 option_list = list(
-  make_option(c("-bpath", "--bamfilespath"), type="character", action="store", default=FALSE,
+  make_option(c("-b", "--bamfilespath"), type="character", action="store", default=FALSE,
               help="JSON dictionary of sampleID: bam file location", metavar="character"),
-  make_option(c("-anno", "--annotation"), type="character", action="store", default=FALSE,
+  make_option(c("-a", "--annotation"), type="character", action="store", default=FALSE,
               help="Annotation file in gtf/gff/gff3 format", metavar="character"),
   make_option(c("-v", "--verbose"), action="store_true", default=TRUE,
               help="Should the program print extra stuff out? [default %default]")
@@ -125,6 +125,7 @@ for (column in colnames(fc$counts)) {
   } else {
     name <- gsub('.*.sample','sample',column)
     name <- gsub('.B.*', '', name)
+    name <- gsub('.Ba*', '', name)
     name <- gsub('.MG1655.*','', name)
     print("parsing: ")
     print(name)
