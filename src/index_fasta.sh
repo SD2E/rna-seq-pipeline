@@ -12,17 +12,17 @@ gff=$2
 #sed -i "s/${fasta}//g" .agave.log
 
 ref_name=$(basename "${fasta%.fa}")
-mkdir ${ref_name}
-mv $fasta ${ref_name}/${ref_name}.fa
+#mkdir ${ref_name}
+#mv $fasta ${ref_name}/${ref_name}.fa
 if [ -z "${gff}" ]
 then :
 else
-  mv $gff ${ref_name}/${ref_name}.gff
+  mv $gff ${ref_name}.gff
 fi
-cd ${ref_name}
+#cd ${ref_name}
 #ln -s $fasta ${ref_name}.fa
-bwa index -a bwtsw ${ref_name}.fa
-samtools faidx ${ref_name}.fa
+bwa index -a bwtsw ${fasta}
+samtools faidx ${fasta}
 # Create bed file from fasta index
 awk 'BEGIN {FS="\t"}; {print $1 FS "0" FS $2}' ${ref_name}.fa.fai > ${ref_name}.bed
 

@@ -3,9 +3,9 @@
   "appId": "urrutia-fasta_indexing_app-0.1.0",
   "archive": true,
   "archiveSystem": "data-sd2e-community",
-  "archivePath": "reference/novel_chassis/b_subtilis/Bacillus_subtilis_168_Marburg/",
+  "archivePath": "reference/novel_chassis/b_subtilis/B._subtilis_168_PmtlA-comKS/",
   "inputs": {
-    "fasta": "agave://data-sd2e-community/shared-q1-workshop/urrutia/references/b_subtilis_refs_from_diveena/Bacillus_subtilis_168_Marburg.fa",
-    "gff": "agave://data-sd2e-community/shared-q1-workshop/urrutia/references/b_subtilis_refs_from_diveena/Bacillus_subtilis_168_Marburg.gff"
+    "fasta": "agave://data-sd2e-community/shared-q1-workshop/urrutia/references/b_subtilis_refs_from_diveena/B._subtilis_168_PmtlA-comKS.fa",
+    "gff": "agave://data-sd2e-community/shared-q1-workshop/urrutia/references/b_subtilis_refs_from_diveena/B._subtilis_168_PmtlA-comKS.gff"
   }
 }
