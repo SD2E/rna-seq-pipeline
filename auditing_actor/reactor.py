@@ -141,8 +141,7 @@ def query_jobs_table(query={}, projection={}, dbURI="", return_max=-1):
     """
     # handle defaults
     if not dbURI:
-        dbURI = 'mongodb://readonly***REMOVED***@' + \
-                'catalog.sd2e.org:27020/admin?readPreference=primary'
+        dbURI = "REMOVED"
     # omit projection parameter if you want all fields returned
     args = [query]
     if projection:
