@@ -1,0 +1,83 @@
+{
+  "name": "{{ agave.username }}-{{ app.name }}",
+  "version": "{{ app.version }}",
+  "executionType": "HPC",
+  "executionSystem": "hpc-tacc-stampede2-{{ agave.username }}",
+  "parallelism": "SERIAL",
+  "deploymentPath": "{{ agave.username }}/apps/{{ app.bundle }}",
+  "deploymentSystem": "data-sd2e-projects-users",
+  "defaultProcessorsPerNode": 1,
+  "defaultNodeCount": 1,
+  "defaultQueue": "flat-quadrant",
+  "label": "{{ date_time.iso8601_micro }}",
+  "modules": ["load tacc-singularity"],
+  "shortDescription": "{{ app.description }}",
+  "templatePath": "runner-template.sh",
+  "testPath": "tester.sh",
+  "inputs": [
+   {
+      "id": "fasta",
+      "value": {
+        "validator": null,
+        "visible": true,
+        "required": true,
+        "order": 0,
+        "enquote": false,
+        "default": "agave://data-sd2e-community/sample/sailfish/test/transcripts.fasta.gz"
+      },
+      "details": {
+        "label": "fasta",
+        "description": "FASTA file of the reference genome",
+        "argument": null,
+        "showArgument": false,
+        "repeatArgument": false
+      },
+      "semantics": {
+        "minCardinality": 1,
+        "maxCardinality": 1,
+        "ontology": [
+          "http://edamontology.org/format_1929"
+        ],
+        "fileTypes": []
+      }
+    },
+    {
+      "id": "gff",
+      "value": {
+        "validator": null,
+        "visible": true,
+        "required": false,
+        "order": 0,
+        "enquote": false,
+        "default": ""
+      },
+      "details": {
+        "label": "gff",
+        "description": "GFF file of the reference genome, this is optional",
+        "argument": null,
+        "showArgument": false,
+        "repeatArgument": false
+      },
+      "semantics": {
+        "minCardinality": 1,
+        "maxCardinality": 1,
+        "ontology": [
+          "http://edamontology.org/format_2305"
+        ],
+        "fileTypes": []
+      }
+    }
+  ],
+  "parameters": [{
+    "id": "CONTAINER_IMAGE",
+    "value": {
+      "default": "{{ docker.organization }}/{{ docker.repo }}:{{ docker.tag }}",
+      "description": "Container Image. Do not edit.",
+      "type": "string",
+      "visible": false,
+      "required": true
+    }
+  }
+  ],
+  "outputs": []
+}
