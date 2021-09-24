@@ -1,0 +1,262 @@
+---
+title: "PreprocessingRNAseq"
+author: Uma Saxena
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme: readable
+    toc: true
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+      toc_depth: 2
+bibliography: Bibliography/bibliography.bib
+csl: Bibliography/plos-one.csl
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE, 
+                      message = FALSE,
+                      engine = "R", # Chunks will always have R code, unless noted
+                      error = TRUE,
+                      fig.path="Figures/",  # Set the figure options
+                      fig.align = "center")
+```
+
+## R Markdown for RNAseq preprocessing
+
+Mapping reads to the genome is a very important task, and many different aligners are available, such as bowtie (Langmead and Salzberg 2012), topHat (Trapnell, Pachter, and Salzberg 2009), STAR (Dobin et al. 2013) and Rsubread (Liao, Smyth, and Shi 2013). 
+
+Few Salient Points Regarding This Pipeline:
+
+- This pipeline assumes that the (Illumina) RNAseq fastq files are trimmed and kept in a separate directory as desired for consistancy of genome reference, annotation files and bedfile.
+
+- This pipeline assuming the correct annotation files and bed files are submitted. Bed file is required to find sequence information on interesting genes. 
+
+- This pipeline assumes genome reference file, annotation file and bedfile is consistent
+
+- If individual files are to be analysed, create separate directory with raw data and run the pipeline with the relevant input files.
+
+- If bowtie2 reference index has not been generated, please use the function listed here to generate reference index. Enter generateIndex = T/F
+
+## Prepare for analysis
+
+```{r install-packages, include=FALSE}
+# Install all of the necessary packages
+#install.packages("ggplot2")
+#install.packages("RColorBrewer")
+#install.packages("edgeR")
+#install.packages("gplots")
+#install.packages("GGally")
+#install.packages("Rsubread")
+#install.packages("DESeq2")
+#install.packages("PoiClaClu")
+#source("https://bioconductor.org/biocLite.R")
+#biocLite("ctsGE", "timecourse", "vsn", "GOexpress","Rbowtie")
+#if(!require(devtools)) install.packages("devtools")
+#devtools::install_github("kassambara/fastqcr")
+```
+
+```{r initialise Run}
+
+# USER INPUT
+rawdatapath=""
+ref.filepath= ""
+bowtieBaseName = ""
+generateIndex = T
+intervals= ""
+gtf= ""
+logpath = ""
+# LOAD TOOLS
+library(parallel)
+library(Rsubread)
+library(Rbowtie)
+library(Rsamtools)
+library(DESeq2)
+library(edgeR)
+library(ggplot2)
+library(reshape2)
+library(RColorBrewer)
+library(gplots)
+library(data.table)
+library(stringr)
+
+RNAseqQC = ""
+picard = ""
+bedtools = ""
+pyico = "" #Python2 module
+```
+
+```{r utilities}
+#Returns all items in a list that are not contained in toMatch
+#toMatch can be a single item or a list of items
+exclude <- function (theList, toMatch){
+  return(setdiff(theList,include(theList,toMatch)))
+}
+
+#Returns all items in a list that ARE contained in toMatch
+#toMatch can be a single item or a list of items
+include <- function (theList, toMatch){
+  matches <- unique (grep(paste(toMatch,collapse="|"), 
+                          theList, value=TRUE))
+  return(matches)
+}
+
+# Core wrapping function
+wrap.it <- function(x, len)
+{ 
+  sapply(x, function(y) paste(strwrap(y, len), 
+                              collapse = "\n"), 
+         USE.NAMES = FALSE)
+}
+
+# To call this function with a list or vector
+wrap.labels <- function(x, len)
+{
+  if (is.list(x))
+  {
+    lapply(x, wrap.it, len)
+  } else {
+    wrap.it(x, len)
+  }
+}
+
+# Does the directory exists
+dir.exists<-function (x)
+{
+  res <- file.exists(x) & file.info(x)$isdir
+  setNames(res, x)
+}
+
+
+```
+
+```{r sequtilities}
+concatenateFastq = function(infile, outfile, pattern)
+{
+  samples <- system(paste0("ls ", infile), intern = T)
+  sample.name <- unique(sub(pattern, "", samples))
+  fastq.name <- paste0(sample.name, ".fastq.gz")
+  system(paste0("cat ", infile,  "/", sample.name, "_*.fastq.gz > ", infile, "/", fastq.name))
+  system(paste0("gunzip ", infile,  "/", fastq.name))
+  system(paste0("mv ", infile, "/*.fastq ", outfile))
+}
+
+stripExtension <- function(finame, pattern='([.][A-Za-z]+$)'){
+    sub(pattern, '', finame)
+}
+
+#BuildBowtieIndex, infile is the reference genome in fasta format or comma-separated list of files with ref sequences. Path is where the reference genome will be built. 
+#outfile is ebwt_outfile_base
+
+buildBowtieIndex = function(indir, outfile)
+{
+  refFasta <- list.files(path=indir, pattern=c("(.fa|.fasta)$"), full=T)
+  ebwtBase = outfile
+  bowtie_build_usage --version
+  refPath=indir
+  tmp <- bowtie_build(references=refFasta, outdir=refPath, prefix=ebwtBase, force=TRUE)
+}
+```
+
+```{r userinputvalidators}
+
+#Is files present, bedfiles in correct format
+
+```
+
+```{r bowtieref}
+while(generateIndex == T){
+  tmp <- buildBowtieIndex(ref.filepath, bowtieBaseName)
+}
+```
+
+```{r readfastqs}
+fastq.files <- list.files(path = rawdatapath, pattern = c("(.fastq.gz|.fq.gz|.fastq|.fq)$"), full.names = FALSE)
+fastq.files
+```
+
+```{r fastqc}
+#Running fastqc
+qc.dir = rawdatapath # Results direcory
+run.qc <- fastqc(fq.dir = rawdatapath, # FASTQ files directory
+       qc.dir = rawdatapath,  
+       threads = 10                    # Number of threads
+       )
+qc <- qc_aggregate(rawdatapath)
+summary(qc)
+qc_stats(qc)
+#To show warnings
+
+library(dplyr)
+qc %>%
+  select(sample, module, status) %>%    
+  filter(status %in% c("WARN", "FAIL")) %>%
+  arrange(sample)
+```
+
+```{r readMapping alignment}
+x=fastq.files
+f <- lapply(strsplit(x, "\\_ |\\.R |\\_r |\\.r"), "[", 1)
+f <- unique(unlist(f))
+sample.names = f
+#sample_names <- lapply(f, function(x) list.files(pattern=x))
+
+for(i in 1:length(sample.names)) {
+  
+        print(sample.name[i])
+        outsam= paste(sample_names[i],".sam",sep="")
+  
+        bowtie(sequences=list(R1, R2),
+              index=file.path(ref.filepath, bowtieBaseName), 
+              outfile=outsam,
+              sam=TRUE, 
+              best=TRUE, 
+              force=TRUE,
+              threads=10,
+              trim5=2,
+              type="paired",
+              m=3)
+
+        # converting SAM to BAM, sorting and indexing
+        insam <- outsam
+        outbam <- sample.name[i]
+        asBam(insam, outbam, overwrite=T)
+
+        }
+```
+
+```{r rnaseq qc}
+bam.files <- list.files(rawdatapath, pattern ="*.bam$",full.names=TRUE, recursive = TRUE)
+for(i in 1:length(bam.files)) {
+  bam.name <- sub(pattern = "(.*)\\..*$", replacement = "\\1", basename(bam.files[i]))
+  bam.name <- unique(unlist(f))
+  eachbam <- scanBam(bam.files[i])
+}
+```
+
+```{r readcount}
+
+bamFileList <- BamFileList(bam.files)
+gAlns <- mclapply(bamFileList,readGAlignmentsFromBam)
+print(bam.files) 
+output <- "ReadCountMatrix_preCAD"
+fc <- featureCounts(files=bam.files,annot.ext=ref.filepath,isGTFAnnotationFile=TRUE,GTF.featureType="gene",isPairedEnd=TRUE,requireBothEndsMapped=FALSE)
+write.table(fc$counts,paste(files_location,"/",output,".tsv",sep=""),quote=F,sep="\t",append=F)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```{r generatemultiplefileqcreport}
+qc_report(qc.dir, result.file = paste(rawdatapath,"/","multi-qc-results",sep=""),
+          experiment = "Preprocessing RNAseq, pipeline for CAD")
+ ```         
