@@ -44,5 +44,7 @@ ENV PICARDDIR /opt/picard/picard.jar
 ENV PATH "/opt/bwa/:$PATH"
 ENV PATH  "/opt/samtools/bin/:$PATH"
 
+WORKDIR /data/
 #ADD tests /tests
 ADD src /src
+# TO DO: add https://bioconda.github.io/recipes/ucsc-gtftogenepred/README.html to create ref_flat file
