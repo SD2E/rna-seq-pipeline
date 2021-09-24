@@ -24,7 +24,8 @@ def alignment(r):
             R2 = file
         else:
             r.logger.error("Could not determine R1/R2 readmates")
-    strain = strain_query(sample_id)
+    #strain = strain_query(sample_id)
+    strain = 'B._subtilis_168_PmtlA-comKS_mCherry_ErmR'
 
     job_template = copy.copy(r.settings.bwaJob)
 
@@ -32,10 +33,10 @@ def alignment(r):
     job_template['name'] = sample_id
     job_template['parameters']['path_read1'] = R1
     job_template['parameters']['path_read2'] = R2
-    job_template['parameters']['path_fasta'] = '/reference/novel_chassis/' + strain + '/' + strain + '.fa'
-    job_template['parameters']['path_interval_file'] = '/reference/novel_chassis/' + strain + '/' + strain + '.interval_list'
-    job_template['parameters']['path_dict_file'] = '/reference/novel_chassis/' + strain + '/' + strain + '.dict'
-    job_template['parameters']['path_gff'] = '/reference/novel_chassis/' + strain + '/' + strain + '.gff'
+    job_template['parameters']['path_fasta'] = '/reference/novel_chassis/b_subtilis/' + strain + '/' + strain + '.fa'
+    job_template['parameters']['path_interval_file'] = '/reference/novel_chassis/b_subtilis/' + strain + '/' + strain + '.interval_list'
+    job_template['parameters']['path_dict_file'] = '/reference/novel_chassis/b_subtilis/' + strain + '/' + strain + '.dict'
+    job_template['parameters']['path_gff'] = '/reference/novel_chassis/b_subtilis/' + strain + '/' + strain + '.gff'
     job_template['parameters']['outname'] = sample_id + '_' + strain
 
 
@@ -143,7 +144,7 @@ def get_job_state(mpjId, ag):
 
 # Takes sample id and retuns strain
 def strain_query(sample_id):
-    dbURI = '***REMOVED***'
+    dbURI = os.getenv('_REACTOR_MONGO_BOT')
     client = pymongo.MongoClient(dbURI)
     db = client.catalog_staging
     samples = db.samples
@@ -157,9 +158,12 @@ def strain_query(sample_id):
     if len(results) == 0:
         r.logger.error("No results found for sample: {}".format(sample_id))
     strain = '_'.join(results[0]['strain']['label'].split(' '))
-
+    # replace with genetic construct if it exists
+    try:
+        strain = '_'.join(results[0]['genetic_construct']['label'].split(' '))
+    except Exception as e:
+        pass
     return strain
-
 
 def main():
     """Main function"""

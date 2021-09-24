@@ -6,6 +6,7 @@ import pprint
 import copy
 import pymongo
 import glob
+import os
 
 
 def parse_manifest(r):
@@ -77,11 +78,7 @@ def dataframe_jobs(r, manifest, archive_paths):
     job_def["name"] = experiment_id
     ag = r.client
     parameters = job_def.parameters
-<<<<<<< HEAD
-    parameters["path_gff"] = "/reference/novel_chassis/b_subtilis/b_subtilis_strains_1.0.1.gff"
-=======
-    parameters["path_gff"] = "/reference/novel_chassis/Pseudomonas_putida_KT2440/Pseudomonas_putida_KT2440_genes_only.gff"
->>>>>>> 420b7e8d67febcc65d6120b869b58c2e468d81ad
+    parameters["path_gff"] = "/reference/novel_chassis/b_subtilis/B._subtilis_168_PmtlA-comKS_mCherry_ErmR/B._subtilis_168_PmtlA-comKS_mCherry_ErmR.gff"
     job_def.parameters = parameters
 
     data = {
@@ -160,8 +157,10 @@ def dataframe_jobs(r, manifest, archive_paths):
 
 
 def mongo_query(experiment_id):
-    dbURI = '***REMOVED***'
+    #dbURI = '***REMOVED***'
+    dbURI = os.getenv('_REACTOR_MONGO_READONLY')
     client = pymongo.MongoClient(dbURI)
+    print(dbURI)
     db = client.catalog_staging
     #filesdb = db.files
     jobs = db.jobs

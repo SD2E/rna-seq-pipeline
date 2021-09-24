@@ -47,12 +47,10 @@ def manifest(r):
         manifest = json.load(open(manifestFileName))
     except Exception as e:
         r.on_failure("failed to load manifest {}".format(manifestUrl), e)
-    r.logger.info("Processing: {}".format(manifestPath))
 
     experiment_id = manifest['experiment_id']
 
     rna_list = []
-    bad_mes = []
     for sample in manifest["samples"]:
         mes_types = [measurement["measurement_type"] for measurement in sample["measurements"]]
         if mes_types != []:
@@ -137,27 +135,15 @@ def manifest(r):
         print("PRODUCT PATTERNS:")
         pprint.pprint(product_patterns)
 
-        # mpj = Job(r, measurement_id=measurement_id, data=data,
-        #           archive_patterns=archive_patterns,
-        #           product_patterns=product_patterns,
-        #           setup_archive_path=False)
-        # mpj.setup()
-        #print("JOB UUID: ", mpj.uuid)
-        #r.logger.info("Submitted Pipeline Job {}".format(mpj.uuid))
-        #job_def.archivePath = mpj.archive_path
+        mpj = Job(r, measurement_id=measurement_id, data=data,
+                  archive_patterns=archive_patterns,
+                  product_patterns=product_patterns,
+                  setup_archive_path=False)
+        mpj.setup()
+        print("JOB UUID: ", mpj.uuid)
+        r.logger.info("Submitted Pipeline Job {}".format(mpj.uuid))
+        job_def.archivePath = mpj.archive_path
         #job_def.archivePath = 'shared-q1-workshop/urrutia/experiment.ginkgo.23121_Novel-chassis_2.0_DNA-seq_strain_verfication/preprocessed/'
-<<<<<<< HEAD
-        #
-        # notif = [{'event': 'RUNNING',
-        #           "persistent": True,
-        #           'url': mpj.callback + '&status=${JOB_STATUS}'},
-        #          {'event': 'FAILED',
-        #           "persistent": False,
-        #           'url': mpj.callback + '&status=${JOB_STATUS}'},
-        #          {'event': 'FINISHED',
-        #           "persistent": False,
-        #           'url': mpj.callback + '&status=FINISHED'}]
-=======
         try:
             audit_nonce = os.getenv('_REACTOR_AUDIT_RNASEQ_NONCE')
             pipeline_config = copy.copy(r.settings.pipelines)
@@ -182,44 +168,27 @@ def manifest(r):
                    'url': audit_rnaseq_callback + '&status=${JOB_STATUS}' +
                    '&analysis_type=preprocessing' +
                    '&mpjId=' + mpj.uuid}]
->>>>>>> 420b7e8d67febcc65d6120b869b58c2e468d81ad
 
         #notifications = job_template["notifications"]
         #if notifications is not None:
         #   for item in notifications:
         #       notif.append(item)
 
-<<<<<<< HEAD
-        #job_def["notifications"] = notif
-        print(json.dumps(job_def, indent=4))
-        # try:
-        #     job_id = ag.jobs.submit(body=job_def)['id']
-        #     print(json.dumps(job_def, indent=4))
-        #     mpj.run({"launched": job_id, "experiment_id": experiment_id, "sample_id": sample_id})
-        #     r.logger.info("Submitted Agave job {}".format(job_id))
-        # except Exception as e:
-        #     print(json.dumps(job_def, indent=4))
-        #     r.logger.error("Error submitting job: {}".format(e))
-        #     print(e.response.content)
-    r.logger.info("Sucessfully Processed: {}".format(manifestPath))
-    r.logger.info("Could've Submitted {} Pipeline Jobs ".format(len(rna_list)))
-=======
         job_def["notifications"] = notif
         mpj_state = get_job_state(mpj.uuid, ag)
         try:
-            if mpj_state in ['CREATED', 'RESET']:
+            if mpj_state in ['CREATED', 'RESET', 'RUNNING']:
                 job_id = ag.jobs.submit(body=job_def)['id']
                 print(json.dumps(job_def, indent=4))
                 r.logger.info("Submitted Agave job {}".format(job_id))
                 mpj.run({"launched": job_id, "sample_id": sample_id, "experiment_id": experiment_id})
             else:
-                r.logger.info("Unable to submit job, in state {}".format(mpj.state))
+                r.logger.info("Unable to submit job, in state {}".format(mpj_state))
         except Exception as e:
             print(json.dumps(job_def, indent=4))
             r.logger.error("Error submitting job: {}".format(e))
             print(e.response.content)
 
->>>>>>> 420b7e8d67febcc65d6120b869b58c2e468d81ad
 
 def get_job_state(id, ag):
     from datacatalog.managers.pipelinejobs.jobmanager import JobManager
