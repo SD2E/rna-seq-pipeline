@@ -6,6 +6,8 @@ import pprint
 import copy
 import pymongo
 import glob
+import datetime
+import os
 
 
 def parse_manifest(r):
@@ -44,7 +46,8 @@ def parse_manifest(r):
     return manifest
 
 def dataframe_query(experiment_id):
-    dbURI = '***REMOVED***'
+    #dbURI = '***REMOVED***'
+    dbURI = os.getenv('_REACTOR_MONGO_READONLY')
     client = pymongo.MongoClient(dbURI)
     db = client.catalog_staging
     jobs_table = db.jobs
@@ -67,6 +70,13 @@ def dataframe_query(experiment_id):
         r.logger.info("Multiple Dataframe Records Recieved for Query {}".format(query))
         exit(1)
     return dataframe_record
+
+# def check_pipeline_job(mpj):
+#     if mpj.state == 'CREATED':
+#         ids = query_qc_jobs()
+#         retire(ids)
+#     return
+
 
 
 def submit_job(r, manifest, dataframe_record):
@@ -100,10 +110,12 @@ def submit_job(r, manifest, dataframe_record):
     job_def["name"] = experiment_id
     parameters = job_def.parameters
     parameters["experiment_id"] = experiment_id
+    parameters['_REACTOR_MONGO_READONLY'] = os.getenv('_REACTOR_MONGO_READONLY')
     job_def.parameters = parameters
 
     data = {
-        "experiment_id": experiment_id
+        "experiment_id": experiment_id,
+        "datetime": datetime.datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
         }
     archive_patterns = [
        {'level': '2', 'patterns': ['.csv$']}
@@ -119,16 +131,17 @@ def submit_job(r, manifest, dataframe_record):
               archive_patterns=archive_patterns,
               product_patterns=product_patterns)
               #setup_archive_path=False)
+    # check mpj
+    # check_pipeline_job(mpj)
     mpj.setup()
-    print(json.dumps(job_def, indent=4))
 
-    pprint.pprint(r.settings.pipelines)
-    print("data:")
-    pprint.pprint(data)
-    print("product_patterns:")
-    pprint.pprint(product_patterns)
-    print("archive_patterns:")
-    pprint.pprint(archive_patterns)
+    # pprint.pprint(r.settings.pipelines)
+    # print("data:")
+    # pprint.pprint(data)
+    # print("product_patterns:")
+    # pprint.pprint(product_patterns)
+    # print("archive_patterns:")
+    # pprint.pprint(archive_patterns)
 
     print("JOB UUID: ", mpj.uuid)
     r.logger.info("Created Pipeline job {}".format(mpj.uuid))

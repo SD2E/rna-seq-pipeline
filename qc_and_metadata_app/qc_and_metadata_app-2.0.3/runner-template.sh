@@ -17,5 +17,5 @@ fi
 #   Example: docker run centos:7 uname -a
 #            container_exec centos:7 uname -a
 
-echo container_exec ${CONTAINER_IMAGE} python /src/mongo_query_and_basic_metrics.py ${experiment_id}
-container_exec ${CONTAINER_IMAGE} python /src/mongo_query_and_basic_metrics.py ${experiment_id}
+echo container_exec ${CONTAINER_IMAGE} python /src/mongo_query_and_basic_metrics.py ${experiment_id} ${_REACTOR_MONGO_READONLY}
+container_exec ${CONTAINER_IMAGE} python /src/mongo_query_and_basic_metrics.py ${experiment_id} ${_REACTOR_MONGO_READONLY}

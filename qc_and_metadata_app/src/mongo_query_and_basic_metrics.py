@@ -13,9 +13,11 @@ import numpy as np
 import sys
 from qc_from_raw_counts import *
 
-def mongo_query(experiment_id):
+def mongo_query(experiment_id, dbURI):
     # We're going to query off the staging version of the jobs_table
-    dbURI = '***REMOVED***'
+    #dbURI = '***REMOVED***'
+    #dbURI = os.getenv('_REACTOR_MONGO_READONLY')
+    print(dbURI)
     client = pymongo.MongoClient(dbURI)
     db = client.catalog_staging
     jobs_table = db.jobs
@@ -41,9 +43,11 @@ def mongo_query(experiment_id):
         # Brittle and positional,
         # TODO: surface sample_id and outname in top-level 'data'
         try:
-            sample_id = [entry['data'] for entry in job['history'] if entry['name'] == 'run'][0]['sample_id']
+            #sample_id = [entry['data'] for entry in job['history'] if entry['name'] == 'run'][0]['sample_id']
+            sample_id = job['data']['sample_id']
         except Exception as e:
-            experiment_id = [entry['data'] for entry in job['history'] if entry['name'] == 'run'][0]['experiment_id']
+            #experiment_id = [entry['data'] for entry in job['history'] if entry['name'] == 'run'][0]['experiment_id']
+            experiment_id = job['data']['experiment_id']
         if job["pipeline_uuid"] == "106d3f7f-07dc-596f-86f9-df75083e52cc":
             preprocessing_jobs[sample_id] = job
         if job["pipeline_uuid"] == "106bd127-e2d2-57ac-b9be-11ed06042e68":
@@ -57,9 +61,19 @@ def mongo_query(experiment_id):
     # number reads before mapping (probably also use FastQC results for this)
     # and mapped reads (bwa log?)
 
+    # need to clean up DNA prerpocessing jobs
+    # submitted with the same experiment id
+    dna_list = [sid for sid in preprocessing_jobs.keys()
+                if sid not in alignment_jobs.keys()]
+
+    rna_preprocessing_jobs = {k : v for k,v in preprocessing_jobs.items()
+                              if k not in dna_list}
+    preprocessing_jobs = rna_preprocessing_jobs
+
     # create a list of input R1s so we can query data catalog for metadata
     raw_inputs = []
-    raw_inputs = [job['data']['inputs'][0] for sample,job in preprocessing_jobs.items()]
+    raw_inputs = [job['data']['inputs'][0] for sample, job
+                  in preprocessing_jobs.items()]
 
     query = {}
     query['filename'] = {'$in': raw_inputs}
@@ -263,6 +277,16 @@ def metadata_construction(metadata_query_results):
         meta_data[sample['sample_id']] = metadata
     return meta_data
 
+def clean_metadata(meta_data):
+    list_metadata = ['Arabinose', 'Cuminic_acid', 'Vanillic_acid', 'Xylose',
+                         'Dextrose', 'IPTG']
+    for item in list_metadata:
+        if all(value[item] == 0 for value in meta_data.values()):
+            print(item, "is zero")
+            for v in meta_data.values():
+                v.pop(item, None)
+                v.pop(item+'_unit', None)
+    return meta_data
 
 
 def crawl_file_system(prefix, meta_data, preprocessing_jobs, alignment_jobs):
@@ -441,7 +465,7 @@ def write_dataframes(experiment_id, prefix, dataframe_jobs, qc_metadata, filenam
     counts.to_csv(experiment_id + '_' + filename.split('.')[0] + '_transposed.csv')
     return
 
-def main(experiment_id):
+def main(experiment_id, dbURI):
     # """Main function"""
     # r = Reactor()
     # ag = r.client # Agave client
@@ -454,9 +478,11 @@ def main(experiment_id):
 
     # Run a mongo query on the jobs table to get job metadata
     (metadata_query_results, preprocessing_jobs,
-        alignment_jobs, dataframe_jobs) = mongo_query(experiment_id)
+        alignment_jobs, dataframe_jobs) = mongo_query(experiment_id, dbURI)
     # Construct meta_data dictionary from query results
     meta_data = metadata_construction(metadata_query_results)
+    # Clean unecessary metadata
+    meta_data = clean_metadata(meta_data)
     # Add QC info to meta_data dict, reading job output files for this
     meta_data = crawl_file_system(prefix, meta_data, preprocessing_jobs,
                                   alignment_jobs)
@@ -464,16 +490,22 @@ def main(experiment_id):
     write_to_csv(meta_data, experiment_id)
     df_metadata = pd.read_csv(experiment_id + '_QC_and_metadata.csv')
     # Get metadata factors from the dict (temp/time/etc)
-    # factors = [metadata_key for metadata_key
-    #            in meta_data[list(meta_data.keys())[0]]
-    #            if metadata_key.split("_")[0] != 'QC'
-    #            and metadata_key not in ['Replicate', 'Arabinose_unit',
-    #                                     'IPTG_unit', 'Strain_input_state',
-    #                                     'Vanillic_acid_unit', 'Dextrose_unit',
-    #                                     'Cuminic_acid_unit', 'Xylose_unit']
-    #            and all(value[metadata_key] == 0 for value in meta_data.values()) == False
-    #            and all(value[metadata_key] == 'NA' for value in meta_data.values()) == False]
-    factors =['Timepoint','Dextrose']
+    factors = [metadata_key for metadata_key
+               in meta_data[list(meta_data.keys())[0]]
+                   # ignore QC values
+                   if metadata_key.split("_")[0] != 'QC'
+                   # ignore Units and Replicates
+                   and metadata_key not in ['Replicate', 'Arabinose_unit',
+                                            'IPTG_unit', 'Strain_input_state',
+                                            'Vanillic_acid_unit', 'Dextrose_unit',
+                                            'Cuminic_acid_unit', 'Xylose_unit']
+                   # ignore values that are the same for all samples
+                   and all(
+                           # Compare all values to the first sample
+                           value[metadata_key] ==
+                           meta_data[list(meta_data.keys())[0]][metadata_key]
+                           for value in meta_data.values()
+                           ) is False]
 
     print("Metadata factors for replicate groupings: ", factors)
     # Read in the raw counts file to run the coorelations
@@ -496,4 +528,4 @@ def main(experiment_id):
 
 
 if __name__ == '__main__':
-    main(sys.argv[1])
+    main(sys.argv[1], sys.argv[2])
