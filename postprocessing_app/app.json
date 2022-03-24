@@ -1,14 +1,14 @@
 {
   "name": "{{ agave.username }}-{{ app.name }}",
   "version": "{{ app.version }}",
+  "executionSystem": "{{ app.executionSystem }}",
   "executionType": "HPC",
-  "executionSystem": "hpc-tacc-stampede2-{{ agave.username }}",
   "parallelism": "SERIAL",
-  "deploymentPath": "{{ agave.username }}/apps/{{ app.name }}-{{ app.version }}",
-  "deploymentSystem": "data-sd2e-projects-users",
-  "defaultProcessorsPerNode": 1,
+  "deploymentPath": "apps/{{ app.name }}-{{ app.version }}",
+  "deploymentSystem": "{{ app.deploymentSystem }}",
   "defaultNodeCount": 1,
-  "defaultQueue": "flat-quadrant",
+  "defaultQueue": "{{ app.defaultQueue }}",
+  "defaultProcessorsPerNode": 1,
   "label": "{{ date_time.iso8601_micro }}",
   "modules": ["load tacc-singularity"],
   "shortDescription": "{{ app.description }}",
@@ -34,16 +34,6 @@
     }
   }],
   "parameters": [
-  {
-    "id": "path_bam_dir",
-    "value": {
-      "default": null,
-      "description": "path to the bam directory",
-      "type": "string",
-      "visible": true,
-      "required": false
-    }
-  },
     {
       "id": "path_gff",
       "value": {

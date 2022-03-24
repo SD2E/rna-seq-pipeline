@@ -1,0 +1,19 @@
+{
+    "appId": "urrutia-alignment-app-2.0.0",
+    "archive": true,
+    "archivePath": "/maverick/manifest_test/abaco_out",
+    "archiveSystem": "tacc.storage.ls6",
+    "batchQueue": "normal",
+    "parameters": {
+      "path_gff": "/scratch/05369/urrutia/maize/Zm_B73_RNA-seq_0-1mm_EUnascent_2021.08.24/reference_index/Zea_mays.Zm-B73-REFERENCE-NAM-5.0.51.gtf",
+      "path_read1": "agave://data-tacc-work-urrutia/maverick/manifest_test/4342742_R1_001.fastq.gz",
+      "path_read2": "agave://data-tacc-work-urrutia/maverick/manifest_test/4342742_R2_001.fastq.gz",
+      "path_interval_file": "/scratch/05369/urrutia/maize/Zm_B73_RNA-seq_0-1mm_EUnascent_2021.08.24/reference_index/Zea_mays.Zm-B73-REFERENCE-NAM-5.0.dna.toplevel.interval_list",
+      "path_fasta": "/scratch/05369/urrutia/maize/Zm_B73_RNA-seq_0-1mm_EUnascent_2021.08.24/reference_index/Zea_mays.Zm-B73-REFERENCE-NAM-5.0.dna.toplevel.fa",
+      "path_ref_flat": "/scratch/05369/urrutia/maize/Zm_B73_RNA-seq_0-1mm_EUnascent_2021.08.24/reference_index/Zea_mays.Zm-B73-REFERENCE-NAM-5.0.51.refflat.txt",
+      "path_dict_file": "/scratch/05369/urrutia/maize/Zm_B73_RNA-seq_0-1mm_EUnascent_2021.08.24/reference_index/Zea_mays.Zm-B73-REFERENCE-NAM-5.0.dna.toplevel.dict",
+      "outname": "141667-M9-Kan_MG1655_NAND_Circuit_replicate_4_time_5_hour_NC_E_coli_NAND_37C"
+    },
+    "maxRunTime": "48:00:00",
+    "name": "bwa-aln"
+  }

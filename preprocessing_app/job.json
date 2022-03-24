@@ -1,0 +1,19 @@
+{
+  "name": "test",
+  "appId": "urrutia-rnaseq-2.0.1",
+    "archive": false,
+    "archivePath": "maize/Zm_B73_RNA-seq_0-1mm_EUnascent_2021.08.24/preprocessing/",
+    "archiveSystem": "tacc.storage.ls6",
+    "batchQueue": "normal",
+    "parameters": {
+      "path_filterseqs": "/work/projects/SD2E-Community/prod/data/reference/rna_databases/rRNA_databases",
+      "path_read1": "/scratch/05369/urrutia/maize/bcls/bclconvert/outputs4/BR1_Primary_S6_L004_R1_001.fastq.gz",
+      "path_read2": "/scratch/05369/urrutia/maize/bcls/bclconvert/outputs4/BR1_Primary_S6_L004_R2_001.fastq.gz",
+      "adaptersfile": "TruSeq3-PE-2.fa:2:30:10",
+      "minlen": 36,
+      "sortmerna": true,
+      "trim": true,
+      "multiple_lanes": false
+    },
+    "maxRunTime": "48:00:00"
+}

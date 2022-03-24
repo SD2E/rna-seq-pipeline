@@ -1,0 +1,11 @@
+{
+    "name": "maize",
+    "appId": "urrutia-fasta_indexing_app-2.0.0",
+    "archive": true,
+    "archiveSystem": "tacc.storage.ls6",
+    "archivePath": "maize/Zm_B73_RNA-seq_0-1mm_EUnascent_2021.08.24/reference_index",
+    "inputs": {
+      "fasta": "agave://tacc.storage.ls6/maize/genome/Zea_mays.Zm-B73-REFERENCE-NAM-5.0.dna.toplevel.fa",
+      "gff": "agave://tacc.storage.ls6/maize/genome/Zea_mays.Zm-B73-REFERENCE-NAM-5.0.51.gtf"
+    }
+  }

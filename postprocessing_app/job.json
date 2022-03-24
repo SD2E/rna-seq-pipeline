@@ -1,0 +1,15 @@
+{
+  "appId": "urrutia-rnaseq-post-process-2.0.0",
+  "archive": true,
+  "archivePath": "maize/Zm_B73_RNA-seq_0-1mm_EUnascent_2021.08.24/dataframes/",
+  "archiveSystem": "tacc.storage.ls6",
+  "batchQueue": "normal",
+  "inputs": {
+    "sample_paths": "agave://tacc.storage.ls6/maize/Zm_B73_RNA-seq_0-1mm_EUnascent_2021.08.24/sample_paths.json"
+  },
+  "parameters": {
+    "path_gff": "/scratch/05369/urrutia/maize/genome/Zea_mays.Zm-B73-REFERENCE-NAM-5.0.52.gff3"
+  },
+  "maxRunTime": "24:00:00",
+  "name": "dataframe_test"
+}

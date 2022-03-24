@@ -18,14 +18,16 @@ fi
 #   Example: docker run centos:7 uname -a
 #            container_exec centos:7 uname -a
 
-HPC_PATH=/work/projects/SD2E-Community/prod/data/
 
-hpc_bam_dir=${HPC_PATH}${path_bam_dir}
-hpc_gff=${HPC_PATH}${path_gff}
-
+if [ -z "${path_gff}" ]
+then
+  gff_file=${gff}
+else
+  gff_file=${path_gff}
+fi
 
 echo "sample:bam dictionary is ${sample_paths}"
-echo "gff is ${hpc_gff}"
+echo "gff is ${gff_file}"
 
-echo DEBUG=1 container_exec ${CONTAINER_IMAGE} Rscript --vanilla /opt/src/count_features.R --bamfilespath ${sample_paths} --annotation ${hpc_gff}
-DEBUG=1 container_exec ${CONTAINER_IMAGE} Rscript --vanilla /opt/src/count_features.R --bamfilespath ${sample_paths} --annotation ${hpc_gff}
+echo DEBUG=1 container_exec ${CONTAINER_IMAGE} Rscript --vanilla /opt/src/count_features.R --bamfilespath ${sample_paths} --annotation ${gff_file}
+DEBUG=1 container_exec ${CONTAINER_IMAGE} Rscript --vanilla /opt/src/count_features.R --bamfilespath ${sample_paths} --annotation ${gff_file}

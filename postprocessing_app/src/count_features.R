@@ -100,7 +100,7 @@ gInterval<-readGff3(gtf, quiet=TRUE)
 #Calculate read count data frame
 output <- "ReadCountMatrix_preCAD"
 #fc <- featureCounts(files=bam.files,annot.ext=gtf,isGTFAnnotationFile=TRUE,GTF.featureType="gene",GTF.attrType="gene",isPairedEnd=TRUE,requireBothEndsMapped=FALSE,countMultiMappingReads=TRUE)
-fc <- featureCounts(files=files_location,annot.ext=gtf,isGTFAnnotationFile=TRUE,GTF.featureType="CDS",GTF.attrType="Name",isPairedEnd=TRUE,requireBothEndsMapped=FALSE)
+fc <- featureCounts(files=files_location,annot.ext=gtf,isGTFAnnotationFile=TRUE,GTF.featureType="gene",GTF.attrType="gene_id",isPairedEnd=TRUE,requireBothEndsMapped=FALSE,nthreads=150)
 #prefix=paste('X', gsub('[/,-]','.',files_location), '.', sep = '')
 #colnames(fc$counts) <- gsub(prefix,'',colnames(fc$counts))
 ## TODO: stop string parsing and just use the new input sample: path dictionary
